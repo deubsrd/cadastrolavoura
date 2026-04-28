@@ -14,16 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      socios: {
+        Row: {
+          bairro: string
+          cep: string
+          cidade: string
+          cpf: string
+          created_at: string
+          data_nascimento: string
+          email: string
+          estado_civil: string
+          id: string
+          logradouro: string
+          nacionalidade: string
+          nome_completo: string
+          numero_casa: string
+          numero_unidade: string
+          rg: string
+          rg_orgao: string
+          telefone: string
+          tipo: Database["public"]["Enums"]["tipo_socio"]
+          uf: string
+          unidade_id: string
+          updated_at: string
+        }
+        Insert: {
+          bairro: string
+          cep: string
+          cidade: string
+          cpf: string
+          created_at?: string
+          data_nascimento: string
+          email: string
+          estado_civil: string
+          id?: string
+          logradouro: string
+          nacionalidade: string
+          nome_completo: string
+          numero_casa: string
+          numero_unidade: string
+          rg: string
+          rg_orgao: string
+          telefone: string
+          tipo: Database["public"]["Enums"]["tipo_socio"]
+          uf: string
+          unidade_id: string
+          updated_at?: string
+        }
+        Update: {
+          bairro?: string
+          cep?: string
+          cidade?: string
+          cpf?: string
+          created_at?: string
+          data_nascimento?: string
+          email?: string
+          estado_civil?: string
+          id?: string
+          logradouro?: string
+          nacionalidade?: string
+          nome_completo?: string
+          numero_casa?: string
+          numero_unidade?: string
+          rg?: string
+          rg_orgao?: string
+          telefone?: string
+          tipo?: Database["public"]["Enums"]["tipo_socio"]
+          uf?: string
+          unidade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "socios_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unidades: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          id: string
+          nome: string | null
+          numero: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome?: string | null
+          numero: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          id?: string
+          nome?: string | null
+          numero?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
+      tipo_socio: "administrador" | "cotista"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +284,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+      tipo_socio: ["administrador", "cotista"],
+    },
   },
 } as const
