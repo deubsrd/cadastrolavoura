@@ -30,12 +30,16 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "\n — Cadastro de Franqueados" },
-      { name: "description", content: "Plataforma de cadastro e gestão de franqueados \n." },
-      { property: "og:title", content: "\n — Cadastro de Franqueados" },
-      { property: "og:description", content: "Plataforma de cadastro e gestão de franqueados \n." },
+      { title: "Cadastro de Franqueados" },
+      { name: "description", content: "Plataforma de cadastro e gestão de franqueados n." },
+      { property: "og:title", content: "Cadastro de Franqueados" },
+      { property: "og:description", content: "Plataforma de cadastro e gestão de franqueados n." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Cadastro de Franqueados" },
+      { name: "twitter:description", content: "Plataforma de cadastro e gestão de franqueados n." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1c67b883-346f-4e3f-b250-71e16f5e2e6a/id-preview-4ea9c6fb--597455ab-9c1b-49aa-be67-b1031b39ac24.lovable.app-1777341213271.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/1c67b883-346f-4e3f-b250-71e16f5e2e6a/id-preview-4ea9c6fb--597455ab-9c1b-49aa-be67-b1031b39ac24.lovable.app-1777341213271.png" },
     ],
     links: [
       {
