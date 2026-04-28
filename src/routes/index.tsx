@@ -239,6 +239,7 @@ function PublicForm() {
               {submitting ? "Enviando..." : "Enviar cadastro"}
             </Button>
           </div>
+          </div>
         </form>
       </main>
     </div>
