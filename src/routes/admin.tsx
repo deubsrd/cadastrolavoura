@@ -1,8 +1,9 @@
 import { createFileRoute, Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Sprout, Users, Building2, LogOut } from "lucide-react";
+import { Users, Building2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import lavouraLogo from "@/assets/lavoura-logo.png";
 
 const ADMIN_EMAIL = "lavanderialavoura2025@gmail.com";
 
@@ -58,9 +59,8 @@ function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="hidden w-60 flex-col bg-sidebar p-4 md:flex">
-        <div className="mb-8 flex items-center gap-2 px-2 text-sidebar-foreground">
-          <Sprout className="h-6 w-6" />
-          <span className="text-lg font-bold">{"\n"}</span>
+        <div className="mb-8 px-2">
+          <img src={lavouraLogo} alt="Lavoura" className="h-12 w-auto brightness-0 invert" />
         </div>
         <nav className="flex-1 space-y-1">
           {navItem("/admin", "Franqueados", Users)}
@@ -75,10 +75,7 @@ function AdminLayout() {
       {/* Mobile top bar */}
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
-          <div className="flex items-center gap-2 text-primary">
-            <Sprout className="h-5 w-5" />
-            <span className="font-bold">{"\n"}</span>
-          </div>
+          <img src={lavouraLogo} alt="Lavoura" className="h-9 w-auto" />
           <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4" /></Button>
         </header>
         <nav className="flex gap-2 overflow-x-auto border-b border-border bg-card px-4 py-2 md:hidden">

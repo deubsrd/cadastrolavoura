@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Plus, Trash2, Send, Sprout } from "lucide-react";
+import { Plus, Trash2, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import lavouraLogo from "@/assets/lavoura-logo.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -147,12 +148,9 @@ function PublicForm() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Sprout className="h-5 w-5" />
-            </div>
-            <span className="text-lg font-semibold tracking-tight text-primary">{"\n"}</span>
-          </div>
+          <Link to="/" className="flex items-center">
+            <img src={lavouraLogo} alt="Lavoura — Lavanderia de autosserviço" className="h-12 w-auto" />
+          </Link>
           <Link to="/login" className="text-sm text-muted-foreground hover:text-primary">
             Acesso administrativo
           </Link>
