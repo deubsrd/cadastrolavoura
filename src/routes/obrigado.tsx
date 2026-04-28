@@ -23,7 +23,7 @@ function ThanksPage() {
         </p>
         <div className="mt-8 flex items-center justify-center gap-2 text-primary">
           <Sprout className="h-5 w-5" />
-          <span className="font-semibold">Lavoura</span>
+          <span className="font-semibold">{"\n"}</span>
         </div>
         <Button asChild variant="outline" className="mt-6">
           <Link to="/">Novo cadastro</Link>

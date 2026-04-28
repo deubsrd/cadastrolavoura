@@ -60,7 +60,7 @@ function AdminLayout() {
       <aside className="hidden w-60 flex-col bg-sidebar p-4 md:flex">
         <div className="mb-8 flex items-center gap-2 px-2 text-sidebar-foreground">
           <Sprout className="h-6 w-6" />
-          <span className="text-lg font-bold">Lavoura</span>
+          <span className="text-lg font-bold">{"\n"}</span>
         </div>
         <nav className="flex-1 space-y-1">
           {navItem("/admin", "Franqueados", Users)}
@@ -77,7 +77,7 @@ function AdminLayout() {
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
           <div className="flex items-center gap-2 text-primary">
             <Sprout className="h-5 w-5" />
-            <span className="font-bold">Lavoura</span>
+            <span className="font-bold">{"\n"}</span>
           </div>
           <Button variant="ghost" size="sm" onClick={logout}><LogOut className="h-4 w-4" /></Button>
         </header>
