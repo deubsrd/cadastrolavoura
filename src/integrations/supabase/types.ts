@@ -37,7 +37,7 @@ export type Database = {
           telefone: string
           tipo: Database["public"]["Enums"]["tipo_socio"]
           uf: string
-          unidade_id: string
+          unidade_id: string | null
           updated_at: string
         }
         Insert: {
@@ -62,7 +62,7 @@ export type Database = {
           telefone: string
           tipo: Database["public"]["Enums"]["tipo_socio"]
           uf: string
-          unidade_id: string
+          unidade_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -87,7 +87,7 @@ export type Database = {
           telefone?: string
           tipo?: Database["public"]["Enums"]["tipo_socio"]
           uf?: string
-          unidade_id?: string
+          unidade_id?: string | null
           updated_at?: string
         }
         Relationships: [

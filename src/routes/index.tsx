@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,10 +7,9 @@ import lavouraLogo from "@/assets/lavoura-logo.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { SocioFields, type SocioData, emptySocio } from "@/components/forms/SocioFields";
 import { SocioDocuments, type SocioDocs, emptyDocs } from "@/components/forms/SocioDocuments";
-import { isTransientDbError, withDbRetry } from "@/lib/db-retry";
 import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
 
 export const Route = createFileRoute("/")({
@@ -22,8 +21,6 @@ export const Route = createFileRoute("/")({
   }),
   component: PublicForm,
 });
-
-type Unidade = { id: string; numero: string; nome: string | null };
 
 function validateSocio(s: SocioData): Partial<Record<keyof SocioData, string>> {
   const e: Partial<Record<keyof SocioData, string>> = {};
@@ -47,21 +44,12 @@ function validateSocio(s: SocioData): Partial<Record<keyof SocioData, string>> {
 
 function PublicForm() {
   const navigate = useNavigate();
-  const [unidades, setUnidades] = useState<Unidade[]>([]);
-  const [unidadeId, setUnidadeId] = useState<string>("");
+  const [numeroUnidade, setNumeroUnidade] = useState<string>("");
   const [socios, setSocios] = useState<SocioData[]>([emptySocio()]);
   const [errs, setErrs] = useState<Array<Partial<Record<keyof SocioData, string>>>>([{}]);
   const [docs, setDocs] = useState<SocioDocs[]>([emptyDocs()]);
   const [docErrs, setDocErrs] = useState<Array<{ identidadeFile?: string; cpfFile?: string }>>([{}]);
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    withDbRetry(() => supabase.from("unidades").select("id, numero, nome").eq("ativo", true).order("numero"))
-      .then(({ data, error }) => {
-        if (error) toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Recarregue a página em alguns segundos." : "Não foi possível carregar as unidades.");
-        else setUnidades(data ?? []);
-      });
-  }, []);
 
   const addSocio = () => {
     setSocios((p) => [...p, emptySocio()]);
@@ -78,8 +66,9 @@ function PublicForm() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!unidadeId) {
-      toast.error("Selecione o número da unidade.");
+    const numero = numeroUnidade.trim();
+    if (!numero) {
+      toast.error("Informe o número da unidade.");
       return;
     }
     const newErrs = socios.map(validateSocio);
@@ -98,7 +87,6 @@ function PublicForm() {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
-    const unidade = unidades.find((u) => u.id === unidadeId)!;
     setSubmitting(true);
 
     // Upload dos PDFs antes de inserir
@@ -107,7 +95,7 @@ function PublicForm() {
     try {
       for (let i = 0; i < socios.length; i++) {
         const cpfDigits = socios[i].cpf.replace(/\D/g, "");
-        const folder = `${unidade.numero}/${ts}-${cpfDigits || `socio${i + 1}`}`;
+        const folder = `${numero}/${ts}-${cpfDigits || `socio${i + 1}`}`;
         const idFile = docs[i].identidadeFile!;
         const cpfFile = docs[i].cpfFile!;
         const idPath = `${folder}/identidade.pdf`;
@@ -129,8 +117,8 @@ function PublicForm() {
     }
 
     const payload = socios.map((s, i) => ({
-      unidade_id: unidadeId,
-      numero_unidade: unidade.numero,
+      unidade_id: null,
+      numero_unidade: numero,
       ...s,
       documento_identidade_path: uploadedPaths[i].identidade,
       documento_cpf_path: uploadedPaths[i].cpf,
@@ -175,23 +163,16 @@ function PublicForm() {
             </CardHeader>
             <CardContent>
               <Label htmlFor="unidade" className="text-sm">Número da unidade</Label>
-              <Select value={unidadeId} onValueChange={setUnidadeId}>
-                <SelectTrigger id="unidade" className="mt-1.5">
-                  <SelectValue placeholder={unidades.length ? "Selecione a unidade" : "Carregando..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {unidades.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.numero}{u.nome ? ` — ${u.nome}` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {unidades.length === 0 && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Nenhuma unidade disponível. Entre em contato com a {"\n"}.
-                </p>
-              )}
+              <Input
+                id="unidade"
+                className="mt-1.5"
+                value={numeroUnidade}
+                onChange={(e) => setNumeroUnidade(e.target.value)}
+                placeholder="Ex.: 001"
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Informe o número da sua unidade conforme indicado pela franqueadora.
+              </p>
             </CardContent>
           </Card>
 
