@@ -3,7 +3,7 @@ import { CheckCircle2, Sprout } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/obrigado")({
-  head: () => ({ meta: [{ title: "Cadastro enviado — Lavoura" }] }),
+  head: () => ({ meta: [{ title: "Cadastro enviado — \n" }] }),
   component: ThanksPage,
 });
 

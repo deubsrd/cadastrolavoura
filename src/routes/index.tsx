@@ -14,8 +14,8 @@ import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Cadastro de Franqueados — Lavoura" },
-      { name: "description", content: "Preencha o cadastro da sua unidade Lavoura." },
+      { title: "Cadastro de Franqueados — \n" },
+      { name: "description", content: "Preencha o cadastro da sua unidade \n." },
     ],
   }),
   component: PublicForm,

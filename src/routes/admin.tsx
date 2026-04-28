@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 const ADMIN_EMAIL = "lavanderialavoura2025@gmail.com";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Painel administrativo — Lavoura" }] }),
+  head: () => ({ meta: [{ title: "Painel administrativo — \n" }] }),
   component: AdminLayout,
 });
 
