@@ -163,23 +163,16 @@ function PublicForm() {
             </CardHeader>
             <CardContent>
               <Label htmlFor="unidade" className="text-sm">Número da unidade</Label>
-              <Select value={unidadeId} onValueChange={setUnidadeId}>
-                <SelectTrigger id="unidade" className="mt-1.5">
-                  <SelectValue placeholder={unidades.length ? "Selecione a unidade" : "Carregando..."} />
-                </SelectTrigger>
-                <SelectContent>
-                  {unidades.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>
-                      {u.numero}{u.nome ? ` — ${u.nome}` : ""}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {unidades.length === 0 && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Nenhuma unidade disponível. Entre em contato com a {"\n"}.
-                </p>
-              )}
+              <Input
+                id="unidade"
+                className="mt-1.5"
+                value={numeroUnidade}
+                onChange={(e) => setNumeroUnidade(e.target.value)}
+                placeholder="Ex.: 001"
+              />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Informe o número da sua unidade conforme indicado pela franqueadora.
+              </p>
             </CardContent>
           </Card>
 
