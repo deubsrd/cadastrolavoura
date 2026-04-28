@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { SocioFields, type SocioData, emptySocio } from "@/components/forms/SocioFields";
 import { SocioDocuments, type SocioDocs, emptyDocs } from "@/components/forms/SocioDocuments";
 import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -50,6 +51,7 @@ function PublicForm() {
   const [docs, setDocs] = useState<SocioDocs[]>([emptyDocs()]);
   const [docErrs, setDocErrs] = useState<Array<{ identidadeFile?: string; cpfFile?: string }>>([{}]);
   const [submitting, setSubmitting] = useState(false);
+  const [lgpdAceito, setLgpdAceito] = useState(false);
 
   const addSocio = () => {
     setSocios((p) => [...p, emptySocio()]);
@@ -85,6 +87,10 @@ function PublicForm() {
       newDocErrs.some((x) => Object.keys(x).length > 0)
     ) {
       toast.error("Preencha todos os campos obrigatórios.");
+      return;
+    }
+    if (!lgpdAceito) {
+      toast.error("É necessário aceitar a Política de Privacidade (LGPD).");
       return;
     }
     setSubmitting(true);
@@ -209,11 +215,23 @@ function PublicForm() {
             </Card>
           ))}
 
+          <div className="flex items-start gap-3 rounded-md border border-border bg-card p-4">
+            <Checkbox
+              id="lgpd"
+              checked={lgpdAceito}
+              onCheckedChange={(v) => setLgpdAceito(v === true)}
+              className="mt-1"
+            />
+            <Label htmlFor="lgpd" className="text-sm font-normal leading-relaxed text-muted-foreground">
+              Li e concordo com a Política de Privacidade da Lavoura. Estou ciente de que meus dados pessoais serão utilizados para fins de cadastro de franquia, conforme a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).
+            </Label>
+          </div>
+
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
             <Button type="button" variant="outline" onClick={addSocio}>
               <Plus className="mr-2 h-4 w-4" /> Adicionar outro sócio
             </Button>
-            <Button type="submit" disabled={submitting}
+            <Button type="submit" disabled={submitting || !lgpdAceito}
               style={{ background: "var(--gradient-accent)" }}
               className="text-accent-foreground hover:opacity-90">
               <Send className="mr-2 h-4 w-4" />

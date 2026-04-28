@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Download, Trash2, FileText, Search } from "lucide-react";
+import { Download, Trash2, FileText, Search, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Franqueados — Lavoura" }] }),
@@ -27,18 +28,28 @@ type SocioRow = {
   created_at: string;
   documento_identidade_path: string | null;
   documento_cpf_path: string | null;
+  data_nascimento: string | null;
+  rg: string | null;
+  rg_orgao: string | null;
+  nacionalidade: string | null;
+  estado_civil: string | null;
+  logradouro: string | null;
+  numero_casa: string | null;
+  bairro: string | null;
+  cep: string | null;
 };
 
 function AdminFranqueados() {
   const [rows, setRows] = useState<SocioRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
+  const [selected, setSelected] = useState<SocioRow | null>(null);
 
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("socios")
-      .select("id, nome_completo, email, telefone, cpf, tipo, numero_unidade, cidade, uf, created_at, documento_identidade_path, documento_cpf_path")
+      .select("*")
       .order("created_at", { ascending: false });
     setLoading(false);
     if (error) {
@@ -145,6 +156,9 @@ function AdminFranqueados() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
+                      <Button size="sm" variant="ghost" onClick={() => setSelected(r)} title="Ver detalhes">
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button size="sm" variant="ghost" onClick={() => handleDelete(r.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -156,6 +170,72 @@ function AdminFranqueados() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{selected?.nome_completo}</DialogTitle>
+            <DialogDescription>Dados completos do franqueado</DialogDescription>
+          </DialogHeader>
+          {selected && (
+            <div className="space-y-4 text-sm">
+              <Section title="Identificação">
+                <Field label="Tipo de sócio" value={selected.tipo} />
+                <Field label="Unidade" value={selected.numero_unidade} />
+                <Field label="CPF" value={selected.cpf} />
+                <Field label="RG" value={selected.rg} />
+                <Field label="Órgão expedidor" value={selected.rg_orgao} />
+                <Field label="Data de nascimento" value={selected.data_nascimento ? new Date(selected.data_nascimento).toLocaleDateString("pt-BR") : "—"} />
+                <Field label="Nacionalidade" value={selected.nacionalidade} />
+                <Field label="Estado civil" value={selected.estado_civil} />
+              </Section>
+              <Section title="Contato">
+                <Field label="Email" value={selected.email} />
+                <Field label="Telefone" value={selected.telefone} />
+              </Section>
+              <Section title="Endereço">
+                <Field label="CEP" value={selected.cep} />
+                <Field label="Logradouro" value={selected.logradouro} />
+                <Field label="Número" value={selected.numero_casa} />
+                <Field label="Bairro" value={selected.bairro} />
+                <Field label="Cidade" value={selected.cidade} />
+                <Field label="UF" value={selected.uf} />
+              </Section>
+              <Section title="Documentos">
+                <div className="col-span-2 flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadDoc(selected.documento_identidade_path)}>
+                    <FileText className="mr-2 h-4 w-4" /> Ver Identidade (PDF)
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => handleDownloadDoc(selected.documento_cpf_path)}>
+                    <FileText className="mr-2 h-4 w-4" /> Ver CPF (PDF)
+                  </Button>
+                </div>
+              </Section>
+              <p className="text-xs text-muted-foreground">
+                Cadastrado em {new Date(selected.created_at).toLocaleString("pt-BR")}
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h3 className="mb-2 text-sm font-semibold text-primary">{title}</h3>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{children}</div>
+    </div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string | null | undefined }) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="font-medium">{value || "—"}</p>
     </div>
   );
 }
