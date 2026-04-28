@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SocioFields, type SocioData, emptySocio } from "@/components/forms/SocioFields";
 import { SocioDocuments, type SocioDocs, emptyDocs } from "@/components/forms/SocioDocuments";
+import { isTransientDbError, withDbRetry } from "@/lib/db-retry";
 import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
 
 export const Route = createFileRoute("/")({
@@ -23,24 +24,6 @@ export const Route = createFileRoute("/")({
 });
 
 type Unidade = { id: string; numero: string; nome: string | null };
-type DbError = { code?: string; message?: string; status?: number } | null;
-type DbResult<TData = unknown> = { data?: TData; error: DbError };
-
-const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
-
-const isTransientDbError = (error: DbError) => {
-  const message = error?.message?.toLowerCase() ?? "";
-  return error?.code === "PGRST002" || error?.status === 503 || message.includes("schema cache") || message.includes("database connection") || message.includes("connection error");
-};
-
-async function withDbRetry<T extends DbResult>(operation: () => PromiseLike<T>, attempts = 3): Promise<T> {
-  let result = await operation();
-  for (let attempt = 1; result.error && isTransientDbError(result.error) && attempt < attempts; attempt += 1) {
-    await wait(450 * attempt);
-    result = await operation();
-  }
-  return result;
-}
 
 function validateSocio(s: SocioData): Partial<Record<keyof SocioData, string>> {
   const e: Partial<Record<keyof SocioData, string>> = {};
