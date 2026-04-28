@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, Sprout } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import lavouraLogo from "@/assets/lavoura-logo.png";
 
 export const Route = createFileRoute("/obrigado")({
   head: () => ({ meta: [{ title: "Cadastro enviado — \n" }] }),
@@ -21,9 +22,8 @@ function ThanksPage() {
         <p className="mt-2 text-muted-foreground">
           Recebemos seus dados. A equipe {"\n"} entrará em contato em breve.
         </p>
-        <div className="mt-8 flex items-center justify-center gap-2 text-primary">
-          <Sprout className="h-5 w-5" />
-          <span className="font-semibold">{"\n"}</span>
+        <div className="mt-8 flex items-center justify-center">
+          <img src={lavouraLogo} alt="Lavoura" className="h-10 w-auto" />
         </div>
         <Button asChild variant="outline" className="mt-6">
           <Link to="/">Novo cadastro</Link>
