@@ -12,7 +12,7 @@ import { Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/unidades")({
   head: () => ({ meta: [{ title: "Unidades — Lavoura" }] }),
-  component: AdminUnidades;
+  component: AdminUnidades,
 });
 
 type Unidade = { id: string; numero: string; nome: string | null; ativo: boolean; created_at: string };
