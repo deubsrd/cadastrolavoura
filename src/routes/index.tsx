@@ -23,6 +23,24 @@ export const Route = createFileRoute("/")({
 });
 
 type Unidade = { id: string; numero: string; nome: string | null };
+type DbError = { code?: string; message?: string; status?: number } | null;
+type DbResult<TData = unknown> = { data?: TData; error: DbError };
+
+const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+const isTransientDbError = (error: DbError) => {
+  const message = error?.message?.toLowerCase() ?? "";
+  return error?.code === "PGRST002" || error?.status === 503 || message.includes("schema cache") || message.includes("database connection") || message.includes("connection error");
+};
+
+async function withDbRetry<T extends DbResult>(operation: () => PromiseLike<T>, attempts = 3): Promise<T> {
+  let result = await operation();
+  for (let attempt = 1; result.error && isTransientDbError(result.error) && attempt < attempts; attempt += 1) {
+    await wait(450 * attempt);
+    result = await operation();
+  }
+  return result;
+}
 
 function validateSocio(s: SocioData): Partial<Record<keyof SocioData, string>> {
   const e: Partial<Record<keyof SocioData, string>> = {};
@@ -55,9 +73,9 @@ function PublicForm() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    supabase.from("unidades").select("id, numero, nome").eq("ativo", true)
-      .order("numero").then(({ data, error }) => {
-        if (error) toast.error("Não foi possível carregar as unidades.");
+    withDbRetry(() => supabase.from("unidades").select("id, numero, nome").eq("ativo", true).order("numero"))
+      .then(({ data, error }) => {
+        if (error) toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Recarregue a página em alguns segundos." : "Não foi possível carregar as unidades.");
         else setUnidades(data ?? []);
       });
   }, []);
