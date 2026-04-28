@@ -39,15 +39,20 @@ function AdminUnidades() {
     if (saving) return;
     if (!numero.trim()) return toast.error("Informe o número.");
     setSaving(true);
-    const { data, error } = await withDbRetry(() =>
-      supabase.from("unidades").insert({ numero: numero.trim(), nome: nome.trim() || null }).select("*").single(),
-      2
-    );
-    setSaving(false);
-    if (error) return toast.error(isTransientDbError(error) ? "A conexão demorou demais. Tente novamente em alguns segundos." : error.message);
-    setNumero(""); setNome("");
-    toast.success("Unidade criada.");
-    setRows((prev) => [...prev, data as Unidade].sort((a, b) => a.numero.localeCompare(b.numero)));
+    try {
+      const { data, error } = await withDbRetry(() =>
+        supabase.from("unidades").insert({ numero: numero.trim(), nome: nome.trim() || null }).select("*").single(),
+        2
+      );
+      if (error) return toast.error(isTransientDbError(error) ? "A conexão demorou demais. Tente novamente em alguns segundos." : error.message);
+      setNumero(""); setNome("");
+      toast.success("Unidade criada.");
+      setRows((prev) => [...prev, data as Unidade].sort((a, b) => a.numero.localeCompare(b.numero)));
+    } catch {
+      toast.error("Não foi possível adicionar a unidade. Tente novamente.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggle = async (u: Unidade) => {
