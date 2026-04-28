@@ -41,7 +41,11 @@ function AdminFranqueados() {
       .select("id, nome_completo, email, telefone, cpf, tipo, numero_unidade, cidade, uf, created_at, documento_identidade_path, documento_cpf_path")
       .order("created_at", { ascending: false });
     setLoading(false);
-    if (error) return toast.error("Falha ao carregar franqueados.");
+    if (error) {
+      console.error("[admin/socios] erro ao carregar:", error);
+      return toast.error(`Falha ao carregar franqueados: ${error.message}`);
+    }
+    console.log("[admin/socios] carregados:", data?.length ?? 0);
     setRows((data ?? []) as SocioRow[]);
   };
 
