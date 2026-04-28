@@ -19,9 +19,9 @@ function ThanksPage() {
         <h1 className="text-2xl font-bold tracking-tight text-primary">
           Cadastro enviado com sucesso
         </h1>
-        <p className="mt-2 text-muted-foreground">
-          Recebemos seus dados. A equipe {"\n"} entrará em contato em breve.
-        </p>
+         <p className="mt-2 text-muted-foreground">
+           Recebemos seus dados. Você deu o primeiro passo parar ter a sua Lavoura!
+         </p>
         <div className="mt-8 flex items-center justify-center">
           <img src={lavouraLogo} alt="Lavoura" className="h-10 w-auto" />
         </div>
