@@ -16,6 +16,23 @@ export const Route = createFileRoute("/admin/unidades")({
 });
 
 type Unidade = { id: string; numero: string; nome: string | null; ativo: boolean; created_at: string };
+type DbError = { code?: string; message?: string; status?: number } | null;
+
+const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+
+const isTransientDbError = (error: DbError) => {
+  const message = error?.message?.toLowerCase() ?? "";
+  return error?.code === "PGRST002" || error?.status === 503 || message.includes("schema cache") || message.includes("database connection") || message.includes("connection error");
+};
+
+async function withDbRetry<T extends { error: DbError }>(operation: () => Promise<T>, attempts = 3) {
+  let result = await operation();
+  for (let attempt = 1; result.error && isTransientDbError(result.error) && attempt < attempts; attempt += 1) {
+    await wait(450 * attempt);
+    result = await operation();
+  }
+  return result;
+}
 
 function AdminUnidades() {
   const [rows, setRows] = useState<Unidade[]>([]);
@@ -25,9 +42,9 @@ function AdminUnidades() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("unidades").select("*").order("numero");
+    const { data, error } = await withDbRetry(() => supabase.from("unidades").select("*").order("numero"));
     setLoading(false);
-    if (error) return toast.error("Falha ao carregar unidades.");
+    if (error) return toast.error(`Falha ao carregar unidades: ${error.message}`);
     setRows((data ?? []) as Unidade[]);
   };
   useEffect(() => { load(); }, []);
@@ -35,23 +52,23 @@ function AdminUnidades() {
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!numero.trim()) return toast.error("Informe o número.");
-    const { error } = await supabase.from("unidades").insert({ numero: numero.trim(), nome: nome.trim() || null });
-    if (error) return toast.error(error.message);
+    const { error } = await withDbRetry(() => supabase.from("unidades").insert({ numero: numero.trim(), nome: nome.trim() || null }));
+    if (error) return toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Tente novamente em alguns segundos." : error.message);
     setNumero(""); setNome("");
     toast.success("Unidade criada.");
     load();
   };
 
   const toggle = async (u: Unidade) => {
-    const { error } = await supabase.from("unidades").update({ ativo: !u.ativo }).eq("id", u.id);
-    if (error) return toast.error(error.message);
+    const { error } = await withDbRetry(() => supabase.from("unidades").update({ ativo: !u.ativo }).eq("id", u.id));
+    if (error) return toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Tente novamente em alguns segundos." : error.message);
     load();
   };
 
   const remove = async (id: string) => {
     if (!confirm("Excluir esta unidade?")) return;
-    const { error } = await supabase.from("unidades").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    const { error } = await withDbRetry(() => supabase.from("unidades").delete().eq("id", id));
+    if (error) return toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Tente novamente em alguns segundos." : error.message);
     setRows((prev) => prev.filter((r) => r.id !== id));
   };
 
