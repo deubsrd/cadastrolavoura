@@ -1,0 +1,157 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Download, Trash2, FileText, Search } from "lucide-react";
+
+export const Route = createFileRoute("/admin/")({
+  head: () => ({ meta: [{ title: "Franqueados — Lavoura" }] }),
+  component: AdminFranqueados,
+});
+
+type SocioRow = {
+  id: string;
+  nome_completo: string;
+  email: string;
+  telefone: string;
+  cpf: string;
+  tipo: "administrador" | "cotista";
+  numero_unidade: string;
+  cidade: string;
+  uf: string;
+  created_at: string;
+  documento_identidade_path: string | null;
+  documento_cpf_path: string | null;
+};
+
+function AdminFranqueados() {
+  const [rows, setRows] = useState<SocioRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [q, setQ] = useState("");
+
+  const load = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("socios")
+      .select("id, nome_completo, email, telefone, cpf, tipo, numero_unidade, cidade, uf, created_at, documento_identidade_path, documento_cpf_path")
+      .order("created_at", { ascending: false });
+    setLoading(false);
+    if (error) return toast.error("Falha ao carregar franqueados.");
+    setRows((data ?? []) as SocioRow[]);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    if (!term) return rows;
+    return rows.filter((r) =>
+      [r.nome_completo, r.email, r.cpf, r.numero_unidade, r.cidade].some((v) =>
+        (v ?? "").toLowerCase().includes(term)
+      )
+    );
+  }, [rows, q]);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Excluir este sócio?")) return;
+    const { error } = await supabase.from("socios").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Sócio excluído.");
+    setRows((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  const handleDownloadDoc = async (path: string | null) => {
+    if (!path) return toast.error("Documento não disponível.");
+    const { data, error } = await supabase.storage.from("socio-documentos").createSignedUrl(path, 60);
+    if (error || !data) return toast.error("Falha ao gerar link.");
+    window.open(data.signedUrl, "_blank");
+  };
+
+  const exportCSV = () => {
+    const header = ["Nome", "Email", "Telefone", "CPF", "Tipo", "Unidade", "Cidade", "UF", "Cadastrado em"];
+    const lines = filtered.map((r) => [
+      r.nome_completo, r.email, r.telefone, r.cpf, r.tipo, r.numero_unidade, r.cidade, r.uf,
+      new Date(r.created_at).toLocaleString("pt-BR"),
+    ].map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(","));
+    const csv = [header.join(","), ...lines].join("\n");
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `franqueados-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Franqueados</h1>
+          <p className="text-sm text-muted-foreground">{filtered.length} cadastro(s)</p>
+        </div>
+        <div className="flex gap-2">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar..." className="pl-8" />
+          </div>
+          <Button onClick={exportCSV} variant="outline"><Download className="mr-2 h-4 w-4" />Exportar CSV</Button>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader><CardTitle className="text-base">Lista de sócios</CardTitle></CardHeader>
+        <CardContent className="overflow-x-auto p-0">
+          {loading ? (
+            <p className="p-6 text-sm text-muted-foreground">Carregando...</p>
+          ) : filtered.length === 0 ? (
+            <p className="p-6 text-sm text-muted-foreground">Nenhum cadastro encontrado.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Unidade</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Documentos</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((r) => (
+                  <TableRow key={r.id}>
+                    <TableCell className="font-medium">{r.nome_completo}</TableCell>
+                    <TableCell><Badge variant={r.tipo === "administrador" ? "default" : "secondary"}>{r.tipo}</Badge></TableCell>
+                    <TableCell>{r.numero_unidade}</TableCell>
+                    <TableCell>{r.email}</TableCell>
+                    <TableCell>{r.telefone}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => handleDownloadDoc(r.documento_identidade_path)} title="Identidade">
+                          <FileText className="h-4 w-4" /> ID
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleDownloadDoc(r.documento_cpf_path)} title="CPF">
+                          <FileText className="h-4 w-4" /> CPF
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="ghost" onClick={() => handleDelete(r.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
