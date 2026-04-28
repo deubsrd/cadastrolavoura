@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { isTransientDbError, withDbRetry } from "@/lib/db-retry";
 import { Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/unidades")({
@@ -25,9 +26,9 @@ function AdminUnidades() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("unidades").select("*").order("numero");
+    const { data, error } = await withDbRetry(() => supabase.from("unidades").select("*").order("numero"));
     setLoading(false);
-    if (error) return toast.error("Falha ao carregar unidades.");
+    if (error) return toast.error(`Falha ao carregar unidades: ${error.message}`);
     setRows((data ?? []) as Unidade[]);
   };
   useEffect(() => { load(); }, []);
@@ -35,23 +36,23 @@ function AdminUnidades() {
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!numero.trim()) return toast.error("Informe o número.");
-    const { error } = await supabase.from("unidades").insert({ numero: numero.trim(), nome: nome.trim() || null });
-    if (error) return toast.error(error.message);
+    const { error } = await withDbRetry(() => supabase.from("unidades").insert({ numero: numero.trim(), nome: nome.trim() || null }));
+    if (error) return toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Tente novamente em alguns segundos." : error.message);
     setNumero(""); setNome("");
     toast.success("Unidade criada.");
     load();
   };
 
   const toggle = async (u: Unidade) => {
-    const { error } = await supabase.from("unidades").update({ ativo: !u.ativo }).eq("id", u.id);
-    if (error) return toast.error(error.message);
+    const { error } = await withDbRetry(() => supabase.from("unidades").update({ ativo: !u.ativo }).eq("id", u.id));
+    if (error) return toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Tente novamente em alguns segundos." : error.message);
     load();
   };
 
   const remove = async (id: string) => {
     if (!confirm("Excluir esta unidade?")) return;
-    const { error } = await supabase.from("unidades").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    const { error } = await withDbRetry(() => supabase.from("unidades").delete().eq("id", id));
+    if (error) return toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Tente novamente em alguns segundos." : error.message);
     setRows((prev) => prev.filter((r) => r.id !== id));
   };
 

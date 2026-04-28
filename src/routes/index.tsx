@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SocioFields, type SocioData, emptySocio } from "@/components/forms/SocioFields";
 import { SocioDocuments, type SocioDocs, emptyDocs } from "@/components/forms/SocioDocuments";
+import { isTransientDbError, withDbRetry } from "@/lib/db-retry";
 import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
 
 export const Route = createFileRoute("/")({
@@ -55,9 +56,9 @@ function PublicForm() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    supabase.from("unidades").select("id, numero, nome").eq("ativo", true)
-      .order("numero").then(({ data, error }) => {
-        if (error) toast.error("Não foi possível carregar as unidades.");
+    withDbRetry(() => supabase.from("unidades").select("id, numero, nome").eq("ativo", true).order("numero"))
+      .then(({ data, error }) => {
+        if (error) toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Recarregue a página em alguns segundos." : "Não foi possível carregar as unidades.");
         else setUnidades(data ?? []);
       });
   }, []);
