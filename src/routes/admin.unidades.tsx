@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { isTransientDbError, withDbRetry } from "@/lib/db-retry";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Users } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/unidades")({
   head: () => ({ meta: [{ title: "Unidades — Lavoura" }] }),
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/admin/unidades")({
 });
 
 type Unidade = { id: string; numero: string; nome: string | null; ativo: boolean; created_at: string };
+type SocioBrief = { id: string; nome_completo: string; tipo: string; email: string; telefone: string; cpf: string };
 
 function AdminUnidades() {
   const [rows, setRows] = useState<Unidade[]>([]);
@@ -24,6 +26,23 @@ function AdminUnidades() {
   const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [selected, setSelected] = useState<Unidade | null>(null);
+  const [socios, setSocios] = useState<SocioBrief[]>([]);
+  const [loadingSocios, setLoadingSocios] = useState(false);
+
+  const openSocios = async (u: Unidade) => {
+    setSelected(u);
+    setLoadingSocios(true);
+    setSocios([]);
+    const { data, error } = await supabase
+      .from("socios")
+      .select("id, nome_completo, tipo, email, telefone, cpf")
+      .eq("numero_unidade", u.numero)
+      .order("nome_completo");
+    setLoadingSocios(false);
+    if (error) return toast.error(`Falha ao carregar sócios: ${error.message}`);
+    setSocios((data ?? []) as SocioBrief[]);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -114,12 +133,31 @@ function AdminUnidades() {
               <TableBody>
                 {rows.map((u) => (
                   <TableRow key={u.id}>
-                    <TableCell className="font-medium">{u.numero}</TableCell>
-                    <TableCell>{u.nome ?? "—"}</TableCell>
+                    <TableCell className="font-medium">
+                      <button
+                        type="button"
+                        onClick={() => openSocios(u)}
+                        className="text-primary underline-offset-2 hover:underline"
+                      >
+                        {u.numero}
+                      </button>
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        type="button"
+                        onClick={() => openSocios(u)}
+                        className="hover:underline"
+                      >
+                        {u.nome ?? "—"}
+                      </button>
+                    </TableCell>
                     <TableCell>
                       <Badge variant={u.ativo ? "default" : "secondary"}>{u.ativo ? "Ativa" : "Inativa"}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
+                      <Button size="sm" variant="ghost" onClick={() => openSocios(u)} title="Ver sócios">
+                        <Users className="h-4 w-4" />
+                      </Button>
                       <Button size="sm" variant="ghost" onClick={() => toggle(u)}>{u.ativo ? "Desativar" : "Ativar"}</Button>
                       <Button size="sm" variant="ghost" onClick={() => remove(u.id)}><Trash2 className="h-4 w-4" /></Button>
                     </TableCell>
@@ -130,6 +168,43 @@ function AdminUnidades() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Sócios da Unidade {selected?.numero}</DialogTitle>
+            <DialogDescription>{selected?.nome ?? "Sem nome cadastrado"}</DialogDescription>
+          </DialogHeader>
+          {loadingSocios ? (
+            <p className="p-4 text-sm text-muted-foreground">Carregando sócios...</p>
+          ) : socios.length === 0 ? (
+            <p className="p-4 text-sm text-muted-foreground">Nenhum sócio vinculado a esta unidade.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>CPF</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {socios.map((s) => (
+                  <TableRow key={s.id}>
+                    <TableCell className="font-medium">{s.nome_completo}</TableCell>
+                    <TableCell><Badge variant={s.tipo === "administrador" ? "default" : "secondary"}>{s.tipo}</Badge></TableCell>
+                    <TableCell>{s.email}</TableCell>
+                    <TableCell>{s.telefone}</TableCell>
+                    <TableCell>{s.cpf}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
