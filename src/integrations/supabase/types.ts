@@ -22,6 +22,8 @@ export type Database = {
           cpf: string
           created_at: string
           data_nascimento: string
+          documento_cpf_path: string | null
+          documento_identidade_path: string | null
           email: string
           estado_civil: string
           id: string
@@ -45,6 +47,8 @@ export type Database = {
           cpf: string
           created_at?: string
           data_nascimento: string
+          documento_cpf_path?: string | null
+          documento_identidade_path?: string | null
           email: string
           estado_civil: string
           id?: string
@@ -68,6 +72,8 @@ export type Database = {
           cpf?: string
           created_at?: string
           data_nascimento?: string
+          documento_cpf_path?: string | null
+          documento_identidade_path?: string | null
           email?: string
           estado_civil?: string
           id?: string

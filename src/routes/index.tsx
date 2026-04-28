@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SocioFields, type SocioData, emptySocio } from "@/components/forms/SocioFields";
+import { SocioDocuments, type SocioDocs, emptyDocs } from "@/components/forms/SocioDocuments";
 import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
 
 export const Route = createFileRoute("/")({
@@ -48,6 +49,8 @@ function PublicForm() {
   const [unidadeId, setUnidadeId] = useState<string>("");
   const [socios, setSocios] = useState<SocioData[]>([emptySocio()]);
   const [errs, setErrs] = useState<Array<Partial<Record<keyof SocioData, string>>>>([{}]);
+  const [docs, setDocs] = useState<SocioDocs[]>([emptyDocs()]);
+  const [docErrs, setDocErrs] = useState<Array<{ identidadeFile?: string; cpfFile?: string }>>([{}]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -61,10 +64,14 @@ function PublicForm() {
   const addSocio = () => {
     setSocios((p) => [...p, emptySocio()]);
     setErrs((p) => [...p, {}]);
+    setDocs((p) => [...p, emptyDocs()]);
+    setDocErrs((p) => [...p, {}]);
   };
   const removeSocio = (i: number) => {
     setSocios((p) => p.filter((_, idx) => idx !== i));
     setErrs((p) => p.filter((_, idx) => idx !== i));
+    setDocs((p) => p.filter((_, idx) => idx !== i));
+    setDocErrs((p) => p.filter((_, idx) => idx !== i));
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -75,16 +82,56 @@ function PublicForm() {
     }
     const newErrs = socios.map(validateSocio);
     setErrs(newErrs);
-    if (newErrs.some((x) => Object.keys(x).length > 0)) {
+    const newDocErrs = docs.map((d) => {
+      const e: { identidadeFile?: string; cpfFile?: string } = {};
+      if (!d.identidadeFile) e.identidadeFile = "Envie o PDF do RG ou CNH";
+      if (!d.cpfFile) e.cpfFile = "Envie o PDF do CPF";
+      return e;
+    });
+    setDocErrs(newDocErrs);
+    if (
+      newErrs.some((x) => Object.keys(x).length > 0) ||
+      newDocErrs.some((x) => Object.keys(x).length > 0)
+    ) {
       toast.error("Preencha todos os campos obrigatórios.");
       return;
     }
     const unidade = unidades.find((u) => u.id === unidadeId)!;
     setSubmitting(true);
-    const payload = socios.map((s) => ({
+
+    // Upload dos PDFs antes de inserir
+    const ts = Date.now();
+    const uploadedPaths: Array<{ identidade: string; cpf: string }> = [];
+    try {
+      for (let i = 0; i < socios.length; i++) {
+        const cpfDigits = socios[i].cpf.replace(/\D/g, "");
+        const folder = `${unidade.numero}/${ts}-${cpfDigits || `socio${i + 1}`}`;
+        const idFile = docs[i].identidadeFile!;
+        const cpfFile = docs[i].cpfFile!;
+        const idPath = `${folder}/identidade.pdf`;
+        const cpfPath = `${folder}/cpf.pdf`;
+        const up1 = await supabase.storage
+          .from("socio-documentos")
+          .upload(idPath, idFile, { contentType: "application/pdf", upsert: false });
+        if (up1.error) throw up1.error;
+        const up2 = await supabase.storage
+          .from("socio-documentos")
+          .upload(cpfPath, cpfFile, { contentType: "application/pdf", upsert: false });
+        if (up2.error) throw up2.error;
+        uploadedPaths.push({ identidade: idPath, cpf: cpfPath });
+      }
+    } catch (err) {
+      setSubmitting(false);
+      toast.error("Erro ao enviar os documentos. Tente novamente.");
+      return;
+    }
+
+    const payload = socios.map((s, i) => ({
       unidade_id: unidadeId,
       numero_unidade: unidade.numero,
       ...s,
+      documento_identidade_path: uploadedPaths[i].identidade,
+      documento_cpf_path: uploadedPaths[i].cpf,
     }));
     const { error } = await supabase.from("socios").insert(payload);
     setSubmitting(false);
@@ -167,6 +214,17 @@ function PublicForm() {
                 <SocioFields value={socio}
                   onChange={(v) => setSocios((p) => p.map((s, idx) => idx === i ? v : s))}
                   errors={errs[i]} />
+                <div className="mt-6 border-t border-border pt-6">
+                  <h3 className="mb-1 text-sm font-semibold text-primary">Documentos (PDF)</h3>
+                  <p className="mb-4 text-xs text-muted-foreground">
+                    Anexe os documentos deste sócio. Ambos os arquivos são obrigatórios.
+                  </p>
+                  <SocioDocuments
+                    value={docs[i] ?? emptyDocs()}
+                    onChange={(v) => setDocs((p) => p.map((d, idx) => (idx === i ? v : d)))}
+                    errors={docErrs[i]}
+                  />
+                </div>
               </CardContent>
             </Card>
           ))}
