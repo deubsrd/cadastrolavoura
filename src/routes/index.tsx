@@ -14,8 +14,8 @@ import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Cadastro de Franqueados — Lavoura" },
-      { name: "description", content: "Preencha o cadastro da sua unidade Lavoura." },
+      { title: "Cadastro de Franqueados — \n" },
+      { name: "description", content: "Preencha o cadastro da sua unidade \n." },
     ],
   }),
   component: PublicForm,
@@ -151,7 +151,7 @@ function PublicForm() {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Sprout className="h-5 w-5" />
             </div>
-            <span className="text-lg font-semibold tracking-tight text-primary">Lavoura</span>
+            <span className="text-lg font-semibold tracking-tight text-primary">{"\n"}</span>
           </div>
           <Link to="/login" className="text-sm text-muted-foreground hover:text-primary">
             Acesso administrativo
@@ -172,7 +172,7 @@ function PublicForm() {
         <form onSubmit={onSubmit} className="space-y-6">
           <Card style={{ boxShadow: "var(--shadow-card)" }}>
             <CardHeader>
-              <CardTitle className="text-base">Unidade Lavoura</CardTitle>
+              <CardTitle className="text-base">Unidade {"\n"}</CardTitle>
             </CardHeader>
             <CardContent>
               <Label htmlFor="unidade" className="text-sm">Número da unidade</Label>
@@ -190,7 +190,7 @@ function PublicForm() {
               </Select>
               {unidades.length === 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Nenhuma unidade disponível. Entre em contato com a Lavoura.
+                  Nenhuma unidade disponível. Entre em contato com a {"\n"}.
                 </p>
               )}
             </CardContent>
