@@ -215,7 +215,6 @@ function PublicForm() {
             </Card>
           ))}
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
           <div className="flex items-start gap-3 rounded-md border border-border bg-card p-4">
             <Checkbox
               id="lgpd"
@@ -238,7 +237,6 @@ function PublicForm() {
               <Send className="mr-2 h-4 w-4" />
               {submitting ? "Enviando..." : "Enviar cadastro"}
             </Button>
-          </div>
           </div>
         </form>
       </main>
