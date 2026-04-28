@@ -23,6 +23,7 @@ function AdminUnidades() {
   const [numero, setNumero] = useState("");
   const [nome, setNome] = useState("");
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -35,9 +36,12 @@ function AdminUnidades() {
 
   const add = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     if (!numero.trim()) return toast.error("Informe o número.");
-    const { error } = await withDbRetry(() => supabase.from("unidades").insert({ numero: numero.trim(), nome: nome.trim() || null }));
-    if (error) return toast.error(isTransientDbError(error) ? "Conexão com o banco instável. Tente novamente em alguns segundos." : error.message);
+    setSaving(true);
+    const { error } = await withDbRetry(() => supabase.from("unidades").insert({ numero: numero.trim(), nome: nome.trim() || null }), 8);
+    setSaving(false);
+    if (error) return toast.error(isTransientDbError(error) ? "O banco ainda está reconectando. Aguarde alguns segundos e tente adicionar novamente." : error.message);
     setNumero(""); setNome("");
     toast.success("Unidade criada.");
     load();
@@ -76,7 +80,7 @@ function AdminUnidades() {
               <Input id="nome" value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Lavoura Centro" />
             </div>
             <div className="flex items-end">
-              <Button type="submit"><Plus className="mr-2 h-4 w-4" />Adicionar</Button>
+              <Button type="submit" disabled={saving}><Plus className="mr-2 h-4 w-4" />{saving ? "Adicionando..." : "Adicionar"}</Button>
             </div>
           </form>
         </CardContent>
