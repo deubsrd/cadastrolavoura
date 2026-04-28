@@ -172,7 +172,7 @@ function PublicForm() {
         <form onSubmit={onSubmit} className="space-y-6">
           <Card style={{ boxShadow: "var(--shadow-card)" }}>
             <CardHeader>
-              <CardTitle className="text-base">Unidade Lavoura</CardTitle>
+              <CardTitle className="text-base">Unidade {"\n"}</CardTitle>
             </CardHeader>
             <CardContent>
               <Label htmlFor="unidade" className="text-sm">Número da unidade</Label>
@@ -190,7 +190,7 @@ function PublicForm() {
               </Select>
               {unidades.length === 0 && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Nenhuma unidade disponível. Entre em contato com a Lavoura.
+                  Nenhuma unidade disponível. Entre em contato com a {"\n"}.
                 </p>
               )}
             </CardContent>

@@ -19,7 +19,7 @@ function ThanksPage() {
           Cadastro enviado com sucesso
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Recebemos seus dados. A equipe Lavoura entrará em contato em breve.
+          Recebemos seus dados. A equipe {"\n"} entrará em contato em breve.
         </p>
         <div className="mt-8 flex items-center justify-center gap-2 text-primary">
           <Sprout className="h-5 w-5" />
