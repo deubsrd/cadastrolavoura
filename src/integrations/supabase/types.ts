@@ -100,6 +100,69 @@ export type Database = {
           },
         ]
       }
+      unidade_documentos: {
+        Row: {
+          arquivado: boolean
+          created_at: string
+          data_vencimento: string | null
+          id: string
+          mime_type: string | null
+          nome: string
+          storage_path: string
+          substituido_por: string | null
+          tamanho_bytes: number | null
+          tipo: string
+          unidade_id: string
+          updated_at: string
+          versao: number
+        }
+        Insert: {
+          arquivado?: boolean
+          created_at?: string
+          data_vencimento?: string | null
+          id?: string
+          mime_type?: string | null
+          nome: string
+          storage_path: string
+          substituido_por?: string | null
+          tamanho_bytes?: number | null
+          tipo: string
+          unidade_id: string
+          updated_at?: string
+          versao?: number
+        }
+        Update: {
+          arquivado?: boolean
+          created_at?: string
+          data_vencimento?: string | null
+          id?: string
+          mime_type?: string | null
+          nome?: string
+          storage_path?: string
+          substituido_por?: string | null
+          tamanho_bytes?: number | null
+          tipo?: string
+          unidade_id?: string
+          updated_at?: string
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unidade_documentos_substituido_por_fkey"
+            columns: ["substituido_por"]
+            isOneToOne: false
+            referencedRelation: "unidade_documentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "unidade_documentos_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unidades: {
         Row: {
           ativo: boolean
