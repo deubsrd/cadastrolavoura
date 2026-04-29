@@ -9,8 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { isTransientDbError, withDbRetry } from "@/lib/db-retry";
-import { Plus, Trash2, Users } from "lucide-react";
+import { Plus, Trash2, Users, FileText } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UnidadeDocumentos } from "@/components/admin/UnidadeDocumentos";
 
 export const Route = createFileRoute("/admin/unidades")({
   head: () => ({ meta: [{ title: "Unidades — Lavoura" }] }),
@@ -158,6 +160,9 @@ function AdminUnidades() {
                       <Button size="sm" variant="ghost" onClick={() => openSocios(u)} title="Ver sócios">
                         <Users className="h-4 w-4" />
                       </Button>
+                      <Button size="sm" variant="ghost" onClick={() => openSocios(u)} title="Documentos">
+                        <FileText className="h-4 w-4" />
+                      </Button>
                       <Button size="sm" variant="ghost" onClick={() => toggle(u)}>{u.ativo ? "Desativar" : "Ativar"}</Button>
                       <Button size="sm" variant="ghost" onClick={() => remove(u.id)}><Trash2 className="h-4 w-4" /></Button>
                     </TableCell>
@@ -170,39 +175,50 @@ function AdminUnidades() {
       </Card>
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+        <DialogContent className="max-h-[85vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Sócios da Unidade {selected?.numero}</DialogTitle>
+            <DialogTitle>Unidade {selected?.numero}</DialogTitle>
             <DialogDescription>{selected?.nome ?? "Sem nome cadastrado"}</DialogDescription>
           </DialogHeader>
-          {loadingSocios ? (
-            <p className="p-4 text-sm text-muted-foreground">Carregando sócios...</p>
-          ) : socios.length === 0 ? (
-            <p className="p-4 text-sm text-muted-foreground">Nenhum sócio vinculado a esta unidade.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Telefone</TableHead>
-                  <TableHead>CPF</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {socios.map((s) => (
-                  <TableRow key={s.id}>
-                    <TableCell className="font-medium">{s.nome_completo}</TableCell>
-                    <TableCell><Badge variant={s.tipo === "administrador" ? "default" : "secondary"}>{s.tipo}</Badge></TableCell>
-                    <TableCell>{s.email}</TableCell>
-                    <TableCell>{s.telefone}</TableCell>
-                    <TableCell>{s.cpf}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+          <Tabs defaultValue="socios" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="socios">Sócios</TabsTrigger>
+              <TabsTrigger value="documentos">Documentos</TabsTrigger>
+            </TabsList>
+            <TabsContent value="socios" className="mt-4">
+              {loadingSocios ? (
+                <p className="p-4 text-sm text-muted-foreground">Carregando sócios...</p>
+              ) : socios.length === 0 ? (
+                <p className="p-4 text-sm text-muted-foreground">Nenhum sócio vinculado a esta unidade.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nome</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Telefone</TableHead>
+                      <TableHead>CPF</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {socios.map((s) => (
+                      <TableRow key={s.id}>
+                        <TableCell className="font-medium">{s.nome_completo}</TableCell>
+                        <TableCell><Badge variant={s.tipo === "administrador" ? "default" : "secondary"}>{s.tipo}</Badge></TableCell>
+                        <TableCell>{s.email}</TableCell>
+                        <TableCell>{s.telefone}</TableCell>
+                        <TableCell>{s.cpf}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabsContent>
+            <TabsContent value="documentos" className="mt-4">
+              {selected && <UnidadeDocumentos unidadeId={selected.id} />}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
