@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Send } from "lucide-react";
 import { Info } from "lucide-react";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SocioFields, type SocioData, emptySocio } from "@/components/forms/SocioFields";
 import { SocioDocuments, type SocioDocs, emptyDocs } from "@/components/forms/SocioDocuments";
 import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
@@ -53,6 +54,25 @@ function PublicForm() {
   const [docErrs, setDocErrs] = useState<Array<{ identidadeFile?: string; cpfFile?: string }>>([{}]);
   const [submitting, setSubmitting] = useState(false);
   const [lgpdAceito, setLgpdAceito] = useState(false);
+  const [unidades, setUnidades] = useState<Array<{ id: string; numero: string; nome: string | null }>>([]);
+  const [loadingUnidades, setLoadingUnidades] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const { data, error } = await supabase
+        .from("unidades")
+        .select("id, numero, nome")
+        .eq("ativo", true)
+        .order("numero", { ascending: true });
+      if (!mounted) return;
+      if (!error && data) setUnidades(data);
+      setLoadingUnidades(false);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const addSocio = () => {
     setSocios((p) => [...p, emptySocio()]);
@@ -189,16 +209,31 @@ function PublicForm() {
             </CardHeader>
             <CardContent>
               <Label htmlFor="unidade" className="text-sm">Número da unidade</Label>
-              <Input
-                id="unidade"
-                className="mt-1.5"
-                value={numeroUnidade}
-                onChange={(e) => setNumeroUnidade(e.target.value)}
-                placeholder="Ex.: 001"
-              />
-              <p className="mt-2 text-xs text-muted-foreground">
-                Informe o número da sua unidade conforme indicado pela franqueadora.
-              </p>
+              {loadingUnidades ? (
+                <p className="mt-2 text-sm text-muted-foreground">Carregando unidades...</p>
+              ) : unidades.length === 0 ? (
+                <p className="mt-2 text-sm text-destructive">
+                  Nenhuma unidade disponível. Entre em contato com a franqueadora.
+                </p>
+              ) : (
+                <>
+                  <Select value={numeroUnidade} onValueChange={setNumeroUnidade}>
+                    <SelectTrigger id="unidade" className="mt-1.5">
+                      <SelectValue placeholder="Selecione a sua unidade" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {unidades.map((u) => (
+                        <SelectItem key={u.id} value={u.numero}>
+                          {u.numero}{u.nome ? ` — ${u.nome}` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Selecione a sua unidade conforme indicado pela franqueadora.
+                  </p>
+                </>
+              )}
             </CardContent>
           </Card>
 
