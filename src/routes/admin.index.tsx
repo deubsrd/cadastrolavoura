@@ -343,3 +343,10 @@ function Field({ label, value }: { label: string; value: string | null | undefin
     </div>
   );
 }
+
+function formatDateBR(value: string | null | undefined): string {
+  if (!value) return "—";
+  const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+  return value;
+}
