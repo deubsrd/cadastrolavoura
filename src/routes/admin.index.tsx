@@ -254,7 +254,7 @@ function AdminFranqueados() {
                 <Field label="CPF" value={selected.cpf} />
                 <Field label="RG" value={selected.rg} />
                 <Field label="Órgão expedidor" value={selected.rg_orgao} />
-                <Field label="Data de nascimento" value={selected.data_nascimento ? new Date(selected.data_nascimento).toLocaleDateString("pt-BR") : "—"} />
+                <Field label="Data de nascimento" value={formatDateBR(selected.data_nascimento)} />
                 <Field label="Nacionalidade" value={selected.nacionalidade} />
                 <Field label="Estado civil" value={selected.estado_civil} />
               </Section>
@@ -342,4 +342,11 @@ function Field({ label, value }: { label: string; value: string | null | undefin
       <p className="font-medium">{value || "—"}</p>
     </div>
   );
+}
+
+function formatDateBR(value: string | null | undefined): string {
+  if (!value) return "—";
+  const iso = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+  return value;
 }
