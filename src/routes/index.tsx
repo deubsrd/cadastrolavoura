@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, Trash2, Send } from "lucide-react";
+import { Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import lavouraLogo from "@/assets/lavoura-logo.png";
 import { Button } from "@/components/ui/button";
@@ -160,6 +161,25 @@ function PublicForm() {
           <p className="mt-2 text-muted-foreground">
             Preencha os dados de cada sócio da unidade. Todos os campos são obrigatórios.
           </p>
+        </div>
+
+        <div
+          className="mb-6 flex gap-3 rounded-lg border border-primary/20 bg-secondary/40 p-4 sm:p-5"
+          style={{ boxShadow: "var(--shadow-card)" }}
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Info className="h-5 w-5" />
+          </div>
+          <div className="space-y-2 text-sm leading-relaxed">
+            <p className="font-semibold text-primary">Por que pedimos essas informações?</p>
+            <p className="text-foreground/80">
+              Seus dados são coletados uma única vez para agilizar todos os processos da sua franquia:
+              elaboração de contratos, pedidos junto a fornecedores, abertura de contas e documentações
+              oficiais. Assim, você não precisa repetir as mesmas informações toda vez que um novo
+              documento for necessário. Todas as informações são armazenadas com segurança e utilizadas
+              exclusivamente para fins administrativos da Lavoura.
+            </p>
+          </div>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-6">

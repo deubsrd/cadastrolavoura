@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Download, Trash2, FileText, Search, Eye } from "lucide-react";
+import { Download, Trash2, FileText, Search, Eye, Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { SocioFields, type SocioData } from "@/components/forms/SocioFields";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Franqueados — Lavoura" }] }),
@@ -44,6 +45,9 @@ function AdminFranqueados() {
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<SocioRow | null>(null);
+  const [editing, setEditing] = useState<SocioRow | null>(null);
+  const [editData, setEditData] = useState<SocioData | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -85,6 +89,40 @@ function AdminFranqueados() {
     const { data, error } = await supabase.storage.from("socio-documentos").createSignedUrl(path, 60);
     if (error || !data) return toast.error("Falha ao gerar link.");
     window.open(data.signedUrl, "_blank");
+  };
+
+  const openEdit = (r: SocioRow) => {
+    setEditing(r);
+    setEditData({
+      tipo: r.tipo,
+      nome_completo: r.nome_completo ?? "",
+      email: r.email ?? "",
+      telefone: r.telefone ?? "",
+      data_nascimento: r.data_nascimento ?? "",
+      rg: r.rg ?? "",
+      rg_orgao: r.rg_orgao ?? "",
+      cpf: r.cpf ?? "",
+      logradouro: r.logradouro ?? "",
+      numero_casa: r.numero_casa ?? "",
+      bairro: r.bairro ?? "",
+      cidade: r.cidade ?? "",
+      uf: r.uf ?? "",
+      cep: r.cep ?? "",
+      nacionalidade: r.nacionalidade ?? "",
+      estado_civil: r.estado_civil ?? "",
+    });
+  };
+
+  const saveEdit = async () => {
+    if (!editing || !editData) return;
+    setSaving(true);
+    const { error } = await supabase.from("socios").update(editData).eq("id", editing.id);
+    setSaving(false);
+    if (error) return toast.error(`Falha ao salvar: ${error.message}`);
+    toast.success("Dados atualizados com sucesso.");
+    setRows((prev) => prev.map((r) => (r.id === editing.id ? { ...r, ...editData } : r)));
+    setEditing(null);
+    setEditData(null);
   };
 
   const exportCSV = () => {
@@ -159,6 +197,9 @@ function AdminFranqueados() {
                       <Button size="sm" variant="ghost" onClick={() => setSelected(r)} title="Ver detalhes">
                         <Eye className="h-4 w-4" />
                       </Button>
+                      <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Editar">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button size="sm" variant="ghost" onClick={() => handleDelete(r.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -214,6 +255,28 @@ function AdminFranqueados() {
               <p className="text-xs text-muted-foreground">
                 Cadastrado em {new Date(selected.created_at).toLocaleString("pt-BR")}
               </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editing} onOpenChange={(o) => { if (!o) { setEditing(null); setEditData(null); } }}>
+        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar franqueado</DialogTitle>
+            <DialogDescription>Altere os dados e clique em salvar.</DialogDescription>
+          </DialogHeader>
+          {editData && (
+            <div className="space-y-4">
+              <SocioFields value={editData} onChange={setEditData} />
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => { setEditing(null); setEditData(null); }} disabled={saving}>
+                  Cancelar
+                </Button>
+                <Button onClick={saveEdit} disabled={saving}>
+                  {saving ? "Salvando..." : "Salvar alterações"}
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
