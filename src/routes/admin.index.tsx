@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { Download, Trash2, FileText, Search, Eye, Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SocioFields, type SocioData } from "@/components/forms/SocioFields";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Franqueados — Lavoura" }] }),
@@ -48,6 +50,8 @@ function AdminFranqueados() {
   const [editing, setEditing] = useState<SocioRow | null>(null);
   const [editData, setEditData] = useState<SocioData | null>(null);
   const [saving, setSaving] = useState(false);
+  const [unidades, setUnidades] = useState<Array<{ id: string; numero: string; nome: string | null }>>([]);
+  const [editUnidade, setEditUnidade] = useState<string>("");
 
   const load = async () => {
     setLoading(true);
@@ -65,6 +69,20 @@ function AdminFranqueados() {
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await supabase
+        .from("unidades")
+        .select("id, numero, nome")
+        .order("numero", { ascending: true });
+      if (error) {
+        console.error("[admin/unidades] erro:", error);
+        return;
+      }
+      setUnidades(data ?? []);
+    })();
+  }, []);
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -111,16 +129,26 @@ function AdminFranqueados() {
       nacionalidade: r.nacionalidade ?? "",
       estado_civil: r.estado_civil ?? "",
     });
+    setEditUnidade(r.numero_unidade ?? "");
   };
 
   const saveEdit = async () => {
     if (!editing || !editData) return;
+    if (!editUnidade) {
+      return toast.error("Selecione a unidade.");
+    }
     setSaving(true);
-    const { error } = await supabase.from("socios").update(editData).eq("id", editing.id);
+    const unidadeRow = unidades.find((u) => u.numero === editUnidade);
+    const updatePayload = {
+      ...editData,
+      numero_unidade: editUnidade,
+      unidade_id: unidadeRow?.id ?? null,
+    };
+    const { error } = await supabase.from("socios").update(updatePayload).eq("id", editing.id);
     setSaving(false);
     if (error) return toast.error(`Falha ao salvar: ${error.message}`);
     toast.success("Dados atualizados com sucesso.");
-    setRows((prev) => prev.map((r) => (r.id === editing.id ? { ...r, ...editData } : r)));
+    setRows((prev) => prev.map((r) => (r.id === editing.id ? { ...r, ...editData, numero_unidade: editUnidade } : r)));
     setEditing(null);
     setEditData(null);
   };
@@ -268,6 +296,19 @@ function AdminFranqueados() {
           </DialogHeader>
           {editData && (
             <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-unidade" className="text-sm font-medium">Unidade</Label>
+                <Select value={editUnidade} onValueChange={setEditUnidade}>
+                  <SelectTrigger id="edit-unidade"><SelectValue placeholder="Selecione a unidade" /></SelectTrigger>
+                  <SelectContent>
+                    {unidades.map((u) => (
+                      <SelectItem key={u.id} value={u.numero}>
+                        {u.numero}{u.nome ? ` — ${u.nome}` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <SocioFields value={editData} onChange={setEditData} />
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => { setEditing(null); setEditData(null); }} disabled={saving}>
