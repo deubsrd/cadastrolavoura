@@ -9,8 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { isTransientDbError, withDbRetry } from "@/lib/db-retry";
-import { Plus, Trash2, Users, FileText } from "lucide-react";
+import { Plus, Trash2, Users, FileText, Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UnidadeDocumentos } from "@/components/admin/UnidadeDocumentos";
 
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/admin/unidades")({
   component: AdminUnidades,
 });
 
-type Unidade = { id: string; numero: string; nome: string | null; ativo: boolean; created_at: string };
+type Unidade = { id: string; numero: string; nome: string | null; ativo: boolean; created_at: string; endereco: string | null; cnpj: string | null };
 type SocioBrief = { id: string; nome_completo: string; tipo: string; email: string; telefone: string; cpf: string };
 
 function AdminUnidades() {
@@ -31,6 +32,40 @@ function AdminUnidades() {
   const [selected, setSelected] = useState<Unidade | null>(null);
   const [socios, setSocios] = useState<SocioBrief[]>([]);
   const [loadingSocios, setLoadingSocios] = useState(false);
+  const [editing, setEditing] = useState<Unidade | null>(null);
+  const [editForm, setEditForm] = useState({ numero: "", nome: "", endereco: "", cnpj: "" });
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const openEdit = (u: Unidade) => {
+    setEditing(u);
+    setEditForm({
+      numero: u.numero,
+      nome: u.nome ?? "",
+      endereco: u.endereco ?? "",
+      cnpj: u.cnpj ?? "",
+    });
+  };
+
+  const saveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editing || savingEdit) return;
+    if (!editForm.numero.trim()) return toast.error("Informe o número.");
+    setSavingEdit(true);
+    const payload = {
+      numero: editForm.numero.trim(),
+      nome: editForm.nome.trim() || null,
+      endereco: editForm.endereco.trim() || null,
+      cnpj: editForm.cnpj.trim() || null,
+    };
+    const { data, error } = await withDbRetry(() =>
+      supabase.from("unidades").update(payload).eq("id", editing.id).select("*").single()
+    );
+    setSavingEdit(false);
+    if (error) return toast.error(isTransientDbError(error) ? "Conexão instável. Tente novamente." : error.message);
+    setRows((prev) => prev.map((r) => (r.id === editing.id ? (data as Unidade) : r)).sort((a, b) => a.numero.localeCompare(b.numero)));
+    setEditing(null);
+    toast.success("Unidade atualizada.");
+  };
 
   const openSocios = async (u: Unidade) => {
     setSelected(u);
@@ -163,6 +198,9 @@ function AdminUnidades() {
                       <Button size="sm" variant="ghost" onClick={() => openSocios(u)} title="Documentos">
                         <FileText className="h-4 w-4" />
                       </Button>
+                      <Button size="sm" variant="ghost" onClick={() => openEdit(u)} title="Editar">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
                       <Button size="sm" variant="ghost" onClick={() => toggle(u)}>{u.ativo ? "Desativar" : "Ativar"}</Button>
                       <Button size="sm" variant="ghost" onClick={() => remove(u.id)}><Trash2 className="h-4 w-4" /></Button>
                     </TableCell>
@@ -219,6 +257,39 @@ function AdminUnidades() {
               {selected && <UnidadeDocumentos unidadeId={selected.id} />}
             </TabsContent>
           </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Editar unidade</DialogTitle>
+            <DialogDescription>Atualize as informações da unidade.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={saveEdit} className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
+              <div className="space-y-1">
+                <Label htmlFor="edit-numero">Número</Label>
+                <Input id="edit-numero" value={editForm.numero} onChange={(e) => setEditForm((f) => ({ ...f, numero: e.target.value }))} />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="edit-nome">Nome</Label>
+                <Input id="edit-nome" value={editForm.nome} onChange={(e) => setEditForm((f) => ({ ...f, nome: e.target.value }))} placeholder="Lavoura Centro" />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-cnpj">CNPJ</Label>
+              <Input id="edit-cnpj" value={editForm.cnpj} onChange={(e) => setEditForm((f) => ({ ...f, cnpj: e.target.value }))} placeholder="00.000.000/0000-00" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-endereco">Endereço</Label>
+              <Textarea id="edit-endereco" value={editForm.endereco} onChange={(e) => setEditForm((f) => ({ ...f, endereco: e.target.value }))} placeholder="Rua, número, bairro, cidade - UF" rows={3} />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="ghost" onClick={() => setEditing(null)}>Cancelar</Button>
+              <Button type="submit" disabled={savingEdit}>{savingEdit ? "Salvando..." : "Salvar"}</Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

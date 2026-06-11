@@ -166,7 +166,9 @@ export type Database = {
       unidades: {
         Row: {
           ativo: boolean
+          cnpj: string | null
           created_at: string
+          endereco: string | null
           id: string
           nome: string | null
           numero: string
@@ -174,7 +176,9 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean
+          cnpj?: string | null
           created_at?: string
+          endereco?: string | null
           id?: string
           nome?: string | null
           numero: string
@@ -182,7 +186,9 @@ export type Database = {
         }
         Update: {
           ativo?: boolean
+          cnpj?: string | null
           created_at?: string
+          endereco?: string | null
           id?: string
           nome?: string | null
           numero?: string
