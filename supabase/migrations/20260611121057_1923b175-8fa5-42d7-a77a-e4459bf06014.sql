@@ -1,0 +1,1 @@
+ALTER TABLE public.unidades ADD COLUMN IF NOT EXISTS endereco text, ADD COLUMN IF NOT EXISTS cnpj text;
