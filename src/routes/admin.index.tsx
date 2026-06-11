@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Download, Trash2, FileText, Search, Eye, Pencil } from "lucide-react";
+import { FileDown } from "lucide-react";
+import jsPDF from "jspdf";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { SocioFields, type SocioData } from "@/components/forms/SocioFields";
 import { Label } from "@/components/ui/label";
@@ -107,6 +109,99 @@ function AdminFranqueados() {
     const { data, error } = await supabase.storage.from("socio-documentos").createSignedUrl(path, 60);
     if (error || !data) return toast.error("Falha ao gerar link.");
     window.open(data.signedUrl, "_blank");
+  };
+
+  const exportSocioPDF = (r: SocioRow) => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 40;
+    let y = 50;
+
+    const ensureSpace = (need: number) => {
+      if (y + need > pageH - 40) {
+        doc.addPage();
+        y = 50;
+      }
+    };
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Ficha do Franqueado", marginX, y);
+    y += 8;
+    doc.setDrawColor(57, 79, 62);
+    doc.setLineWidth(1);
+    doc.line(marginX, y, pageW - marginX, y);
+    y += 18;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(`Gerado em ${new Date().toLocaleString("pt-BR")}`, marginX, y);
+    y += 20;
+    doc.setTextColor(0);
+
+    const section = (title: string) => {
+      ensureSpace(30);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(57, 79, 62);
+      doc.text(title, marginX, y);
+      y += 6;
+      doc.setDrawColor(220);
+      doc.line(marginX, y, pageW - marginX, y);
+      y += 14;
+      doc.setTextColor(0);
+    };
+
+    const field = (label: string, value: string | null | undefined) => {
+      ensureSpace(28);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(110);
+      doc.text(label.toUpperCase(), marginX, y);
+      y += 12;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(20);
+      const lines = doc.splitTextToSize(value || "—", pageW - marginX * 2);
+      doc.text(lines, marginX, y);
+      y += lines.length * 13 + 4;
+    };
+
+    section("Identificação");
+    field("Nome completo", r.nome_completo);
+    field("Tipo de sócio", r.tipo);
+    field("Unidade", r.numero_unidade);
+    field("CPF", r.cpf);
+    field("RG", r.rg);
+    field("Órgão expedidor", r.rg_orgao);
+    field("Data de nascimento", formatDateBR(r.data_nascimento));
+    field("Nacionalidade", r.nacionalidade);
+    field("Estado civil", r.estado_civil);
+
+    section("Contato");
+    field("Email", r.email);
+    field("Telefone", r.telefone);
+
+    section("Endereço");
+    field("CEP", r.cep);
+    field("Logradouro", r.logradouro);
+    field("Número", r.numero_casa);
+    field("Bairro", r.bairro);
+    field("Cidade", r.cidade);
+    field("UF", r.uf);
+
+    section("Cadastro");
+    field("Cadastrado em", new Date(r.created_at).toLocaleString("pt-BR"));
+
+    const slug = (r.nome_completo || "franqueado")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+    doc.save(`franqueado-${slug}.pdf`);
   };
 
   const openEdit = (r: SocioRow) => {
@@ -224,6 +319,9 @@ function AdminFranqueados() {
                     <TableCell className="text-right">
                       <Button size="sm" variant="ghost" onClick={() => setSelected(r)} title="Ver detalhes">
                         <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => exportSocioPDF(r)} title="Baixar PDF">
+                        <FileDown className="h-4 w-4" />
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Editar">
                         <Pencil className="h-4 w-4" />
