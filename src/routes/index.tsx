@@ -132,7 +132,11 @@ function PublicForm() {
     try {
       for (let i = 0; i < socios.length; i++) {
         const cpfDigits = socios[i].cpf.replace(/\D/g, "");
-        const folder = `pending/${numero}/${ts}-${cpfDigits || `socio${i + 1}`}`;
+        const uniqueId =
+          typeof crypto !== "undefined" && "randomUUID" in crypto
+            ? crypto.randomUUID()
+            : `${ts}-${Math.random().toString(36).slice(2, 12)}`;
+        const folder = `pending/${numero}/${ts}-${cpfDigits || `socio${i + 1}`}-${uniqueId}`;
         const idFile = docs[i].identidadeFile!;
         const cpfFile = docs[i].cpfFile!;
         const idPath = `${folder}/identidade.pdf`;
