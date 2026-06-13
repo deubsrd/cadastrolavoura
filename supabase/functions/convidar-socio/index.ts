@@ -61,9 +61,6 @@ Deno.serve(async (req) => {
 
     if (socioErr || !socio) return json({ error: "Sócio não encontrado." }, 404);
     if (!socio.unidade_id) return json({ error: "Sócio sem unidade vinculada." }, 400);
-    if (socio.tipo !== "administrador") {
-      return json({ error: "Apenas sócios do tipo 'administrador' podem receber acesso." }, 400);
-    }
 
     const redirectTo = Deno.env.get("APP_REDIRECT_URL") ?? "https://cadastro.lavanderialavoura.com.br/app";
 

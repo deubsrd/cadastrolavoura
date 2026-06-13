@@ -416,9 +416,7 @@ function AdminFranqueados() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {r.tipo !== "administrador" ? (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      ) : r.user_id ? (
+                      {r.user_id ? (
                         <div className="flex items-center gap-1.5">
                           <Badge variant="default">Acesso liberado</Badge>
                           <Button
