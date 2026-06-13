@@ -14,6 +14,103 @@ export type Database = {
   }
   public: {
     Tables: {
+      financeiro_mensal: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_items: Json
+          data: Json
+          id: string
+          label: string
+          month: number
+          removed_items: Json
+          unidade_id: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_items?: Json
+          data?: Json
+          id?: string
+          label: string
+          month: number
+          removed_items?: Json
+          unidade_id: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_items?: Json
+          data?: Json
+          id?: string
+          label?: string
+          month?: number
+          removed_items?: Json
+          unidade_id?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financeiro_mensal_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      obra_checklist_itens: {
+        Row: {
+          categoria: string
+          created_at: string
+          id: string
+          item: string
+          observacao: string | null
+          ordem: number
+          quantidade_sugerida: string | null
+          status: string
+          unidade_id: string
+          updated_at: string
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          id?: string
+          item: string
+          observacao?: string | null
+          ordem?: number
+          quantidade_sugerida?: string | null
+          status?: string
+          unidade_id: string
+          updated_at?: string
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          id?: string
+          item?: string
+          observacao?: string | null
+          ordem?: number
+          quantidade_sugerida?: string | null
+          status?: string
+          unidade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obra_checklist_itens_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       socios: {
         Row: {
           bairro: string
@@ -39,6 +136,7 @@ export type Database = {
           uf: string
           unidade_id: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           bairro: string
@@ -64,6 +162,7 @@ export type Database = {
           uf: string
           unidade_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           bairro?: string
@@ -89,6 +188,7 @@ export type Database = {
           uf?: string
           unidade_id?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -222,6 +322,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_my_unidade_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
