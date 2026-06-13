@@ -12,16 +12,18 @@ function ThanksPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md text-center">
-        <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
-          style={{ background: "var(--gradient-accent)" }}>
+        <div
+          className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
+          style={{ background: "var(--gradient-accent)" }}
+        >
           <CheckCircle2 className="h-8 w-8 text-accent-foreground" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-primary">
           Cadastro enviado com sucesso
         </h1>
-         <p className="mt-2 text-muted-foreground">
-           Recebemos seus dados. Você deu o primeiro passo parar ter a sua Lavoura!
-         </p>
+        <p className="mt-2 text-muted-foreground">
+          Recebemos seus dados. Você deu o primeiro passo parar ter a sua Lavoura!
+        </p>
         <div className="mt-8 flex items-center justify-center">
           <img src={lavouraLogo} alt="Lavoura" className="h-10 w-auto" />
         </div>

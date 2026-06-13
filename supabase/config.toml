@@ -1,1 +1,4 @@
 project_id = "vmaniutkhisiktjrgswd"
+
+[functions.convidar-socio]
+verify_jwt = false

@@ -49,7 +49,8 @@ const TIPO_LABEL: Record<DocTipo, string> = {
 };
 
 const TIPO_ORDER: DocTipo[] = ["cof", "pre_contrato", "contrato", "outros"];
-const ACCEPT = "application/pdf,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*";
+const ACCEPT =
+  "application/pdf,.pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*";
 const MAX_MB = 20;
 
 function formatDateBR(value: string | null | undefined): string {
@@ -140,8 +141,7 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
     e.preventDefault();
     if (uploading) return;
     if (!file) return toast.error("Selecione um arquivo.");
-    if (tipo === "outros" && !nomeCustom.trim())
-      return toast.error("Informe o nome do documento.");
+    if (tipo === "outros" && !nomeCustom.trim()) return toast.error("Informe o nome do documento.");
 
     setUploading(true);
     try {
@@ -191,7 +191,8 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
           .from("unidade_documentos")
           .update({ arquivado: true, substituido_por: inserted.id })
           .eq("id", substituirId);
-        if (archErr) toast.error(`Documento enviado, mas falha ao arquivar anterior: ${archErr.message}`);
+        if (archErr)
+          toast.error(`Documento enviado, mas falha ao arquivar anterior: ${archErr.message}`);
       }
 
       toast.success(substituirId ? "Documento substituído." : "Documento enviado.");
@@ -245,8 +246,7 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
     load();
   };
 
-  const toggleHist = (id: string) =>
-    setHistoricoOpen((p) => ({ ...p, [id]: !p[id] }));
+  const toggleHist = (id: string) => setHistoricoOpen((p) => ({ ...p, [id]: !p[id] }));
 
   return (
     <div className="space-y-4">
@@ -282,11 +282,7 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
 
           <div className="space-y-1">
             <Label>Validade (opcional)</Label>
-            <Input
-              type="date"
-              value={vencimento}
-              onChange={(e) => setVencimento(e.target.value)}
-            />
+            <Input type="date" value={vencimento} onChange={(e) => setVencimento(e.target.value)} />
           </div>
 
           <div className="space-y-1">
@@ -365,7 +361,9 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
                           <div className="flex items-center gap-2">
                             <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                             <span className="truncate text-sm font-medium">{d.nome}</span>
-                            <Badge variant="outline" className="text-xs">v{d.versao}</Badge>
+                            <Badge variant="outline" className="text-xs">
+                              v{d.versao}
+                            </Badge>
                           </div>
                           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                             <span>Enviado em {formatDateBR(d.created_at)}</span>
@@ -373,23 +371,35 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
                               <span>· {(d.tamanho_bytes / 1024).toFixed(0)} KB</span>
                             )}
                             {status && (
-                              <Badge
-                                variant={status.variant}
-                                className={status.className}
-                              >
+                              <Badge variant={status.variant} className={status.className}>
                                 {status.label}
                               </Badge>
                             )}
                           </div>
                         </div>
                         <div className="flex shrink-0 gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => view(d)} title="Visualizar">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => view(d)}
+                            title="Visualizar"
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => download(d)} title="Baixar">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => download(d)}
+                            title="Baixar"
+                          >
                             <Download className="h-4 w-4" />
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={() => remove(d)} title="Excluir">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => remove(d)}
+                            title="Excluir"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -423,13 +433,28 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
                                     </span>
                                   </div>
                                   <div className="flex shrink-0 gap-1">
-                                    <Button size="sm" variant="ghost" onClick={() => view(h)} className="h-7 w-7 p-0">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => view(h)}
+                                      className="h-7 w-7 p-0"
+                                    >
                                       <Eye className="h-3 w-3" />
                                     </Button>
-                                    <Button size="sm" variant="ghost" onClick={() => download(h)} className="h-7 w-7 p-0">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => download(h)}
+                                      className="h-7 w-7 p-0"
+                                    >
                                       <Download className="h-3 w-3" />
                                     </Button>
-                                    <Button size="sm" variant="ghost" onClick={() => remove(h)} className="h-7 w-7 p-0">
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => remove(h)}
+                                      className="h-7 w-7 p-0"
+                                    >
                                       <Trash2 className="h-3 w-3" />
                                     </Button>
                                   </div>

@@ -1,37 +1,49 @@
 import { createFileRoute, Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Building2, HardHat, LogOut } from "lucide-react";
+import { Building2, Wallet, LifeBuoy, HardHat, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lavouraLogo from "@/assets/lavoura-logo.png";
 
-const ADMIN_EMAIL = "lavanderialavoura2025@gmail.com";
-
-export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Painel administrativo — \n" }] }),
-  component: AdminLayout,
+export const Route = createFileRoute("/app")({
+  head: () => ({ meta: [{ title: "Sistema Lavoura" }] }),
+  component: AppLayout,
 });
 
-function AdminLayout() {
+function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [ready, setReady] = useState(false);
+  const [status, setStatus] = useState<"checking" | "ready" | "denied">("checking");
 
   useEffect(() => {
+    const check = async (
+      session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"],
+    ) => {
+      if (!session) {
+        setStatus("denied");
+        navigate({ to: "/login" });
+        return;
+      }
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .eq("role", "franqueado")
+        .maybeSingle();
+
+      if (error || !data) {
+        setStatus("denied");
+        navigate({ to: "/login" });
+        return;
+      }
+      setStatus("ready");
+    };
+
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      if (!session || session.user.email !== ADMIN_EMAIL) {
-        navigate({ to: "/login" });
-      } else {
-        setReady(true);
-      }
+      check(session);
     });
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session || data.session.user.email !== ADMIN_EMAIL) {
-        navigate({ to: "/login" });
-      } else {
-        setReady(true);
-      }
-    });
+    supabase.auth.getSession().then(({ data }) => check(data.session));
+
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
 
@@ -40,7 +52,7 @@ function AdminLayout() {
     navigate({ to: "/login" });
   };
 
-  if (!ready) {
+  if (status !== "ready") {
     return (
       <div className="flex min-h-screen items-center justify-center text-muted-foreground">
         Carregando...
@@ -48,8 +60,8 @@ function AdminLayout() {
     );
   }
 
-  const navItem = (to: string, label: string, Icon: typeof Users) => {
-    const active = location.pathname === to || (to === "/admin" && location.pathname === "/admin");
+  const navItem = (to: string, label: string, Icon: typeof Building2) => {
+    const active = location.pathname === to;
     return (
       <Link
         to={to}
@@ -72,9 +84,10 @@ function AdminLayout() {
           <img src={lavouraLogo} alt="Lavoura" className="h-12 w-auto brightness-0 invert" />
         </div>
         <nav className="flex-1 space-y-1">
-          {navItem("/admin", "Franqueados", Users)}
-          {navItem("/admin/unidades", "Unidades", Building2)}
-          {navItem("/admin/obra", "Obra", HardHat)}
+          {navItem("/app", "Minha Unidade", Building2)}
+          {navItem("/app/financeiro", "Financeiro", Wallet)}
+          {navItem("/app/central", "Central de Suporte", LifeBuoy)}
+          {navItem("/app/obra", "Obra", HardHat)}
         </nav>
         <Button
           variant="ghost"
@@ -85,7 +98,6 @@ function AdminLayout() {
         </Button>
       </aside>
 
-      {/* Mobile top bar */}
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
           <img src={lavouraLogo} alt="Lavoura" className="h-9 w-auto" />
@@ -95,19 +107,25 @@ function AdminLayout() {
         </header>
         <nav className="flex gap-2 overflow-x-auto border-b border-border bg-card px-4 py-2 md:hidden">
           <Link
-            to="/admin"
+            to="/app"
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
-            Franqueados
+            Minha Unidade
           </Link>
           <Link
-            to="/admin/unidades"
+            to="/app/financeiro"
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
-            Unidades
+            Financeiro
           </Link>
           <Link
-            to="/admin/obra"
+            to="/app/central"
+            className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            Central
+          </Link>
+          <Link
+            to="/app/obra"
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Obra

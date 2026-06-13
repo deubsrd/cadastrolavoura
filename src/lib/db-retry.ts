@@ -1,4 +1,9 @@
-export type DbError = { code?: string; details?: string | null; message?: string; status?: number } | null;
+export type DbError = {
+  code?: string;
+  details?: string | null;
+  message?: string;
+  status?: number;
+} | null;
 export type DbResult<TData = unknown> = { data?: TData; error: DbError };
 
 const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -25,9 +30,16 @@ export const isTransientDbError = (error: DbError) => {
   );
 };
 
-export async function withDbRetry<T extends DbResult>(operation: () => PromiseLike<T>, attempts = 6): Promise<T> {
+export async function withDbRetry<T extends DbResult>(
+  operation: () => PromiseLike<T>,
+  attempts = 6,
+): Promise<T> {
   let result = await Promise.race([operation(), timeoutResult<T>(9000)]);
-  for (let attempt = 1; result.error && isTransientDbError(result.error) && attempt < attempts; attempt += 1) {
+  for (
+    let attempt = 1;
+    result.error && isTransientDbError(result.error) && attempt < attempts;
+    attempt += 1
+  ) {
     await wait(650 * attempt);
     result = await Promise.race([operation(), timeoutResult<T>(9000)]);
   }

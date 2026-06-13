@@ -5,15 +5,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Download, Trash2, FileText, Search, Eye, Pencil } from "lucide-react";
+import { Download, Trash2, FileText, Search, Eye, Pencil, Mail } from "lucide-react";
 import { FileDown } from "lucide-react";
 import jsPDF from "jspdf";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { SocioFields, type SocioData } from "@/components/forms/SocioFields";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Franqueados — Lavoura" }] }),
@@ -42,6 +61,8 @@ type SocioRow = {
   numero_casa: string | null;
   bairro: string | null;
   cep: string | null;
+  unidade_id: string | null;
+  user_id: string | null;
 };
 
 function AdminFranqueados() {
@@ -52,8 +73,30 @@ function AdminFranqueados() {
   const [editing, setEditing] = useState<SocioRow | null>(null);
   const [editData, setEditData] = useState<SocioData | null>(null);
   const [saving, setSaving] = useState(false);
-  const [unidades, setUnidades] = useState<Array<{ id: string; numero: string; nome: string | null }>>([]);
+  const [unidades, setUnidades] = useState<
+    Array<{ id: string; numero: string; nome: string | null }>
+  >([]);
   const [editUnidade, setEditUnidade] = useState<string>("");
+  const [convidando, setConvidando] = useState<string | null>(null);
+
+  const handleConvidar = async (r: SocioRow) => {
+    if (!r.unidade_id)
+      return toast.error("Vincule este sócio a uma unidade antes de conceder acesso.");
+    setConvidando(r.id);
+    const { data, error } = await supabase.functions.invoke("convidar-socio", {
+      body: { socio_id: r.id },
+    });
+    setConvidando(null);
+    if (error || (data as { error?: string })?.error) {
+      return toast.error(
+        (data as { error?: string })?.error || error?.message || "Falha ao conceder acesso.",
+      );
+    }
+    toast.success(
+      r.user_id ? "Convite reenviado por e-mail." : "Acesso criado! Convite enviado por e-mail.",
+    );
+    load();
+  };
 
   const load = async () => {
     setLoading(true);
@@ -70,7 +113,9 @@ function AdminFranqueados() {
     setRows((data ?? []) as SocioRow[]);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -91,8 +136,8 @@ function AdminFranqueados() {
     if (!term) return rows;
     return rows.filter((r) =>
       [r.nome_completo, r.email, r.cpf, r.numero_unidade, r.cidade].some((v) =>
-        (v ?? "").toLowerCase().includes(term)
-      )
+        (v ?? "").toLowerCase().includes(term),
+      ),
     );
   }, [rows, q]);
 
@@ -106,7 +151,9 @@ function AdminFranqueados() {
 
   const handleDownloadDoc = async (path: string | null) => {
     if (!path) return toast.error("Documento não disponível.");
-    const { data, error } = await supabase.storage.from("socio-documentos").createSignedUrl(path, 60);
+    const { data, error } = await supabase.storage
+      .from("socio-documentos")
+      .createSignedUrl(path, 60);
     if (error || !data) return toast.error("Falha ao gerar link.");
     window.open(data.signedUrl, "_blank");
   };
@@ -243,22 +290,49 @@ function AdminFranqueados() {
     setSaving(false);
     if (error) return toast.error(`Falha ao salvar: ${error.message}`);
     toast.success("Dados atualizados com sucesso.");
-    setRows((prev) => prev.map((r) => (r.id === editing.id ? { ...r, ...editData, numero_unidade: editUnidade } : r)));
+    setRows((prev) =>
+      prev.map((r) =>
+        r.id === editing.id ? { ...r, ...editData, numero_unidade: editUnidade } : r,
+      ),
+    );
     setEditing(null);
     setEditData(null);
   };
 
   const exportCSV = () => {
-    const header = ["Nome", "Email", "Telefone", "CPF", "Tipo", "Unidade", "Cidade", "UF", "Cadastrado em"];
-    const lines = filtered.map((r) => [
-      r.nome_completo, r.email, r.telefone, r.cpf, r.tipo, r.numero_unidade, r.cidade, r.uf,
-      new Date(r.created_at).toLocaleString("pt-BR"),
-    ].map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(","));
+    const header = [
+      "Nome",
+      "Email",
+      "Telefone",
+      "CPF",
+      "Tipo",
+      "Unidade",
+      "Cidade",
+      "UF",
+      "Cadastrado em",
+    ];
+    const lines = filtered.map((r) =>
+      [
+        r.nome_completo,
+        r.email,
+        r.telefone,
+        r.cpf,
+        r.tipo,
+        r.numero_unidade,
+        r.cidade,
+        r.uf,
+        new Date(r.created_at).toLocaleString("pt-BR"),
+      ]
+        .map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`)
+        .join(","),
+    );
     const csv = [header.join(","), ...lines].join("\n");
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `franqueados-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    a.href = url;
+    a.download = `franqueados-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
     URL.revokeObjectURL(url);
   };
 
@@ -272,14 +346,24 @@ function AdminFranqueados() {
         <div className="flex gap-2">
           <div className="relative">
             <Search className="pointer-events-none absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar..." className="pl-8" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Buscar..."
+              className="pl-8"
+            />
           </div>
-          <Button onClick={exportCSV} variant="outline"><Download className="mr-2 h-4 w-4" />Exportar CSV</Button>
+          <Button onClick={exportCSV} variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Exportar CSV
+          </Button>
         </div>
       </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Lista de sócios</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle className="text-base">Lista de sócios</CardTitle>
+        </CardHeader>
         <CardContent className="overflow-x-auto p-0">
           {loading ? (
             <p className="p-6 text-sm text-muted-foreground">Carregando...</p>
@@ -295,6 +379,7 @@ function AdminFranqueados() {
                   <TableHead>Email</TableHead>
                   <TableHead>Telefone</TableHead>
                   <TableHead>Documentos</TableHead>
+                  <TableHead>Acesso</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -302,25 +387,77 @@ function AdminFranqueados() {
                 {filtered.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">{r.nome_completo}</TableCell>
-                    <TableCell><Badge variant={r.tipo === "administrador" ? "default" : "secondary"}>{r.tipo}</Badge></TableCell>
+                    <TableCell>
+                      <Badge variant={r.tipo === "administrador" ? "default" : "secondary"}>
+                        {r.tipo}
+                      </Badge>
+                    </TableCell>
                     <TableCell>{r.numero_unidade}</TableCell>
                     <TableCell>{r.email}</TableCell>
                     <TableCell>{r.telefone}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => handleDownloadDoc(r.documento_identidade_path)} title="Identidade">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDownloadDoc(r.documento_identidade_path)}
+                          title="Identidade"
+                        >
                           <FileText className="h-4 w-4" /> ID
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDownloadDoc(r.documento_cpf_path)} title="CPF">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDownloadDoc(r.documento_cpf_path)}
+                          title="CPF"
+                        >
                           <FileText className="h-4 w-4" /> CPF
                         </Button>
                       </div>
                     </TableCell>
+                    <TableCell>
+                      {r.tipo !== "administrador" ? (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      ) : r.user_id ? (
+                        <div className="flex items-center gap-1.5">
+                          <Badge variant="default">Acesso liberado</Badge>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleConvidar(r)}
+                            disabled={convidando === r.id}
+                            title="Reenviar convite"
+                          >
+                            <Mail className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleConvidar(r)}
+                          disabled={convidando === r.id || !r.unidade_id}
+                        >
+                          <Mail className="mr-1.5 h-4 w-4" />
+                          {convidando === r.id ? "Enviando..." : "Conceder acesso"}
+                        </Button>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="ghost" onClick={() => setSelected(r)} title="Ver detalhes">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setSelected(r)}
+                        title="Ver detalhes"
+                      >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => exportSocioPDF(r)} title="Baixar PDF">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => exportSocioPDF(r)}
+                        title="Baixar PDF"
+                      >
                         <FileDown className="h-4 w-4" />
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Editar">
@@ -370,10 +507,18 @@ function AdminFranqueados() {
               </Section>
               <Section title="Documentos">
                 <div className="col-span-2 flex flex-wrap gap-2">
-                  <Button size="sm" variant="outline" onClick={() => handleDownloadDoc(selected.documento_identidade_path)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDownloadDoc(selected.documento_identidade_path)}
+                  >
                     <FileText className="mr-2 h-4 w-4" /> Ver Identidade (PDF)
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => handleDownloadDoc(selected.documento_cpf_path)}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDownloadDoc(selected.documento_cpf_path)}
+                  >
                     <FileText className="mr-2 h-4 w-4" /> Ver CPF (PDF)
                   </Button>
                 </div>
@@ -386,7 +531,15 @@ function AdminFranqueados() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={!!editing} onOpenChange={(o) => { if (!o) { setEditing(null); setEditData(null); } }}>
+      <Dialog
+        open={!!editing}
+        onOpenChange={(o) => {
+          if (!o) {
+            setEditing(null);
+            setEditData(null);
+          }
+        }}
+      >
         <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar franqueado</DialogTitle>
@@ -395,13 +548,18 @@ function AdminFranqueados() {
           {editData && (
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="edit-unidade" className="text-sm font-medium">Unidade</Label>
+                <Label htmlFor="edit-unidade" className="text-sm font-medium">
+                  Unidade
+                </Label>
                 <Select value={editUnidade} onValueChange={setEditUnidade}>
-                  <SelectTrigger id="edit-unidade"><SelectValue placeholder="Selecione a unidade" /></SelectTrigger>
+                  <SelectTrigger id="edit-unidade">
+                    <SelectValue placeholder="Selecione a unidade" />
+                  </SelectTrigger>
                   <SelectContent>
                     {unidades.map((u) => (
                       <SelectItem key={u.id} value={u.numero}>
-                        {u.numero}{u.nome ? ` — ${u.nome}` : ""}
+                        {u.numero}
+                        {u.nome ? ` — ${u.nome}` : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -409,7 +567,14 @@ function AdminFranqueados() {
               </div>
               <SocioFields value={editData} onChange={setEditData} />
               <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => { setEditing(null); setEditData(null); }} disabled={saving}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setEditing(null);
+                    setEditData(null);
+                  }}
+                  disabled={saving}
+                >
                   Cancelar
                 </Button>
                 <Button onClick={saveEdit} disabled={saving}>

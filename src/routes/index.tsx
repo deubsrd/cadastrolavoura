@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SocioFields, type SocioData, emptySocio } from "@/components/forms/SocioFields";
 import { SocioDocuments, type SocioDocs, emptyDocs } from "@/components/forms/SocioDocuments";
 import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
@@ -51,10 +57,14 @@ function PublicForm() {
   const [socios, setSocios] = useState<SocioData[]>([emptySocio()]);
   const [errs, setErrs] = useState<Array<Partial<Record<keyof SocioData, string>>>>([{}]);
   const [docs, setDocs] = useState<SocioDocs[]>([emptyDocs()]);
-  const [docErrs, setDocErrs] = useState<Array<{ identidadeFile?: string; cpfFile?: string }>>([{}]);
+  const [docErrs, setDocErrs] = useState<Array<{ identidadeFile?: string; cpfFile?: string }>>([
+    {},
+  ]);
   const [submitting, setSubmitting] = useState(false);
   const [lgpdAceito, setLgpdAceito] = useState(false);
-  const [unidades, setUnidades] = useState<Array<{ id: string; numero: string; nome: string | null }>>([]);
+  const [unidades, setUnidades] = useState<
+    Array<{ id: string; numero: string; nome: string | null }>
+  >([]);
   const [loadingUnidades, setLoadingUnidades] = useState(true);
 
   useEffect(() => {
@@ -165,7 +175,11 @@ function PublicForm() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
           <Link to="/" className="flex items-center">
-            <img src={lavouraLogo} alt="Lavoura — Lavanderia de autosserviço" className="h-12 w-auto" />
+            <img
+              src={lavouraLogo}
+              alt="Lavoura — Lavanderia de autosserviço"
+              className="h-12 w-auto"
+            />
           </Link>
           <Link to="/login" className="text-sm text-muted-foreground hover:text-primary">
             Acesso administrativo
@@ -193,11 +207,11 @@ function PublicForm() {
           <div className="space-y-2 text-sm leading-relaxed">
             <p className="font-semibold text-primary">Por que pedimos essas informações?</p>
             <p className="text-foreground/80">
-              Seus dados são coletados uma única vez para agilizar todos os processos da sua franquia:
-              elaboração de contratos, pedidos junto a fornecedores, abertura de contas e documentações
-              oficiais. Assim, você não precisa repetir as mesmas informações toda vez que um novo
-              documento for necessário. Todas as informações são armazenadas com segurança e utilizadas
-              exclusivamente para fins administrativos da Lavoura.
+              Seus dados são coletados uma única vez para agilizar todos os processos da sua
+              franquia: elaboração de contratos, pedidos junto a fornecedores, abertura de contas e
+              documentações oficiais. Assim, você não precisa repetir as mesmas informações toda vez
+              que um novo documento for necessário. Todas as informações são armazenadas com
+              segurança e utilizadas exclusivamente para fins administrativos da Lavoura.
             </p>
           </div>
         </div>
@@ -208,7 +222,9 @@ function PublicForm() {
               <CardTitle className="text-base">Unidade {"\n"}</CardTitle>
             </CardHeader>
             <CardContent>
-              <Label htmlFor="unidade" className="text-sm">Número da unidade</Label>
+              <Label htmlFor="unidade" className="text-sm">
+                Número da unidade
+              </Label>
               {loadingUnidades ? (
                 <p className="mt-2 text-sm text-muted-foreground">Carregando unidades...</p>
               ) : unidades.length === 0 ? (
@@ -224,7 +240,8 @@ function PublicForm() {
                     <SelectContent>
                       {unidades.map((u) => (
                         <SelectItem key={u.id} value={u.numero}>
-                          {u.numero}{u.nome ? ` — ${u.nome}` : ""}
+                          {u.numero}
+                          {u.nome ? ` — ${u.nome}` : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -240,21 +257,25 @@ function PublicForm() {
           {socios.map((socio, i) => (
             <Card key={i} style={{ boxShadow: "var(--shadow-card)" }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-base">
-                  Sócio {i + 1}
-                </CardTitle>
+                <CardTitle className="text-base">Sócio {i + 1}</CardTitle>
                 {socios.length > 1 && (
-                  <Button type="button" variant="ghost" size="sm"
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
                     onClick={() => removeSocio(i)}
-                    className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  >
                     <Trash2 className="mr-1 h-4 w-4" /> Remover
                   </Button>
                 )}
               </CardHeader>
               <CardContent>
-                <SocioFields value={socio}
-                  onChange={(v) => setSocios((p) => p.map((s, idx) => idx === i ? v : s))}
-                  errors={errs[i]} />
+                <SocioFields
+                  value={socio}
+                  onChange={(v) => setSocios((p) => p.map((s, idx) => (idx === i ? v : s)))}
+                  errors={errs[i]}
+                />
                 <div className="mt-6 border-t border-border pt-6">
                   <h3 className="mb-1 text-sm font-semibold text-primary">Documentos (PDF)</h3>
                   <p className="mb-4 text-xs text-muted-foreground">
@@ -277,8 +298,13 @@ function PublicForm() {
               onCheckedChange={(v) => setLgpdAceito(v === true)}
               className="mt-1"
             />
-            <Label htmlFor="lgpd" className="text-sm font-normal leading-relaxed text-muted-foreground">
-              Li e concordo com a Política de Privacidade da Lavoura. Estou ciente de que meus dados pessoais serão utilizados para fins de cadastro de franquia, conforme a Lei Geral de Proteção de Dados (LGPD — Lei nº 13.709/2018).
+            <Label
+              htmlFor="lgpd"
+              className="text-sm font-normal leading-relaxed text-muted-foreground"
+            >
+              Li e concordo com a Política de Privacidade da Lavoura. Estou ciente de que meus dados
+              pessoais serão utilizados para fins de cadastro de franquia, conforme a Lei Geral de
+              Proteção de Dados (LGPD — Lei nº 13.709/2018).
             </Label>
           </div>
 
@@ -286,9 +312,12 @@ function PublicForm() {
             <Button type="button" variant="outline" onClick={addSocio}>
               <Plus className="mr-2 h-4 w-4" /> Adicionar outro sócio
             </Button>
-            <Button type="submit" disabled={submitting || !lgpdAceito}
+            <Button
+              type="submit"
+              disabled={submitting || !lgpdAceito}
               style={{ background: "var(--gradient-accent)" }}
-              className="text-accent-foreground hover:opacity-90">
+              className="text-accent-foreground hover:opacity-90"
+            >
               <Send className="mr-2 h-4 w-4" />
               {submitting ? "Enviando..." : "Enviar cadastro"}
             </Button>

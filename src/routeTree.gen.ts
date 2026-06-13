@@ -11,10 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AppObraRouteImport } from './routes/app.obra'
+import { Route as AppFinanceiroRouteImport } from './routes/app.financeiro'
+import { Route as AppCentralRouteImport } from './routes/app.central'
 import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
+import { Route as AdminObraRouteImport } from './routes/admin.obra'
 
 const ObrigadoRoute = ObrigadoRouteImport.update({
   id: '/obrigado',
@@ -24,6 +30,11 @@ const ObrigadoRoute = ObrigadoRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -36,65 +47,130 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const AppObraRoute = AppObraRouteImport.update({
+  id: '/obra',
+  path: '/obra',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinanceiroRoute = AppFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCentralRoute = AppCentralRouteImport.update({
+  id: '/central',
+  path: '/central',
+  getParentRoute: () => AppRoute,
 } as any)
 const AdminUnidadesRoute = AdminUnidadesRouteImport.update({
   id: '/unidades',
   path: '/unidades',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminObraRoute = AdminObraRouteImport.update({
+  id: '/obra',
+  path: '/obra',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
+  '/app/central': typeof AppCentralRoute
+  '/app/financeiro': typeof AppFinanceiroRoute
+  '/app/obra': typeof AppObraRoute
   '/admin/': typeof AdminIndexRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
+  '/app/central': typeof AppCentralRoute
+  '/app/financeiro': typeof AppFinanceiroRoute
+  '/app/obra': typeof AppObraRoute
   '/admin': typeof AdminIndexRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
+  '/app/central': typeof AppCentralRoute
+  '/app/financeiro': typeof AppFinanceiroRoute
+  '/app/obra': typeof AppObraRoute
   '/admin/': typeof AdminIndexRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
+    | '/app'
     | '/login'
     | '/obrigado'
+    | '/admin/obra'
     | '/admin/unidades'
+    | '/app/central'
+    | '/app/financeiro'
+    | '/app/obra'
     | '/admin/'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/obrigado' | '/admin/unidades' | '/admin'
+  to:
+    | '/'
+    | '/login'
+    | '/obrigado'
+    | '/admin/obra'
+    | '/admin/unidades'
+    | '/app/central'
+    | '/app/financeiro'
+    | '/app/obra'
+    | '/admin'
+    | '/app'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/app'
     | '/login'
     | '/obrigado'
+    | '/admin/obra'
     | '/admin/unidades'
+    | '/app/central'
+    | '/app/financeiro'
+    | '/app/obra'
     | '/admin/'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   ObrigadoRoute: typeof ObrigadoRoute
 }
@@ -115,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -129,12 +212,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/app/obra': {
+      id: '/app/obra'
+      path: '/obra'
+      fullPath: '/app/obra'
+      preLoaderRoute: typeof AppObraRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/financeiro': {
+      id: '/app/financeiro'
+      path: '/financeiro'
+      fullPath: '/app/financeiro'
+      preLoaderRoute: typeof AppFinanceiroRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/central': {
+      id: '/app/central'
+      path: '/central'
+      fullPath: '/app/central'
+      preLoaderRoute: typeof AppCentralRouteImport
+      parentRoute: typeof AppRoute
     }
     '/admin/unidades': {
       id: '/admin/unidades'
@@ -143,27 +254,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUnidadesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/obra': {
+      id: '/admin/obra'
+      path: '/obra'
+      fullPath: '/admin/obra'
+      preLoaderRoute: typeof AdminObraRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminObraRoute: typeof AdminObraRoute
   AdminUnidadesRoute: typeof AdminUnidadesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminObraRoute: AdminObraRoute,
   AdminUnidadesRoute: AdminUnidadesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AppRouteChildren {
+  AppCentralRoute: typeof AppCentralRoute
+  AppFinanceiroRoute: typeof AppFinanceiroRoute
+  AppObraRoute: typeof AppObraRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCentralRoute: AppCentralRoute,
+  AppFinanceiroRoute: AppFinanceiroRoute,
+  AppObraRoute: AppObraRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   ObrigadoRoute: ObrigadoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
