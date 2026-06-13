@@ -210,9 +210,9 @@ export function useFinanceiro(unidadeId: string | null) {
           month,
           year,
           label: getMonthLabel(month, year),
-          data: (lastRecord ? { ...lastRecord.data } : { ...DEFAULT_DATA }) as unknown as Json,
-          custom_items: (lastRecord ? [...lastRecord.customItems] : []) as unknown as Json,
-          removed_items: (lastRecord ? [...lastRecord.removedItems] : []) as unknown as Json,
+          data: { ...DEFAULT_DATA } as unknown as Json,
+          custom_items: [] as unknown as Json,
+          removed_items: [] as unknown as Json,
         })
         .select()
         .single();
