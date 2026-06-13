@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import lavouraLogo from "@/assets/lavoura-logo.png";
 
 const ADMIN_EMAIL = "lavanderialavoura2025@gmail.com";
@@ -47,6 +54,10 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [loadingReset, setLoadingReset] = useState(false);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       const user = data.session?.user;
@@ -82,6 +93,19 @@ function LoginPage() {
     }
   };
 
+  const handleReset = async () => {
+    if (!resetEmail.trim()) return toast.error("Informe o e-mail.");
+    setLoadingReset(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail.trim(), {
+      redirectTo: `${window.location.origin}/app`,
+    });
+    setLoadingReset(false);
+    if (error) return toast.error(error.message);
+    toast.success("Link enviado! Verifique seu e-mail.");
+    setShowReset(false);
+    setResetEmail("");
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-md">
@@ -110,6 +134,18 @@ function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetEmail(email);
+                    setShowReset(true);
+                  }}
+                  className="text-xs text-muted-foreground hover:text-primary"
+                >
+                  Esqueceu sua senha?
+                </button>
+              </div>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               Entrar
@@ -135,6 +171,30 @@ function LoginPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showReset} onOpenChange={setShowReset}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Redefinir senha</DialogTitle>
+            <DialogDescription>
+              Informe seu e-mail e enviaremos um link para redefinir sua senha.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <Input
+              type="email"
+              placeholder="seu@email.com"
+              value={resetEmail}
+              onChange={(e) => setResetEmail(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleReset(); }}
+              autoFocus
+            />
+            <Button onClick={handleReset} className="w-full" disabled={loadingReset}>
+              {loadingReset ? "Enviando..." : "Enviar link"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
