@@ -65,7 +65,16 @@ Deno.serve(async (req) => {
       return json({ error: "Apenas sócios do tipo 'administrador' podem receber acesso." }, 400);
     }
 
-    const redirectTo = Deno.env.get("APP_REDIRECT_URL") ?? `${SUPABASE_URL.replace(".supabase.co", "")}.lovable.app/app`;
+    const redirectTo = Deno.env.get("APP_REDIRECT_URL") ?? "https://cadastro.lavanderialavoura.com.br/app";
+
+    async function sendRecovery() {
+      const { error: linkErr } = await adminClient.auth.admin.generateLink({
+        type: "recovery",
+        email: socio.email,
+        options: { redirectTo },
+      });
+      return linkErr;
+    }
 
     let authUserId = socio.user_id as string | null;
 
@@ -77,13 +86,15 @@ Deno.serve(async (req) => {
       );
 
       if (inviteErr) {
-        // Usuário já existe (ex.: já tinha conta de outro contexto) -> apenas vincula
+        // Usuário já existe -> localiza e envia link de recuperação
         if (inviteErr.message?.toLowerCase().includes("already registered") || inviteErr.code === "email_exists") {
           const { data: existingUsers, error: listErr } = await adminClient.auth.admin.listUsers();
           if (listErr) return json({ error: `Falha ao localizar usuário existente: ${listErr.message}` }, 500);
           const match = existingUsers.users.find((u) => u.email?.toLowerCase() === socio.email.toLowerCase());
           if (!match) return json({ error: `Falha ao convidar: ${inviteErr.message}` }, 500);
           authUserId = match.id;
+          const recErr = await sendRecovery();
+          if (recErr) return json({ error: `Falha ao enviar e-mail: ${recErr.message}` }, 500);
         } else {
           return json({ error: `Falha ao convidar: ${inviteErr.message}` }, 500);
         }
@@ -91,11 +102,9 @@ Deno.serve(async (req) => {
         authUserId = invited.user.id;
       }
     } else {
-      // Já tem conta: reenvia o link de convite/recuperação de senha
-      const { error: resendErr } = await adminClient.auth.admin.inviteUserByEmail(socio.email, { redirectTo });
-      if (resendErr && !resendErr.message?.toLowerCase().includes("already registered")) {
-        return json({ error: `Falha ao reenviar convite: ${resendErr.message}` }, 500);
-      }
+      // Já tem conta vinculada: envia link de recuperação direto
+      const recErr = await sendRecovery();
+      if (recErr) return json({ error: `Falha ao enviar e-mail: ${recErr.message}` }, 500);
     }
 
     // Vincula o usuário ao sócio
