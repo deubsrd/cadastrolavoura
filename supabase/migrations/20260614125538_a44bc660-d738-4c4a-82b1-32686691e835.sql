@@ -1,0 +1,1 @@
+ALTER TABLE public.unidades ADD COLUMN IF NOT EXISTS link_projeto_3d TEXT;
