@@ -170,19 +170,6 @@ function AdminObra() {
     if (!file) return;
     setUploadingFoto(id);
 
-    // Garante que o bucket existe (cria se necessário)
-    const { data: buckets } = await supabase.storage.listBuckets();
-    const bucketExists = buckets?.some((b) => b.id === "obra-fotos");
-    if (!bucketExists) {
-      const { error: bucketErr } = await supabase.storage.createBucket("obra-fotos", {
-        public: false,
-      });
-      if (bucketErr && !bucketErr.message.includes("already exists")) {
-        setUploadingFoto(null);
-        return toast.error(`Falha ao criar bucket: ${bucketErr.message}`);
-      }
-    }
-
     const ext = file.name.split(".").pop() || "jpg";
     const path = `${id}/${crypto.randomUUID()}.${ext}`;
 
