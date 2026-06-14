@@ -169,10 +169,10 @@ function AdminObra() {
     setUploadingFoto(id);
 
     const ext = file.name.split(".").pop() || "jpg";
-    const path = `obra-fotos/${id}/${crypto.randomUUID()}.${ext}`;
+    const path = `${id}/${crypto.randomUUID()}.${ext}`;
 
     const { error: upErr } = await supabase.storage
-      .from("unidade-documentos")
+      .from("obra-fotos")
       .upload(path, file, { contentType: file.type || undefined, upsert: false });
 
     if (upErr) {
@@ -181,7 +181,7 @@ function AdminObra() {
     }
 
     const { data: urlData } = supabase.storage
-      .from("unidade-documentos")
+      .from("obra-fotos")
       .getPublicUrl(path);
 
     const foto_url = urlData.publicUrl;
