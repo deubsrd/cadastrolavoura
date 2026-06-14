@@ -68,8 +68,10 @@ export type Database = {
         Row: {
           categoria: string
           created_at: string
+          foto_url: string | null
           id: string
           item: string
+          link_compra: string | null
           observacao: string | null
           ordem: number
           quantidade_sugerida: string | null
@@ -80,8 +82,10 @@ export type Database = {
         Insert: {
           categoria: string
           created_at?: string
+          foto_url?: string | null
           id?: string
           item: string
+          link_compra?: string | null
           observacao?: string | null
           ordem?: number
           quantidade_sugerida?: string | null
@@ -92,8 +96,10 @@ export type Database = {
         Update: {
           categoria?: string
           created_at?: string
+          foto_url?: string | null
           id?: string
           item?: string
+          link_compra?: string | null
           observacao?: string | null
           ordem?: number
           quantidade_sugerida?: string | null

@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Eye, HardHat } from "lucide-react";
+import { FileText, Eye, HardHat, Link2 } from "lucide-react";
 
 type ChecklistItem = {
   id: string;
@@ -21,6 +21,8 @@ type ChecklistItem = {
   item: string;
   quantidade_sugerida: string | null;
   observacao: string | null;
+  link_compra: string | null;
+  foto_url: string | null;
   status: "pendente" | "comprado" | "instalado";
 };
 
@@ -171,14 +173,33 @@ function Obra() {
                       key={item.id}
                       className="flex flex-col gap-2 rounded-md border border-border p-3 sm:flex-row sm:items-center sm:justify-between"
                     >
-                      <div>
-                        <p className="text-sm font-medium">
-                          {item.item}
-                          {item.quantidade_sugerida ? ` — ${item.quantidade_sugerida}` : ""}
-                        </p>
-                        {item.observacao && (
-                          <p className="text-xs text-muted-foreground">{item.observacao}</p>
+                      <div className="flex gap-3">
+                        {item.foto_url && (
+                          <img
+                            src={item.foto_url}
+                            alt={item.item}
+                            className="h-14 w-14 shrink-0 rounded-md object-cover ring-1 ring-border"
+                          />
                         )}
+                        <div>
+                          <p className="text-sm font-medium">
+                            {item.item}
+                            {item.quantidade_sugerida ? ` — ${item.quantidade_sugerida}` : ""}
+                          </p>
+                          {item.observacao && (
+                            <p className="text-xs text-muted-foreground">{item.observacao}</p>
+                          )}
+                          {item.link_compra && (
+                            <a
+                              href={item.link_compra}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                            >
+                              <Link2 className="h-3 w-3" /> Comprar online
+                            </a>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge

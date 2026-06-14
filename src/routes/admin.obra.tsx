@@ -22,7 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, FileText, Eye, Upload } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Plus, Trash2, FileText, Eye, Upload, Link2, Image, Pencil } from "lucide-react";
 
 export const Route = createFileRoute("/admin/obra")({
   head: () => ({ meta: [{ title: "Obra — Lavoura" }] }),
@@ -38,6 +44,8 @@ type ChecklistItem = {
   item: string;
   quantidade_sugerida: string | null;
   observacao: string | null;
+  link_compra: string | null;
+  foto_url: string | null;
   status: "pendente" | "comprado" | "instalado";
   ordem: number;
 };
@@ -57,13 +65,20 @@ function AdminObra() {
   const [pranchas, setPranchas] = useState<Prancha[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingFoto, setUploadingFoto] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const fotoRef = useRef<HTMLInputElement>(null);
+
+  // Editing extras (link + foto) inline
+  const [editingLink, setEditingLink] = useState<{ id: string; value: string } | null>(null);
+  const [previewFoto, setPreviewFoto] = useState<string | null>(null);
 
   const [novo, setNovo] = useState({
     categoria: "",
     item: "",
     quantidade_sugerida: "",
     observacao: "",
+    link_compra: "",
   });
 
   useEffect(() => {
@@ -119,6 +134,7 @@ function AdminObra() {
         item: novo.item.trim(),
         quantidade_sugerida: novo.quantidade_sugerida.trim() || null,
         observacao: novo.observacao.trim() || null,
+        link_compra: novo.link_compra.trim() || null,
         ordem,
       })
       .select("*")
@@ -126,7 +142,7 @@ function AdminObra() {
 
     if (error) return toast.error(error.message);
     setItens((prev) => [...prev, data as ChecklistItem]);
-    setNovo({ categoria: novo.categoria, item: "", quantidade_sugerida: "", observacao: "" });
+    setNovo({ categoria: novo.categoria, item: "", quantidade_sugerida: "", observacao: "", link_compra: "" });
     toast.success("Item adicionado.");
   };
 
@@ -134,6 +150,61 @@ function AdminObra() {
     setItens((prev) => prev.map((i) => (i.id === id ? { ...i, status } : i)));
     const { error } = await supabase.from("obra_checklist_itens").update({ status }).eq("id", id);
     if (error) toast.error(error.message);
+  };
+
+  const saveLink = async (id: string, link: string) => {
+    const value = link.trim() || null;
+    setItens((prev) => prev.map((i) => (i.id === id ? { ...i, link_compra: value } : i)));
+    const { error } = await supabase
+      .from("obra_checklist_itens")
+      .update({ link_compra: value })
+      .eq("id", id);
+    if (error) toast.error(error.message);
+    setEditingLink(null);
+  };
+
+  const uploadFoto = async (id: string) => {
+    const file = fotoRef.current?.files?.[0];
+    if (!file) return;
+    setUploadingFoto(id);
+
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `obra-fotos/${id}/${crypto.randomUUID()}.${ext}`;
+
+    const { error: upErr } = await supabase.storage
+      .from("unidade-documentos")
+      .upload(path, file, { contentType: file.type || undefined, upsert: false });
+
+    if (upErr) {
+      setUploadingFoto(null);
+      return toast.error(`Falha no upload: ${upErr.message}`);
+    }
+
+    const { data: urlData } = supabase.storage
+      .from("unidade-documentos")
+      .getPublicUrl(path);
+
+    const foto_url = urlData.publicUrl;
+
+    const { error } = await supabase
+      .from("obra_checklist_itens")
+      .update({ foto_url })
+      .eq("id", id);
+
+    setUploadingFoto(null);
+    if (error) return toast.error(error.message);
+    setItens((prev) => prev.map((i) => (i.id === id ? { ...i, foto_url } : i)));
+    if (fotoRef.current) fotoRef.current.value = "";
+    toast.success("Foto salva.");
+  };
+
+  const removeFoto = async (id: string) => {
+    const { error } = await supabase
+      .from("obra_checklist_itens")
+      .update({ foto_url: null })
+      .eq("id", id);
+    if (error) return toast.error(error.message);
+    setItens((prev) => prev.map((i) => (i.id === id ? { ...i, foto_url: null } : i)));
   };
 
   const removeItem = async (id: string) => {
@@ -201,6 +272,14 @@ function AdminObra() {
     return acc;
   }, {});
 
+  // hidden file input for foto uploads
+  const fotoInputTrigger = (id: string) => {
+    if (fotoRef.current) {
+      fotoRef.current.onchange = () => uploadFoto(id);
+      fotoRef.current.click();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -209,6 +288,9 @@ function AdminObra() {
           Checklist de itens e plantas do projeto por unidade.
         </p>
       </div>
+
+      {/* hidden foto input */}
+      <input ref={fotoRef} type="file" accept="image/*" className="hidden" />
 
       <Card>
         <CardContent className="pt-6">
@@ -244,7 +326,7 @@ function AdminObra() {
                   className="max-w-sm"
                 />
                 <Button onClick={uploadPrancha} disabled={uploading}>
-                  <Upload className="mr-1.5 h-4 w-4" />{" "}
+                  <Upload className="mr-1.5 h-4 w-4" />
                   {uploading ? "Enviando..." : "Enviar planta"}
                 </Button>
               </div>
@@ -279,7 +361,7 @@ function AdminObra() {
               <CardTitle className="text-base">Checklist de itens</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <form onSubmit={addItem} className="grid gap-3 sm:grid-cols-5">
+              <form onSubmit={addItem} className="grid gap-3 sm:grid-cols-6">
                 <Input
                   placeholder="Categoria (ex: Hidráulica)"
                   value={novo.categoria}
@@ -301,6 +383,11 @@ function AdminObra() {
                   onChange={(e) => setNovo((p) => ({ ...p, observacao: e.target.value }))}
                   className="min-h-9"
                 />
+                <Input
+                  placeholder="Link de compra (opcional)"
+                  value={novo.link_compra}
+                  onChange={(e) => setNovo((p) => ({ ...p, link_compra: e.target.value }))}
+                />
                 <Button type="submit">
                   <Plus className="mr-1.5 h-4 w-4" /> Adicionar
                 </Button>
@@ -319,9 +406,11 @@ function AdminObra() {
                     <Table>
                       <TableHeader>
                         <TableRow>
+                          <TableHead>Foto</TableHead>
                           <TableHead>Item</TableHead>
-                          <TableHead>Qtd. sugerida</TableHead>
+                          <TableHead>Qtd.</TableHead>
                           <TableHead>Observação</TableHead>
+                          <TableHead>Link</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Ações</TableHead>
                         </TableRow>
@@ -329,11 +418,101 @@ function AdminObra() {
                       <TableBody>
                         {lista.map((item) => (
                           <TableRow key={item.id}>
+                            {/* Foto */}
+                            <TableCell>
+                              {item.foto_url ? (
+                                <div className="flex items-center gap-1">
+                                  <button onClick={() => setPreviewFoto(item.foto_url)}>
+                                    <img
+                                      src={item.foto_url}
+                                      alt={item.item}
+                                      className="h-10 w-10 rounded object-cover ring-1 ring-border hover:opacity-80"
+                                    />
+                                  </button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => removeFoto(item.id)}
+                                    title="Remover foto"
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => fotoInputTrigger(item.id)}
+                                  disabled={uploadingFoto === item.id}
+                                >
+                                  <Image className="mr-1 h-3.5 w-3.5" />
+                                  {uploadingFoto === item.id ? "..." : "Foto"}
+                                </Button>
+                              )}
+                            </TableCell>
+                            {/* Item */}
                             <TableCell className="font-medium">{item.item}</TableCell>
                             <TableCell>{item.quantidade_sugerida || "—"}</TableCell>
                             <TableCell className="max-w-xs text-sm text-muted-foreground">
                               {item.observacao || "—"}
                             </TableCell>
+                            {/* Link */}
+                            <TableCell>
+                              {editingLink?.id === item.id ? (
+                                <div className="flex items-center gap-1">
+                                  <Input
+                                    value={editingLink.value}
+                                    onChange={(e) =>
+                                      setEditingLink({ id: item.id, value: e.target.value })
+                                    }
+                                    className="h-7 w-48 text-xs"
+                                    placeholder="https://..."
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") saveLink(item.id, editingLink.value);
+                                      if (e.key === "Escape") setEditingLink(null);
+                                    }}
+                                    autoFocus
+                                  />
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => saveLink(item.id, editingLink.value)}
+                                  >
+                                    ✓
+                                  </Button>
+                                </div>
+                              ) : item.link_compra ? (
+                                <div className="flex items-center gap-1">
+                                  <a
+                                    href={item.link_compra}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-1 text-xs text-primary hover:underline"
+                                  >
+                                    <Link2 className="h-3.5 w-3.5" /> Ver link
+                                  </a>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() =>
+                                      setEditingLink({ id: item.id, value: item.link_compra ?? "" })
+                                    }
+                                  >
+                                    <Pencil className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setEditingLink({ id: item.id, value: "" })}
+                                  className="text-xs text-muted-foreground"
+                                >
+                                  <Link2 className="mr-1 h-3.5 w-3.5" /> Adicionar
+                                </Button>
+                              )}
+                            </TableCell>
+                            {/* Status */}
                             <TableCell>
                               <Select
                                 value={item.status}
@@ -352,7 +531,11 @@ function AdminObra() {
                               </Select>
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button size="sm" variant="ghost" onClick={() => removeItem(item.id)}>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeItem(item.id)}
+                              >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </TableCell>
@@ -367,6 +550,18 @@ function AdminObra() {
           </Card>
         </>
       )}
+
+      {/* Preview foto em tamanho maior */}
+      <Dialog open={!!previewFoto} onOpenChange={() => setPreviewFoto(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Foto do item</DialogTitle>
+          </DialogHeader>
+          {previewFoto && (
+            <img src={previewFoto} alt="Preview" className="w-full rounded-lg object-contain" />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
