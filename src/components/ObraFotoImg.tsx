@@ -22,8 +22,9 @@ export function ObraFotoImg({
     let cancelled = false;
     supabase.storage
       .from("obra-fotos")
-      .createSignedUrl(path, 60 * 60) // válida por 1h
-      .then(({ data }) => {
+      .createSignedUrl(path, 60 * 60)
+      .then(({ data, error }) => {
+        if (error) console.error("[ObraFotoImg] signed URL error:", error.message, "path:", path);
         if (!cancelled && data?.signedUrl) setUrl(data.signedUrl);
       });
     return () => {
