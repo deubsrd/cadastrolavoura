@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Plus, Trash2, FileText, Eye, Upload, Link2, Image, Pencil } from "lucide-react";
+import { ObraFotoImg } from "@/components/ObraFotoImg";
 
 export const Route = createFileRoute("/admin/obra")({
   head: () => ({ meta: [{ title: "Obra — Lavoura" }] }),
@@ -45,7 +46,8 @@ type ChecklistItem = {
   quantidade_sugerida: string | null;
   observacao: string | null;
   link_compra: string | null;
-  foto_url: string | null;
+  foto_url: string | null; // stores the storage path
+  _signedUrl?: string | null; // resolved at display time
   status: "pendente" | "comprado" | "instalado";
   ordem: number;
 };
@@ -180,22 +182,32 @@ function AdminObra() {
       return toast.error(`Falha no upload: ${upErr.message}`);
     }
 
-    const { data: urlData } = supabase.storage
-      .from("obra-fotos")
-      .getPublicUrl(path);
-
-    const foto_url = urlData.publicUrl;
-
+    // Salva o path (não a URL pública) — signed URL gerada na exibição
     const { error } = await supabase
       .from("obra_checklist_itens")
-      .update({ foto_url })
+      .update({ foto_url: path })
       .eq("id", id);
 
     setUploadingFoto(null);
     if (error) return toast.error(error.message);
-    setItens((prev) => prev.map((i) => (i.id === id ? { ...i, foto_url } : i)));
+
+    // Gera signed URL para exibir imediatamente no admin
+    const { data: signed } = await supabase.storage
+      .from("obra-fotos")
+      .createSignedUrl(path, 60 * 60);
+
+    setItens((prev) =>
+      prev.map((i) =>
+        i.id === id ? { ...i, foto_url: path, _signedUrl: signed?.signedUrl ?? null } : i,
+      ),
+    );
     if (fotoRef.current) fotoRef.current.value = "";
     toast.success("Foto salva.");
+  };
+
+  const getSignedFotoUrl = async (path: string): Promise<string | null> => {
+    const { data } = await supabase.storage.from("obra-fotos").createSignedUrl(path, 60 * 60);
+    return data?.signedUrl ?? null;
   };
 
   const removeFoto = async (id: string) => {
@@ -422,13 +434,12 @@ function AdminObra() {
                             <TableCell>
                               {item.foto_url ? (
                                 <div className="flex items-center gap-1">
-                                  <button onClick={() => setPreviewFoto(item.foto_url)}>
-                                    <img
-                                      src={item.foto_url}
-                                      alt={item.item}
-                                      className="h-10 w-10 rounded object-cover ring-1 ring-border hover:opacity-80"
-                                    />
-                                  </button>
+                                  <ObraFotoImg
+                                    path={item.foto_url}
+                                    alt={item.item}
+                                    className="h-10 w-10 rounded object-cover ring-1 ring-border hover:opacity-80"
+                                    onClick={(url) => setPreviewFoto(url)}
+                                  />
                                   <Button
                                     size="sm"
                                     variant="ghost"

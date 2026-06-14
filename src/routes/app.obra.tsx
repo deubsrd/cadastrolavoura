@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FileText, Eye, HardHat, Link2 } from "lucide-react";
+import { ObraFotoImg } from "@/components/ObraFotoImg";
 
 type ChecklistItem = {
   id: string;
@@ -175,8 +176,8 @@ function Obra() {
                     >
                       <div className="flex gap-3">
                         {item.foto_url && (
-                          <img
-                            src={item.foto_url}
+                          <ObraFotoImg
+                            path={item.foto_url}
                             alt={item.item}
                             className="h-14 w-14 shrink-0 rounded-md object-cover ring-1 ring-border"
                           />
