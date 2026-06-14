@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Eye, HardHat, Link2 } from "lucide-react";
+import { FileText, Eye, HardHat, Link2, ExternalLink } from "lucide-react";
 import { ObraFotoImg } from "@/components/ObraFotoImg";
 
 type ChecklistItem = {
@@ -52,7 +52,7 @@ export const Route = createFileRoute("/app/obra")({
 });
 
 function Obra() {
-  const { unidadeId, loading: loadingUnidade } = useFranqueado();
+  const { unidadeId, unidade, loading: loadingUnidade } = useFranqueado();
   const [itens, setItens] = useState<ChecklistItem[]>([]);
   const [pranchas, setPranchas] = useState<Prancha[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,6 +117,18 @@ function Obra() {
           Checklist de itens e plantas do projeto da sua unidade.
         </p>
       </div>
+
+      {unidade?.link_projeto_3d && (
+        <a
+          href={unidade.link_projeto_3d}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-6 py-4 text-base font-semibold text-primary transition-colors hover:bg-primary/10"
+        >
+          <ExternalLink className="h-5 w-5" />
+          Confira seu projeto 3D
+        </a>
+      )}
 
       <Card>
         <CardHeader>

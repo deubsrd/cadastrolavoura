@@ -41,6 +41,7 @@ type Unidade = {
   created_at: string;
   endereco: string | null;
   cnpj: string | null;
+  link_projeto_3d: string | null;
 };
 type SocioBrief = {
   id: string;
@@ -61,7 +62,7 @@ function AdminUnidades() {
   const [socios, setSocios] = useState<SocioBrief[]>([]);
   const [loadingSocios, setLoadingSocios] = useState(false);
   const [editing, setEditing] = useState<Unidade | null>(null);
-  const [editForm, setEditForm] = useState({ numero: "", nome: "", endereco: "", cnpj: "" });
+  const [editForm, setEditForm] = useState({ numero: "", nome: "", endereco: "", cnpj: "", link_projeto_3d: "" });
   const [savingEdit, setSavingEdit] = useState(false);
 
   const openEdit = (u: Unidade) => {
@@ -71,6 +72,7 @@ function AdminUnidades() {
       nome: u.nome ?? "",
       endereco: u.endereco ?? "",
       cnpj: u.cnpj ?? "",
+      link_projeto_3d: u.link_projeto_3d ?? "",
     });
   };
 
@@ -84,6 +86,7 @@ function AdminUnidades() {
       nome: editForm.nome.trim() || null,
       endereco: editForm.endereco.trim() || null,
       cnpj: editForm.cnpj.trim() || null,
+      link_projeto_3d: editForm.link_projeto_3d.trim() || null,
     };
     const { data, error } = await withDbRetry(() =>
       supabase.from("unidades").update(payload).eq("id", editing.id).select("*").single(),
@@ -408,6 +411,13 @@ function AdminUnidades() {
                 onChange={(e) => setEditForm((f) => ({ ...f, endereco: e.target.value }))}
                 placeholder="Rua, número, bairro, cidade - UF"
                 rows={3}
+              />
+              <Label htmlFor="edit-link3d">Link do Projeto 3D</Label>
+              <Input
+                id="edit-link3d"
+                placeholder="https://..."
+                value={editForm.link_projeto_3d}
+                onChange={(e) => setEditForm((f) => ({ ...f, link_projeto_3d: e.target.value }))}
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">

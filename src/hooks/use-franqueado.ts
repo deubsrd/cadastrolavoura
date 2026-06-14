@@ -8,6 +8,7 @@ export type Unidade = {
   endereco: string | null;
   cnpj: string | null;
   ativo: boolean;
+  link_projeto_3d: string | null;
 };
 
 export type Socio = {
@@ -53,7 +54,7 @@ export function useFranqueado() {
     if (socioData?.unidade_id) {
       const { data: unidadeData, error: unidadeErr } = await supabase
         .from("unidades")
-        .select("id, numero, nome, endereco, cnpj, ativo")
+        .select("id, numero, nome, endereco, cnpj, ativo, link_projeto_3d")
         .eq("id", socioData.unidade_id)
         .maybeSingle();
 
