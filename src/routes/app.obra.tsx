@@ -62,7 +62,7 @@ function Obra() {
     const [{ data: checklist }, { data: docs }] = await Promise.all([
       supabase
         .from("obra_checklist_itens")
-        .select("id, categoria, item, quantidade_sugerida, observacao, status")
+        .select("id, categoria, item, quantidade_sugerida, observacao, status, link_compra, foto_url")
         .eq("unidade_id", unidadeId)
         .order("categoria")
         .order("ordem"),
