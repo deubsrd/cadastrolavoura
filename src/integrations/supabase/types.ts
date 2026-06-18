@@ -64,36 +64,6 @@ export type Database = {
           },
         ]
       }
-      obra_itens_biblioteca: {
-        Row: {
-          categoria: string
-          created_at: string
-          id: string
-          item: string
-          link_compra: string | null
-          observacao: string | null
-          quantidade_sugerida: string | null
-        }
-        Insert: {
-          categoria: string
-          created_at?: string
-          id?: string
-          item: string
-          link_compra?: string | null
-          observacao?: string | null
-          quantidade_sugerida?: string | null
-        }
-        Update: {
-          categoria?: string
-          created_at?: string
-          id?: string
-          item?: string
-          link_compra?: string | null
-          observacao?: string | null
-          quantidade_sugerida?: string | null
-        }
-        Relationships: []
-      }
       obra_checklist_itens: {
         Row: {
           categoria: string
@@ -146,6 +116,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      obra_itens_biblioteca: {
+        Row: {
+          categoria: string
+          created_at: string
+          id: string
+          item: string
+          link_compra: string | null
+          observacao: string | null
+          quantidade_sugerida: string | null
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          id?: string
+          item: string
+          link_compra?: string | null
+          observacao?: string | null
+          quantidade_sugerida?: string | null
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          id?: string
+          item?: string
+          link_compra?: string | null
+          observacao?: string | null
+          quantidade_sugerida?: string | null
+        }
+        Relationships: []
       }
       socios: {
         Row: {
