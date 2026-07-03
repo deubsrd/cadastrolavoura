@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Building2, HardHat, LogOut } from "lucide-react";
+import { Users, Building2, HardHat, Map, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lavouraLogo from "@/assets/lavoura-logo.png";
 
@@ -75,6 +75,7 @@ function AdminLayout() {
           {navItem("/admin", "Franqueados", Users)}
           {navItem("/admin/unidades", "Unidades", Building2)}
           {navItem("/admin/obra", "Obra", HardHat)}
+          {navItem("/admin/jornada", "Jornada", Map)}
         </nav>
         <Button
           variant="ghost"
@@ -111,6 +112,12 @@ function AdminLayout() {
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Obra
+          </Link>
+          <Link
+            to="/admin/jornada"
+            className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            Jornada
           </Link>
         </nav>
         <main className="flex-1 overflow-auto p-4 sm:p-6">

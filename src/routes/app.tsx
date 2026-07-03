@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Wallet, LifeBuoy, HardHat, LogOut } from "lucide-react";
+import { Building2, Wallet, LifeBuoy, HardHat, TrendingUp, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lavouraLogo from "@/assets/lavoura-logo.png";
 
@@ -88,6 +88,7 @@ function AppLayout() {
           {navItem("/app/financeiro", "Financeiro", Wallet)}
           {navItem("/app/central", "Central de Suporte", LifeBuoy)}
           {navItem("/app/obra", "Obra", HardHat)}
+          {navItem("/app/progresso", "Progresso", TrendingUp)}
         </nav>
         <Button
           variant="ghost"
@@ -129,6 +130,12 @@ function AppLayout() {
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Obra
+          </Link>
+          <Link
+            to="/app/progresso"
+            className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            Progresso
           </Link>
         </nav>
         <main className="flex-1 overflow-auto p-4 sm:p-6">

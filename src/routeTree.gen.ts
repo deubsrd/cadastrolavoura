@@ -16,11 +16,13 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as AppProgressoRouteImport } from './routes/app.progresso'
 import { Route as AppObraRouteImport } from './routes/app.obra'
 import { Route as AppFinanceiroRouteImport } from './routes/app.financeiro'
 import { Route as AppCentralRouteImport } from './routes/app.central'
 import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
 import { Route as AdminObraRouteImport } from './routes/admin.obra'
+import { Route as AdminJornadaRouteImport } from './routes/admin.jornada'
 
 const ObrigadoRoute = ObrigadoRouteImport.update({
   id: '/obrigado',
@@ -57,6 +59,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AppProgressoRoute = AppProgressoRouteImport.update({
+  id: '/progresso',
+  path: '/progresso',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppObraRoute = AppObraRouteImport.update({
   id: '/obra',
   path: '/obra',
@@ -82,6 +89,11 @@ const AdminObraRoute = AdminObraRouteImport.update({
   path: '/obra',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminJornadaRoute = AdminJornadaRouteImport.update({
+  id: '/jornada',
+  path: '/jornada',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,11 +101,13 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/central': typeof AppCentralRoute
   '/app/financeiro': typeof AppFinanceiroRoute
   '/app/obra': typeof AppObraRoute
+  '/app/progresso': typeof AppProgressoRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
 }
@@ -101,11 +115,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/central': typeof AppCentralRoute
   '/app/financeiro': typeof AppFinanceiroRoute
   '/app/obra': typeof AppObraRoute
+  '/app/progresso': typeof AppProgressoRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
 }
@@ -116,11 +132,13 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/central': typeof AppCentralRoute
   '/app/financeiro': typeof AppFinanceiroRoute
   '/app/obra': typeof AppObraRoute
+  '/app/progresso': typeof AppProgressoRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
 }
@@ -132,11 +150,13 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/obrigado'
+    | '/admin/jornada'
     | '/admin/obra'
     | '/admin/unidades'
     | '/app/central'
     | '/app/financeiro'
     | '/app/obra'
+    | '/app/progresso'
     | '/admin/'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
@@ -144,11 +164,13 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/obrigado'
+    | '/admin/jornada'
     | '/admin/obra'
     | '/admin/unidades'
     | '/app/central'
     | '/app/financeiro'
     | '/app/obra'
+    | '/app/progresso'
     | '/admin'
     | '/app'
   id:
@@ -158,11 +180,13 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/obrigado'
+    | '/admin/jornada'
     | '/admin/obra'
     | '/admin/unidades'
     | '/app/central'
     | '/app/financeiro'
     | '/app/obra'
+    | '/app/progresso'
     | '/admin/'
     | '/app/'
   fileRoutesById: FileRoutesById
@@ -226,6 +250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/app/progresso': {
+      id: '/app/progresso'
+      path: '/progresso'
+      fullPath: '/app/progresso'
+      preLoaderRoute: typeof AppProgressoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/obra': {
       id: '/app/obra'
       path: '/obra'
@@ -261,16 +292,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminObraRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/jornada': {
+      id: '/admin/jornada'
+      path: '/jornada'
+      fullPath: '/admin/jornada'
+      preLoaderRoute: typeof AdminJornadaRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminJornadaRoute: typeof AdminJornadaRoute
   AdminObraRoute: typeof AdminObraRoute
   AdminUnidadesRoute: typeof AdminUnidadesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminJornadaRoute: AdminJornadaRoute,
   AdminObraRoute: AdminObraRoute,
   AdminUnidadesRoute: AdminUnidadesRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -282,6 +322,7 @@ interface AppRouteChildren {
   AppCentralRoute: typeof AppCentralRoute
   AppFinanceiroRoute: typeof AppFinanceiroRoute
   AppObraRoute: typeof AppObraRoute
+  AppProgressoRoute: typeof AppProgressoRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -289,6 +330,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCentralRoute: AppCentralRoute,
   AppFinanceiroRoute: AppFinanceiroRoute,
   AppObraRoute: AppObraRoute,
+  AppProgressoRoute: AppProgressoRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -304,3 +346,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
