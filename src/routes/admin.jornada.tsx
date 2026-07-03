@@ -7,8 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, Circle, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, Circle, Presentation } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { gerarApresentacaoHTML, type ApresentacaoData } from "@/lib/gerar-apresentacao-quinzenal";
 
 export const Route = createFileRoute("/admin/jornada")({
   head: () => ({ meta: [{ title: "Jornada — Lavoura" }] }),
@@ -76,7 +78,6 @@ function AdminJornada() {
   const totalConcluidos = progresso.filter((p) => p.concluido).length;
   const pct = totalSubitens > 0 ? Math.round((totalConcluidos / totalSubitens) * 100) : 0;
 
-  // Etapa atual: primeira etapa que tem pelo menos 1 subitem não concluído
   const etapaAtualNumero = (() => {
     for (const etapa of etapas) {
       const subs = subitens.filter((s) => s.etapa_id === etapa.id);
@@ -86,11 +87,82 @@ function AdminJornada() {
     return etapas[etapas.length - 1]?.numero ?? 1;
   })();
 
+  const gerarApresentacao = () => {
+    const unidade = unidades.find((u) => u.id === unidadeId);
+    if (!unidade) return;
+
+    const quinzeDiasAtras = new Date();
+    quinzeDiasAtras.setDate(quinzeDiasAtras.getDate() - 15);
+
+    const etapaAtual = etapas.find((e) => e.numero === etapaAtualNumero);
+    const proximaEtapa = etapas.find((e) => e.numero === etapaAtualNumero + 1);
+    const etapaAtualSubs = subitens.filter((s) => {
+      const etapa = etapas.find((e) => e.id === s.etapa_id);
+      return etapa?.numero === etapaAtualNumero;
+    });
+
+    // Feito nos últimos 15 dias
+    const feito = progresso
+      .filter((p) => p.concluido && p.concluido_em && new Date(p.concluido_em) >= quinzeDiasAtras)
+      .map((p) => subitens.find((s) => s.id === p.subitem_id)?.texto ?? "")
+      .filter(Boolean);
+
+    // Pendentes da etapa atual (até 5)
+    const semana = etapaAtualSubs
+      .filter((s) => !isConcluido(s.id))
+      .slice(0, 5)
+      .map((s) => s.texto);
+
+    // Próximos após os 5 da semana (até 4)
+    const proximaSemana = etapaAtualSubs
+      .filter((s) => !isConcluido(s.id))
+      .slice(5, 9)
+      .map((s) => s.texto);
+
+    const etapasData: ApresentacaoData["etapas"] = etapas.map((e) => {
+      const subs = subitens.filter((s) => s.etapa_id === e.id);
+      const concluidos = subs.filter((s) => isConcluido(s.id)).length;
+      const epct = subs.length > 0 ? Math.round((concluidos / subs.length) * 100) : 0;
+      const status = e.numero < etapaAtualNumero ? "done" : e.numero === etapaAtualNumero ? "current" : "next";
+      return { numero: e.numero, nome: e.nome, pct: epct, concluidos, total: subs.length, status };
+    });
+
+    const data: ApresentacaoData = {
+      unidadeNumero: unidade.numero,
+      unidadeNome: unidade.nome,
+      dataReuniao: new Date().toLocaleDateString("pt-BR"),
+      etapaAtualNumero,
+      etapaAtualNome: etapaAtual?.nome ?? "",
+      proximaEtapaNome: proximaEtapa?.nome ?? null,
+      pctGeral: pct,
+      totalConcluidos,
+      totalSubitens,
+      etapas: etapasData,
+      feito,
+      semana,
+      proximaSemana,
+    };
+
+    const html = gerarApresentacaoHTML(data);
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    toast.success("Apresentação gerada!");
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Jornada do Franqueado</h1>
-        <p className="text-sm text-muted-foreground">Acompanhe e mova o progresso de cada unidade pelas etapas de implementação.</p>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Jornada do Franqueado</h1>
+          <p className="text-sm text-muted-foreground">Acompanhe e mova o progresso de cada unidade pelas etapas de implementação.</p>
+        </div>
+        {unidadeId && !loading && (
+          <Button onClick={gerarApresentacao} className="shrink-0">
+            <Presentation className="mr-2 h-4 w-4" />
+            Gerar apresentação
+          </Button>
+        )}
       </div>
 
       <Card>
