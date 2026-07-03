@@ -64,6 +64,98 @@ export type Database = {
           },
         ]
       }
+      jornada_etapas: {
+        Row: {
+          descricao: string | null
+          id: string
+          nome: string
+          numero: number
+          ordem: number
+        }
+        Insert: {
+          descricao?: string | null
+          id?: string
+          nome: string
+          numero: number
+          ordem?: number
+        }
+        Update: {
+          descricao?: string | null
+          id?: string
+          nome?: string
+          numero?: number
+          ordem?: number
+        }
+        Relationships: []
+      }
+      jornada_progresso: {
+        Row: {
+          concluido: boolean
+          concluido_em: string | null
+          id: string
+          subitem_id: string
+          unidade_id: string
+        }
+        Insert: {
+          concluido?: boolean
+          concluido_em?: string | null
+          id?: string
+          subitem_id: string
+          unidade_id: string
+        }
+        Update: {
+          concluido?: boolean
+          concluido_em?: string | null
+          id?: string
+          subitem_id?: string
+          unidade_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jornada_progresso_subitem_id_fkey"
+            columns: ["subitem_id"]
+            isOneToOne: false
+            referencedRelation: "jornada_subitens"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jornada_progresso_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jornada_subitens: {
+        Row: {
+          etapa_id: string
+          id: string
+          ordem: number
+          texto: string
+        }
+        Insert: {
+          etapa_id: string
+          id?: string
+          ordem?: number
+          texto: string
+        }
+        Update: {
+          etapa_id?: string
+          id?: string
+          ordem?: number
+          texto?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jornada_subitens_etapa_id_fkey"
+            columns: ["etapa_id"]
+            isOneToOne: false
+            referencedRelation: "jornada_etapas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       obra_checklist_itens: {
         Row: {
           categoria: string
@@ -113,98 +205,6 @@ export type Database = {
             columns: ["unidade_id"]
             isOneToOne: false
             referencedRelation: "unidades"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      jornada_etapas: {
-        Row: {
-          descricao: string | null
-          id: string
-          nome: string
-          numero: number
-          ordem: number
-        }
-        Insert: {
-          descricao?: string | null
-          id?: string
-          nome: string
-          numero: number
-          ordem?: number
-        }
-        Update: {
-          descricao?: string | null
-          id?: string
-          nome?: string
-          numero?: number
-          ordem?: number
-        }
-        Relationships: []
-      }
-      jornada_subitens: {
-        Row: {
-          etapa_id: string
-          id: string
-          ordem: number
-          texto: string
-        }
-        Insert: {
-          etapa_id: string
-          id?: string
-          ordem?: number
-          texto: string
-        }
-        Update: {
-          etapa_id?: string
-          id?: string
-          ordem?: number
-          texto?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "jornada_subitens_etapa_id_fkey"
-            columns: ["etapa_id"]
-            isOneToOne: false
-            referencedRelation: "jornada_etapas"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      jornada_progresso: {
-        Row: {
-          concluido: boolean
-          concluido_em: string | null
-          id: string
-          subitem_id: string
-          unidade_id: string
-        }
-        Insert: {
-          concluido?: boolean
-          concluido_em?: string | null
-          id?: string
-          subitem_id: string
-          unidade_id: string
-        }
-        Update: {
-          concluido?: boolean
-          concluido_em?: string | null
-          id?: string
-          subitem_id?: string
-          unidade_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "jornada_progresso_unidade_id_fkey"
-            columns: ["unidade_id"]
-            isOneToOne: false
-            referencedRelation: "unidades"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "jornada_progresso_subitem_id_fkey"
-            columns: ["subitem_id"]
-            isOneToOne: false
-            referencedRelation: "jornada_subitens"
             referencedColumns: ["id"]
           },
         ]
