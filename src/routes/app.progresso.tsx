@@ -17,7 +17,7 @@ type Subitem = { id: string; etapa_id: string; texto: string; ordem: number };
 type ProgressoItem = { subitem_id: string; concluido: boolean };
 
 const ETAPA_EMOJIS: Record<number, string> = {
-  1: "🌱", 2: "🌿", 3: "🪴", 4: "🔨", 5: "🌸", 6: "🎉",
+  1: "🌱", 2: "🌿", 3: "🪴", 4: "🔨", 5: "🌸", 6: "🎉", 7: "🌾",
 };
 
 function Progresso() {
