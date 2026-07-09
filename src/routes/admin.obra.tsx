@@ -196,7 +196,7 @@ function AdminObra() {
 
     const { data: origem, error: origemErr } = await supabase
       .from("obra_checklist_itens")
-      .select("categoria, item, quantidade_sugerida, observacao, link_compra, ordem")
+      .select("categoria, item, quantidade_sugerida, observacao, link_compra, foto_url, ordem")
       .eq("unidade_id", importarDe);
 
     if (origemErr || !origem?.length) {
@@ -204,6 +204,7 @@ function AdminObra() {
       return toast.error(origemErr?.message ?? "Nenhum item encontrado na unidade selecionada.");
     }
 
+    // foto_url é o path no bucket obra-fotos — pode ser reutilizado diretamente
     const inserts = origem.map((o) => ({ ...o, unidade_id: unidadeId }));
     const { data, error } = await supabase
       .from("obra_checklist_itens")
