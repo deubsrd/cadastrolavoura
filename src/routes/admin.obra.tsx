@@ -204,6 +204,8 @@ function AdminObra() {
       return toast.error(origemErr?.message ?? "Nenhum item encontrado na unidade selecionada.");
     }
 
+    console.log("[importar] foto_url dos itens de origem:", origem.map(o => ({ item: o.item, foto_url: o.foto_url })));
+
     // foto_url é o path no bucket obra-fotos — pode ser reutilizado diretamente
     const inserts = origem.map((o) => ({ ...o, unidade_id: unidadeId }));
     const { data, error } = await supabase
