@@ -125,7 +125,7 @@ function Obra() {
         <CardContent>
           {pranchas.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              Nenhuma planta enviada ainda pela franqueadora.
+              🌱 Sua Lavoura está sendo projetada...
             </p>
           ) : (
             <div className="space-y-2">
