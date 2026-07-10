@@ -118,18 +118,6 @@ function Obra() {
         </p>
       </div>
 
-      {unidade?.link_projeto_3d && (
-        <a
-          href={unidade.link_projeto_3d}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-6 py-4 text-base font-semibold text-primary transition-colors hover:bg-primary/10"
-        >
-          <ExternalLink className="h-5 w-5" />
-          Confira seu projeto 3D
-        </a>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Plantas / pranchas do projeto</CardTitle>
@@ -155,6 +143,19 @@ function Obra() {
                   </Button>
                 </div>
               ))}
+            </div>
+          )}
+          {unidade?.link_projeto_3d && (
+            <div className="mt-4 pt-4 border-t border-border">
+              <a
+                href={unidade.link_projeto_3d}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-6 py-4 text-base font-semibold text-primary transition-colors hover:bg-primary/10"
+              >
+                <ExternalLink className="h-5 w-5" />
+                Visualizar projeto 3D
+              </a>
             </div>
           )}
         </CardContent>

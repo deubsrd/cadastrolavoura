@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, FileText, Eye, Upload, Link2, Image, Pencil, BookOpen, Copy } from "lucide-react";
+import { Plus, Trash2, FileText, Eye, Upload, Link2, Image, Pencil, BookOpen, Copy, ExternalLink } from "lucide-react";
 import { ObraFotoImg } from "@/components/ObraFotoImg";
 
 export const Route = createFileRoute("/admin/obra")({
@@ -64,6 +64,8 @@ function AdminObra() {
   const [uploadingFoto, setUploadingFoto] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const fotoRef = useRef<HTMLInputElement>(null);
+  const [link3d, setLink3d] = useState<string>("");
+  const [savingLink3d, setSavingLink3d] = useState(false);
 
   const [editingLink, setEditingLink] = useState<{ id: string; value: string } | null>(null);
   const [previewFoto, setPreviewFoto] = useState<string | null>(null);
@@ -104,12 +106,14 @@ function AdminObra() {
 
   const load = async (uid: string) => {
     setLoading(true);
-    const [{ data: checklist }, { data: docs }] = await Promise.all([
+    const [{ data: checklist }, { data: docs }, { data: unidadeData }] = await Promise.all([
       supabase.from("obra_checklist_itens").select("*").eq("unidade_id", uid).order("categoria").order("ordem"),
       supabase.from("unidade_documentos").select("id, nome, storage_path, created_at").eq("unidade_id", uid).eq("tipo", "planta_obra").eq("arquivado", false).order("created_at", { ascending: false }),
+      supabase.from("unidades").select("link_projeto_3d").eq("id", uid).single(),
     ]);
     setItens((checklist as ChecklistItem[]) ?? []);
     setPranchas((docs as Prancha[]) ?? []);
+    setLink3d((unidadeData as { link_projeto_3d: string | null } | null)?.link_projeto_3d ?? "");
     setLoading(false);
   };
 
@@ -276,6 +280,18 @@ function AdminObra() {
     setItens((prev) => prev.filter((i) => i.id !== id));
   };
 
+  const saveLink3d = async () => {
+    if (!unidadeId) return;
+    setSavingLink3d(true);
+    const { error } = await supabase
+      .from("unidades")
+      .update({ link_projeto_3d: link3d.trim() || null })
+      .eq("id", unidadeId);
+    setSavingLink3d(false);
+    if (error) return toast.error(error.message);
+    toast.success("Link do projeto 3D salvo.");
+  };
+
   const uploadPrancha = async () => {
     const file = fileRef.current?.files?.[0];
     if (!file || !unidadeId) return toast.error("Selecione um arquivo.");
@@ -376,6 +392,30 @@ function AdminObra() {
                     </div>
                   ))}
                 </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Link Projeto 3D */}
+          <Card>
+            <CardHeader><CardTitle className="text-base">Link do Projeto 3D</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-sm text-muted-foreground">Cole o link do projeto 3D da unidade. Ele aparecerá como botão clicável na aba Obra do franqueado.</p>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="https://..."
+                  value={link3d}
+                  onChange={(e) => setLink3d(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") saveLink3d(); }}
+                />
+                <Button onClick={saveLink3d} disabled={savingLink3d}>
+                  {savingLink3d ? "Salvando..." : "Salvar"}
+                </Button>
+              </div>
+              {link3d && (
+                <a href={link3d} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline">
+                  <ExternalLink className="h-3.5 w-3.5" /> Visualizar projeto 3D
+                </a>
               )}
             </CardContent>
           </Card>
