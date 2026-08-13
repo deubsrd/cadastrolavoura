@@ -505,6 +505,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      popular_gastos_padrao: {
+        Args: { p_unidade_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "franqueado"
