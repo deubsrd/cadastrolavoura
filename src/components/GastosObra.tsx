@@ -73,7 +73,7 @@ export function GastosObra({ unidadeId, isAdmin = false }: Props) {
     clearTimeout(debounceRef.current[id + field]);
     debounceRef.current[id + field] = setTimeout(async () => {
       setSaving(id);
-      await supabase.from("obra_gastos").update({ [field]: valor }).eq("id", id);
+      await supabase.from("obra_gastos").update({ [field]: valor } as Partial<Gasto>).eq("id", id);
       setSaving(null);
     }, 800);
   };
@@ -83,7 +83,7 @@ export function GastosObra({ unidadeId, isAdmin = false }: Props) {
     const { id, field, value } = editing;
     setGastos((prev) => prev.map((g) => g.id === id ? { ...g, [field]: value || null } : g));
     setEditing(null);
-    const { error } = await supabase.from("obra_gastos").update({ [field]: value.trim() || null }).eq("id", id);
+    const { error } = await supabase.from("obra_gastos").update({ [field]: value.trim() || null } as Partial<Gasto>).eq("id", id);
     if (error) toast.error(error.message);
   };
 
