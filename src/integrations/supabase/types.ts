@@ -498,16 +498,16 @@ export type Database = {
     }
     Functions: {
       get_my_unidade_id: { Args: never; Returns: string }
-      popular_gastos_padrao: {
-        Args: { p_unidade_id: string }
-        Returns: undefined
-      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      popular_gastos_padrao: {
+        Args: { p_unidade_id: string }
+        Returns: undefined
       }
     }
     Enums: {
