@@ -216,6 +216,7 @@ export type Database = {
           descricao: string
           id: string
           ordem: number
+          quantidade: string | null
           unidade_id: string
           updated_at: string
           valor_pago: number | null
@@ -227,6 +228,7 @@ export type Database = {
           descricao: string
           id?: string
           ordem?: number
+          quantidade?: string | null
           unidade_id: string
           updated_at?: string
           valor_pago?: number | null
@@ -238,6 +240,7 @@ export type Database = {
           descricao?: string
           id?: string
           ordem?: number
+          quantidade?: string | null
           unidade_id?: string
           updated_at?: string
           valor_pago?: number | null
