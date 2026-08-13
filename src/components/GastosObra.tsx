@@ -73,7 +73,7 @@ export function GastosObra({ unidadeId, isAdmin = false }: Props) {
     clearTimeout(debounceRef.current[id + field]);
     debounceRef.current[id + field] = setTimeout(async () => {
       setSaving(id);
-      await supabase.from("obra_gastos").update({ [field]: valor }).eq("id", id);
+      await supabase.from("obra_gastos").update({ [field]: valor } as Partial<Gasto>).eq("id", id);
       setSaving(null);
     }, 800);
   };
