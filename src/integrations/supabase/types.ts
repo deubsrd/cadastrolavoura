@@ -209,6 +209,50 @@ export type Database = {
           },
         ]
       }
+      obra_gastos: {
+        Row: {
+          categoria: string
+          created_at: string
+          descricao: string
+          id: string
+          ordem: number
+          unidade_id: string
+          updated_at: string
+          valor_pago: number | null
+          valor_previsto: number | null
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          descricao: string
+          id?: string
+          ordem?: number
+          unidade_id: string
+          updated_at?: string
+          valor_pago?: number | null
+          valor_previsto?: number | null
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          descricao?: string
+          id?: string
+          ordem?: number
+          unidade_id?: string
+          updated_at?: string
+          valor_pago?: number | null
+          valor_previsto?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obra_gastos_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       obra_itens_biblioteca: {
         Row: {
           categoria: string
@@ -454,6 +498,10 @@ export type Database = {
     }
     Functions: {
       get_my_unidade_id: { Args: never; Returns: string }
+      popular_gastos_padrao: {
+        Args: { p_unidade_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

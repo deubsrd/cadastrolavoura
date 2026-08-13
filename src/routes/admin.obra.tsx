@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash2, FileText, Eye, Upload, Link2, Image, Pencil, BookOpen, Copy, ExternalLink } from "lucide-react";
 import { ObraFotoImg } from "@/components/ObraFotoImg";
+import { GastosObra } from "@/components/GastosObra";
 
 export const Route = createFileRoute("/admin/obra")({
   head: () => ({ meta: [{ title: "Obra — Lavoura" }] }),
@@ -527,6 +528,16 @@ function AdminObra() {
           </Card>
         </>
       )}
+
+      {/* Acompanhamento de Gastos */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Acompanhamento de Gastos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <GastosObra unidadeId={unidadeId} isAdmin={true} />
+        </CardContent>
+      </Card>
 
       {/* Preview foto */}
       <Dialog open={!!previewFoto} onOpenChange={() => setPreviewFoto(null)}>

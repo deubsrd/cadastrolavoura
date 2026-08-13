@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { FileText, Eye, HardHat, Link2, ExternalLink } from "lucide-react";
 import { ObraFotoImg } from "@/components/ObraFotoImg";
+import { GastosObra } from "@/components/GastosObra";
 
 type ChecklistItem = {
   id: string;
@@ -242,6 +243,17 @@ function Obra() {
               </div>
             ))
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            💰 Acompanhamento de Gastos
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {unidadeId && <GastosObra unidadeId={unidadeId} isAdmin={false} />}
         </CardContent>
       </Card>
     </div>
