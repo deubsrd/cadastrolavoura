@@ -73,8 +73,10 @@ export function GastosObra({ unidadeId, isAdmin = false }: Props) {
     clearTimeout(debounceRef.current[id + field]);
     debounceRef.current[id + field] = setTimeout(async () => {
       setSaving(id);
+      const update: { valor_pago?: number; valor_previsto?: number } = {};
+      update[field] = valor;
       const { error } = await supabase
-        .from("obra_gastos").update({ [field]: valor }).eq("id", id);
+        .from("obra_gastos").update(update).eq("id", id);
       setSaving(null);
       if (error) toast.error(error.message);
     }, 800);
