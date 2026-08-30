@@ -165,9 +165,9 @@ function LoginPage() {
             Entrar com Google
           </Button>
           <div className="text-center text-sm">
-            <p className="text-muted-foreground mb-1">Ainda não é franqueado?</p>
+            <p className="text-muted-foreground mb-1">Recém franqueado?</p>
             <Link to="/cadastro" className="font-semibold text-primary hover:underline">
-              Quero me tornar um franqueado →
+              Cadastre sua unidade →
             </Link>
           </div>
         </CardContent>
