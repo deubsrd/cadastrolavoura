@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Download, Trash2, FileText, Search, Eye, Pencil, Mail } from "lucide-react";
 import { FileDown } from "lucide-react";
 import jsPDF from "jspdf";
@@ -366,7 +367,11 @@ function AdminFranqueados() {
         </CardHeader>
         <CardContent className="overflow-x-auto p-0">
           {loading ? (
-            <p className="p-6 text-sm text-muted-foreground">Carregando...</p>
+            <div className="space-y-3 p-6">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
           ) : filtered.length === 0 ? (
             <p className="p-6 text-sm text-muted-foreground">Nenhum cadastro encontrado.</p>
           ) : (
@@ -461,7 +466,12 @@ function AdminFranqueados() {
                       <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Editar">
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDelete(r.id)}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleDelete(r.id)}
+                        title="Excluir"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>

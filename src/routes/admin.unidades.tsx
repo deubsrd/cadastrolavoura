@@ -15,6 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { isTransientDbError, withDbRetry } from "@/lib/db-retry";
 import { Plus, Trash2, Users, FileText, Pencil } from "lucide-react";
 import {
@@ -240,7 +241,11 @@ function AdminUnidades() {
         </CardHeader>
         <CardContent className="overflow-x-auto p-0">
           {loading ? (
-            <p className="p-6 text-sm text-muted-foreground">Carregando...</p>
+            <div className="space-y-3 p-6">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-10 w-full" />
+              ))}
+            </div>
           ) : rows.length === 0 ? (
             <p className="p-6 text-sm text-muted-foreground">Nenhuma unidade.</p>
           ) : (
@@ -302,7 +307,7 @@ function AdminUnidades() {
                       <Button size="sm" variant="ghost" onClick={() => toggle(u)}>
                         {u.ativo ? "Desativar" : "Ativar"}
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => remove(u.id)}>
+                      <Button size="sm" variant="ghost" onClick={() => remove(u.id)} title="Excluir">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -327,7 +332,10 @@ function AdminUnidades() {
             </TabsList>
             <TabsContent value="socios" className="mt-4">
               {loadingSocios ? (
-                <p className="p-4 text-sm text-muted-foreground">Carregando sócios...</p>
+                <div className="space-y-2 p-4">
+                  <Skeleton className="h-9 w-full" />
+                  <Skeleton className="h-9 w-full" />
+                </div>
               ) : socios.length === 0 ? (
                 <p className="p-4 text-sm text-muted-foreground">
                   Nenhum sócio vinculado a esta unidade.

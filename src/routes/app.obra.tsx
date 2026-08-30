@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FileText, Eye, HardHat, Link2, ExternalLink } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FileText, Eye, HardHat, Link2, ExternalLink, Wallet } from "lucide-react";
 import { ObraFotoImg } from "@/components/ObraFotoImg";
 import { GastosObra } from "@/components/GastosObra";
 
@@ -99,7 +100,13 @@ function Obra() {
   };
 
   if (loadingUnidade || loading) {
-    return <div className="text-sm text-muted-foreground">Carregando...</div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
+    );
   }
 
   const grouped = itens.reduce<Record<string, ChecklistItem[]>>((acc, item) => {
@@ -126,7 +133,7 @@ function Obra() {
         <CardContent>
           {pranchas.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              🌱 Sua Lavoura está sendo projetada...
+              Sua Lavoura está sendo projetada...
             </p>
           ) : (
             <div className="space-y-2">
@@ -249,7 +256,7 @@ function Obra() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            💰 Acompanhamento de Gastos
+            <Wallet className="h-4 w-4" /> Acompanhamento de Gastos
           </CardTitle>
         </CardHeader>
         <CardContent>

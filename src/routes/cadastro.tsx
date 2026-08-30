@@ -5,6 +5,7 @@ import { Plus, Trash2, Send } from "lucide-react";
 import { Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import lavouraLogo from "@/assets/lavoura-logo.png";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { SocioFields, type SocioData, emptySocio } from "@/components/forms/SocioFields";
 import { SocioDocuments, type SocioDocs, emptyDocs } from "@/components/forms/SocioDocuments";
+import { Skeleton } from "@/components/ui/skeleton";
 import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -201,27 +203,20 @@ function PublicForm() {
           </p>
         </div>
 
-        <div
-          className="mb-6 flex gap-3 rounded-lg border border-primary/20 bg-secondary/40 p-4 sm:p-5"
-          style={{ boxShadow: "var(--shadow-card)" }}
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <Info className="h-5 w-5" />
-          </div>
-          <div className="space-y-2 text-sm leading-relaxed">
-            <p className="font-semibold text-primary">Por que pedimos essas informações?</p>
-            <p className="text-foreground/80">
-              Seus dados são coletados uma única vez para agilizar todos os processos da sua
-              franquia: elaboração de contratos, pedidos junto a fornecedores, abertura de contas e
-              documentações oficiais. Assim, você não precisa repetir as mesmas informações toda vez
-              que um novo documento for necessário. Todas as informações são armazenadas com
-              segurança e utilizadas exclusivamente para fins administrativos da Lavoura.
-            </p>
-          </div>
-        </div>
+        <Alert className="mb-6 border-primary/20 bg-secondary/40 shadow-card sm:p-5">
+          <Info className="h-5 w-5 text-primary" />
+          <AlertTitle className="text-primary">Por que pedimos essas informações?</AlertTitle>
+          <AlertDescription className="text-foreground/80">
+            Seus dados são coletados uma única vez para agilizar todos os processos da sua
+            franquia: elaboração de contratos, pedidos junto a fornecedores, abertura de contas e
+            documentações oficiais. Assim, você não precisa repetir as mesmas informações toda vez
+            que um novo documento for necessário. Todas as informações são armazenadas com
+            segurança e utilizadas exclusivamente para fins administrativos da Lavoura.
+          </AlertDescription>
+        </Alert>
 
         <form onSubmit={onSubmit} className="space-y-6">
-          <Card style={{ boxShadow: "var(--shadow-card)" }}>
+          <Card className="shadow-card">
             <CardHeader>
               <CardTitle className="text-base">Unidade {"\n"}</CardTitle>
             </CardHeader>
@@ -230,7 +225,7 @@ function PublicForm() {
                 Número da unidade
               </Label>
               {loadingUnidades ? (
-                <p className="mt-2 text-sm text-muted-foreground">Carregando unidades...</p>
+                <Skeleton className="mt-2 h-9 w-full" />
               ) : unidades.length === 0 ? (
                 <p className="mt-2 text-sm text-destructive">
                   Nenhuma unidade disponível. Entre em contato com a franqueadora.
@@ -259,7 +254,7 @@ function PublicForm() {
           </Card>
 
           {socios.map((socio, i) => (
-            <Card key={i} style={{ boxShadow: "var(--shadow-card)" }}>
+            <Card key={i} className="shadow-card">
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-base">Sócio {i + 1}</CardTitle>
                 {socios.length > 1 && (
@@ -319,8 +314,7 @@ function PublicForm() {
             <Button
               type="submit"
               disabled={submitting || !lgpdAceito}
-              style={{ background: "var(--gradient-accent)" }}
-              className="text-accent-foreground hover:opacity-90"
+              className="bg-gradient-accent text-accent-foreground hover:opacity-90"
             >
               <Send className="mr-2 h-4 w-4" />
               {submitting ? "Enviando..." : "Enviar cadastro"}

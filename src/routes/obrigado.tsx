@@ -12,10 +12,7 @@ function ThanksPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md text-center">
-        <div
-          className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full"
-          style={{ background: "var(--gradient-accent)" }}
-        >
+        <div className="bg-gradient-accent mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full">
           <CheckCircle2 className="h-8 w-8 text-accent-foreground" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-primary">

@@ -5,6 +5,7 @@ import { useFranqueado } from "@/hooks/use-franqueado";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, Download, Eye, Building2 } from "lucide-react";
 
 const TIPO_LABEL: Record<string, string> = {
@@ -53,7 +54,13 @@ function MinhaUnidade() {
   };
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Carregando...</div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    );
   }
 
   if (!unidade) {

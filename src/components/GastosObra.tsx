@@ -154,7 +154,7 @@ export function GastosObra({ unidadeId, isAdmin = false }: Props) {
         <Card className={cn("border-border/50", diferenca < 0 && "border-destructive/30 bg-destructive/5")}>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Diferença</p>
-            <p className={cn("text-xl font-bold", diferenca >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>
+            <p className={cn("text-xl font-bold", diferenca >= 0 ? "text-success" : "text-destructive")}>
               {diferenca >= 0 ? "+" : ""}R$ {fmt(diferenca)}
             </p>
           </CardContent>
@@ -293,7 +293,7 @@ export function GastosObra({ unidadeId, isAdmin = false }: Props) {
                         {/* Diferença */}
                         <td className="px-4 py-2.5 text-right">
                           {g.valor_previsto != null ? (
-                            <span className={cn("font-semibold text-xs", dif > 0.004 ? "text-green-600 dark:text-green-400" : dif < -0.004 ? "text-destructive" : "text-muted-foreground")}>
+                            <span className={cn("font-semibold text-xs", dif > 0.004 ? "text-success" : dif < -0.004 ? "text-destructive" : "text-muted-foreground")}>
                               {dif > 0 ? "+" : ""}R$ {fmt(dif)}
                             </span>
                           ) : (
@@ -317,7 +317,7 @@ export function GastosObra({ unidadeId, isAdmin = false }: Props) {
                     <td className="px-4 py-2 text-right text-sm text-foreground">R$ {fmt(subPago)}</td>
                     {isAdmin && <td className="px-4 py-2 text-right text-sm text-foreground">R$ {fmt(subPrevisto)}</td>}
                     <td className="px-4 py-2 text-right text-xs">
-                      <span className={cn("font-semibold", subDif >= 0 ? "text-green-600 dark:text-green-400" : "text-destructive")}>
+                      <span className={cn("font-semibold", subDif >= 0 ? "text-success" : "text-destructive")}>
                         {subDif >= 0 ? "+" : ""}R$ {fmt(subDif)}
                       </span>
                     </td>

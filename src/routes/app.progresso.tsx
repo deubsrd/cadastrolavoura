@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useFranqueado } from "@/hooks/use-franqueado";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,10 +16,6 @@ export const Route = createFileRoute("/app/progresso")({
 type Etapa = { id: string; numero: number; nome: string; descricao: string | null };
 type Subitem = { id: string; etapa_id: string; texto: string; ordem: number };
 type ProgressoItem = { subitem_id: string; concluido: boolean };
-
-const ETAPA_EMOJIS: Record<number, string> = {
-  1: "🌱", 2: "🌿", 3: "🪴", 4: "🔨", 5: "🌸", 6: "🎉", 7: "🌾",
-};
 
 function Progresso() {
   const { unidadeId, loading: loadingUnidade } = useFranqueado();
@@ -79,16 +76,11 @@ function Progresso() {
             <p className="text-sm font-semibold text-foreground">Progresso geral da implementação</p>
             <span className="text-2xl font-bold text-primary">{pct}%</span>
           </div>
-          <div className="h-4 w-full overflow-hidden rounded-full bg-secondary">
-            <div
-              className="h-full rounded-full bg-primary transition-all duration-700"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
+          <Progress value={pct} className="h-4 bg-secondary" />
           <p className="mt-2 text-xs text-muted-foreground">
             {totalConcluidos} de {totalSubitens} itens concluídos ·{" "}
             <span className="font-medium text-foreground">
-              Etapa atual: {ETAPA_EMOJIS[etapaAtualNumero]} {etapas.find((e) => e.numero === etapaAtualNumero)?.nome}
+              Etapa atual: {etapas.find((e) => e.numero === etapaAtualNumero)?.nome}
             </span>
           </p>
         </CardContent>
@@ -113,7 +105,7 @@ function Progresso() {
                 {/* Ícone na linha */}
                 <div className={cn(
                   "relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 bg-background text-base",
-                  etapaConcluida && "border-green-500 bg-green-500 text-white",
+                  etapaConcluida && "border-success bg-success text-success-foreground",
                   etapaAtiva && !etapaConcluida && "border-primary bg-primary text-primary-foreground",
                   etapaBloqueada && "border-muted-foreground/30 bg-muted text-muted-foreground/50"
                 )}>
@@ -129,16 +121,15 @@ function Progresso() {
                 {/* Conteúdo */}
                 <div className={cn("flex-1 pb-2", etapaBloqueada && "opacity-50")}>
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="text-base">{ETAPA_EMOJIS[etapa.numero]}</span>
                     <h3 className={cn(
                       "text-sm font-semibold",
-                      etapaConcluida && "text-green-600 dark:text-green-400",
+                      etapaConcluida && "text-success",
                       etapaAtiva && !etapaConcluida && "text-primary",
                       etapaBloqueada && "text-muted-foreground"
                     )}>
                       Etapa {etapa.numero} — {etapa.nome}
                     </h3>
-                    {etapaConcluida && <Badge className="bg-green-500 text-white text-xs">Concluída ✓</Badge>}
+                    {etapaConcluida && <Badge className="bg-success text-success-foreground text-xs">Concluída ✓</Badge>}
                     {etapaAtiva && !etapaConcluida && <Badge variant="secondary" className="text-xs">Em andamento</Badge>}
                     {etapaBloqueada && <Badge variant="outline" className="text-xs text-muted-foreground">Em breve</Badge>}
                   </div>
@@ -154,12 +145,11 @@ function Progresso() {
                         <span>{concluidos}/{subs.length} itens</span>
                         <span>{etapaPct}%</span>
                       </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                        <div
-                          className={cn("h-full rounded-full transition-all duration-500", etapaConcluida ? "bg-green-500" : "bg-primary")}
-                          style={{ width: `${etapaPct}%` }}
-                        />
-                      </div>
+                      <Progress
+                        value={etapaPct}
+                        className="h-1.5 bg-secondary"
+                        indicatorClassName={etapaConcluida ? "bg-success" : undefined}
+                      />
                     </div>
                   )}
 
@@ -171,7 +161,7 @@ function Progresso() {
                         return (
                           <div key={sub.id} className="flex items-start gap-2">
                             {ok ? (
-                              <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                              <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
                             ) : (
                               <Circle className="h-4 w-4 text-muted-foreground/50 shrink-0 mt-0.5" />
                             )}

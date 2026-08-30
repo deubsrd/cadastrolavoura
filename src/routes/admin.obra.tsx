@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, FileText, Eye, Upload, Link2, Image, Pencil, BookOpen, Copy, ExternalLink } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Trash2, FileText, Eye, Upload, Link2, Image, Pencil, BookOpen, Copy, ExternalLink, Check } from "lucide-react";
 import { ObraFotoImg } from "@/components/ObraFotoImg";
 import { GastosObra } from "@/components/GastosObra";
 
@@ -387,8 +388,8 @@ function AdminObra() {
                         <p className="text-sm font-medium">{p.nome}</p>
                       </div>
                       <div className="flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => viewPrancha(p)}><Eye className="h-4 w-4" /></Button>
-                        <Button size="sm" variant="ghost" onClick={() => removePrancha(p)}><Trash2 className="h-4 w-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => viewPrancha(p)} title="Visualizar"><Eye className="h-4 w-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => removePrancha(p)} title="Excluir"><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -450,7 +451,11 @@ function AdminObra() {
               </form>
 
               {loading ? (
-                <p className="text-sm text-muted-foreground">Carregando...</p>
+                <div className="space-y-2">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-10 w-full" />
+                  ))}
+                </div>
               ) : itens.length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nenhum item cadastrado para esta unidade ainda.</p>
               ) : (
@@ -491,12 +496,12 @@ function AdminObra() {
                               {editingLink?.id === item.id ? (
                                 <div className="flex items-center gap-1">
                                   <Input value={editingLink.value} onChange={(e) => setEditingLink({ id: item.id, value: e.target.value })} className="h-7 w-48 text-xs" placeholder="https://..." onKeyDown={(e) => { if (e.key === "Enter") saveLink(item.id, editingLink.value); if (e.key === "Escape") setEditingLink(null); }} autoFocus />
-                                  <Button size="sm" variant="ghost" onClick={() => saveLink(item.id, editingLink.value)}>✓</Button>
+                                  <Button size="sm" variant="ghost" onClick={() => saveLink(item.id, editingLink.value)} title="Salvar link"><Check className="h-3.5 w-3.5" /></Button>
                                 </div>
                               ) : item.link_compra ? (
                                 <div className="flex items-center gap-1">
                                   <a href={item.link_compra} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-primary hover:underline"><Link2 className="h-3.5 w-3.5" /> Ver link</a>
-                                  <Button size="sm" variant="ghost" onClick={() => setEditingLink({ id: item.id, value: item.link_compra ?? "" })}><Pencil className="h-3.5 w-3.5" /></Button>
+                                  <Button size="sm" variant="ghost" onClick={() => setEditingLink({ id: item.id, value: item.link_compra ?? "" })} title="Editar link"><Pencil className="h-3.5 w-3.5" /></Button>
                                 </div>
                               ) : (
                                 <Button size="sm" variant="ghost" onClick={() => setEditingLink({ id: item.id, value: "" })} className="text-xs text-muted-foreground">
@@ -515,7 +520,7 @@ function AdminObra() {
                               </Select>
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button size="sm" variant="ghost" onClick={() => removeItem(item.id)}><Trash2 className="h-4 w-4" /></Button>
+                              <Button size="sm" variant="ghost" onClick={() => removeItem(item.id)} title="Excluir item"><Trash2 className="h-4 w-4" /></Button>
                             </TableCell>
                           </TableRow>
                         ))}

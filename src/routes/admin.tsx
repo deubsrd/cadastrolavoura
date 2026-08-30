@@ -90,7 +90,7 @@ function AdminLayout() {
       <div className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
           <img src={lavouraLogo} alt="Lavoura" className="h-9 w-auto" />
-          <Button variant="ghost" size="sm" onClick={logout}>
+          <Button variant="ghost" size="sm" onClick={logout} aria-label="Sair">
             <LogOut className="h-4 w-4" />
           </Button>
         </header>
