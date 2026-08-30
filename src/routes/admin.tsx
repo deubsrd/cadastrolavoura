@@ -20,14 +20,14 @@ function AdminLayout() {
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       if (!session || session.user.email !== ADMIN_EMAIL) {
-        navigate({ to: "/login" });
+        navigate({ to: "/" });
       } else {
         setReady(true);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session || data.session.user.email !== ADMIN_EMAIL) {
-        navigate({ to: "/login" });
+        navigate({ to: "/" });
       } else {
         setReady(true);
       }
@@ -37,7 +37,7 @@ function AdminLayout() {
 
   const logout = async () => {
     await supabase.auth.signOut();
-    navigate({ to: "/login" });
+    navigate({ to: "/" });
   };
 
   if (!ready) {

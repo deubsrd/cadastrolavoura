@@ -28,7 +28,7 @@ function ThanksPage() {
           <img src={lavouraLogo} alt="Lavoura" className="h-10 w-auto" />
         </div>
         <Button asChild variant="outline" className="mt-6">
-          <Link to="/">Novo cadastro</Link>
+          <Link to="/cadastro">Novo cadastro</Link>
         </Button>
       </div>
     </div>

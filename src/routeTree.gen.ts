@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
-import { Route as LoginRouteImport } from './routes/login'
+import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -29,9 +29,9 @@ const ObrigadoRoute = ObrigadoRouteImport.update({
   path: '/obrigado',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -99,7 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
-  '/login': typeof LoginRoute
+  '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
@@ -113,7 +113,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/login': typeof LoginRoute
+  '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
@@ -130,7 +130,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
-  '/login': typeof LoginRoute
+  '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
@@ -148,7 +148,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/app'
-    | '/login'
+    | '/cadastro'
     | '/obrigado'
     | '/admin/jornada'
     | '/admin/obra'
@@ -162,7 +162,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/login'
+    | '/cadastro'
     | '/obrigado'
     | '/admin/jornada'
     | '/admin/obra'
@@ -178,7 +178,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/app'
-    | '/login'
+    | '/cadastro'
     | '/obrigado'
     | '/admin/jornada'
     | '/admin/obra'
@@ -195,7 +195,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
-  LoginRoute: typeof LoginRoute
+  CadastroRoute: typeof CadastroRoute
   ObrigadoRoute: typeof ObrigadoRoute
 }
 
@@ -208,11 +208,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ObrigadoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -340,7 +340,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
-  LoginRoute: LoginRoute,
+  CadastroRoute: CadastroRoute,
   ObrigadoRoute: ObrigadoRoute,
 }
 export const routeTree = rootRouteImport

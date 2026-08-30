@@ -21,7 +21,7 @@ function AppLayout() {
     ) => {
       if (!session) {
         setStatus("denied");
-        navigate({ to: "/login" });
+        navigate({ to: "/" });
         return;
       }
       const { data, error } = await supabase
@@ -33,7 +33,7 @@ function AppLayout() {
 
       if (error || !data) {
         setStatus("denied");
-        navigate({ to: "/login" });
+        navigate({ to: "/" });
         return;
       }
       setStatus("ready");
@@ -49,7 +49,7 @@ function AppLayout() {
 
   const logout = async () => {
     await supabase.auth.signOut();
-    navigate({ to: "/login" });
+    navigate({ to: "/" });
   };
 
   if (status !== "ready") {
