@@ -50,7 +50,7 @@ const trainingItems = [
   {
     title: "Manual de Operação",
     description: "Passo a passo completo para a operação diária da sua unidade.",
-    href: "#",
+    href: "/manual-operacoes-lavoura.pdf",
     icon: BookOpen,
   },
   {
@@ -96,7 +96,8 @@ function SectionCard({
   icon: typeof Monitor;
   href: string;
 }) {
-  const isInternal = href.startsWith("/");
+  const isFile = /\.[a-z0-9]+$/i.test(href);
+  const isInternal = href.startsWith("/") && !isFile;
   const isComingSoon = href === "#";
 
   return (
