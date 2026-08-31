@@ -4,6 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Building2, Wallet, LifeBuoy, HardHat, TrendingUp, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lavouraLogo from "@/assets/lavoura-logo.png";
+import { useFranqueado } from "@/hooks/use-franqueado";
+import { useSocioAppState } from "@/hooks/use-socio-app-state";
+import { GuidedTour } from "@/components/onboarding/GuidedTour";
+import { ONBOARDING_TOUR_STEPS } from "@/lib/onboarding-tour";
+
+const NAV_TOUR_TARGET: Record<string, string> = {
+  "/app": "nav-unidade",
+  "/app/financeiro": "nav-financeiro",
+  "/app/central": "nav-central",
+  "/app/obra": "nav-obra",
+  "/app/progresso": "nav-progresso",
+};
 
 export const Route = createFileRoute("/app")({
   head: () => ({ meta: [{ title: "Sistema Lavoura" }] }),
@@ -52,6 +64,11 @@ function AppLayout() {
     navigate({ to: "/" });
   };
 
+  const { socio } = useFranqueado();
+  const { loading: appStateLoading, tourCompleto, markTourCompleto } = useSocioAppState(
+    socio?.id ?? null,
+  );
+
   if (status !== "ready") {
     return (
       <div className="flex min-h-screen items-center justify-center text-muted-foreground">
@@ -65,6 +82,7 @@ function AppLayout() {
     return (
       <Link
         to={to}
+        data-tour={NAV_TOUR_TARGET[to]}
         className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
           active
             ? "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -109,30 +127,35 @@ function AppLayout() {
         <nav className="flex gap-2 overflow-x-auto border-b border-border bg-card px-4 py-2 md:hidden">
           <Link
             to="/app"
+            data-tour="nav-unidade"
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Minha Unidade
           </Link>
           <Link
             to="/app/financeiro"
+            data-tour="nav-financeiro"
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Financeiro
           </Link>
           <Link
             to="/app/central"
+            data-tour="nav-central"
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Central
           </Link>
           <Link
             to="/app/obra"
+            data-tour="nav-obra"
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Obra
           </Link>
           <Link
             to="/app/progresso"
+            data-tour="nav-progresso"
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Progresso
@@ -142,6 +165,10 @@ function AppLayout() {
           <Outlet />
         </main>
       </div>
+
+      {!appStateLoading && socio && !tourCompleto && (
+        <GuidedTour steps={ONBOARDING_TOUR_STEPS} onFinish={markTourCompleto} />
+      )}
     </div>
   );
 }
