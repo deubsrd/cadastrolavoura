@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_conhecimento: {
+        Row: {
+          created_at: string
+          id: string
+          pergunta: string
+          resposta: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pergunta: string
+          resposta: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pergunta?: string
+          resposta?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_duvidas_pendentes: {
+        Row: {
+          created_at: string
+          id: string
+          pergunta: string
+          respondida_em: string | null
+          resposta: string | null
+          socio_id: string | null
+          status: string
+          unidade_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pergunta: string
+          respondida_em?: string | null
+          resposta?: string | null
+          socio_id?: string | null
+          status?: string
+          unidade_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pergunta?: string
+          respondida_em?: string | null
+          resposta?: string | null
+          socio_id?: string | null
+          status?: string
+          unidade_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_duvidas_pendentes_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_duvidas_pendentes_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financeiro_mensal: {
         Row: {
           created_at: string

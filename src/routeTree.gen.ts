@@ -23,6 +23,7 @@ import { Route as AppCentralRouteImport } from './routes/app.central'
 import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
 import { Route as AdminObraRouteImport } from './routes/admin.obra'
 import { Route as AdminJornadaRouteImport } from './routes/admin.jornada'
+import { Route as AdminDuvidasRouteImport } from './routes/admin.duvidas'
 
 const ObrigadoRoute = ObrigadoRouteImport.update({
   id: '/obrigado',
@@ -94,6 +95,11 @@ const AdminJornadaRoute = AdminJornadaRouteImport.update({
   path: '/jornada',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDuvidasRoute = AdminDuvidasRouteImport.update({
+  id: '/duvidas',
+  path: '/duvidas',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/obrigado'
+    | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
     | '/admin/unidades'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cadastro'
     | '/obrigado'
+    | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
     | '/admin/unidades'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/obrigado'
+    | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
     | '/admin/unidades'
@@ -299,10 +311,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminJornadaRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/duvidas': {
+      id: '/admin/duvidas'
+      path: '/duvidas'
+      fullPath: '/admin/duvidas'
+      preLoaderRoute: typeof AdminDuvidasRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminDuvidasRoute: typeof AdminDuvidasRoute
   AdminJornadaRoute: typeof AdminJornadaRoute
   AdminObraRoute: typeof AdminObraRoute
   AdminUnidadesRoute: typeof AdminUnidadesRoute
@@ -310,6 +330,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminDuvidasRoute: AdminDuvidasRoute,
   AdminJornadaRoute: AdminJornadaRoute,
   AdminObraRoute: AdminObraRoute,
   AdminUnidadesRoute: AdminUnidadesRoute,

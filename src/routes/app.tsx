@@ -8,6 +8,7 @@ import { useFranqueado } from "@/hooks/use-franqueado";
 import { useSocioAppState } from "@/hooks/use-socio-app-state";
 import { GuidedTour } from "@/components/onboarding/GuidedTour";
 import { ONBOARDING_TOUR_STEPS } from "@/lib/onboarding-tour";
+import { ChatWidget } from "@/components/support-chat/ChatWidget";
 
 const NAV_TOUR_TARGET: Record<string, string> = {
   "/app": "nav-unidade",
@@ -169,6 +170,8 @@ function AppLayout() {
       {!appStateLoading && socio && !tourCompleto && (
         <GuidedTour steps={ONBOARDING_TOUR_STEPS} onFinish={markTourCompleto} />
       )}
+
+      {socio && <ChatWidget />}
     </div>
   );
 }
