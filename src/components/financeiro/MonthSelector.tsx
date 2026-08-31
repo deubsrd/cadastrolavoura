@@ -71,7 +71,9 @@ export function MonthSelector({ records, activeId, onSelect, onAdd, onDelete }: 
           {records.length > 1 && (
             <button
               onClick={() => onDelete(r.id)}
-              className="hidden rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive group-hover:block"
+              aria-label={`Excluir ${r.label}`}
+              title={`Excluir ${r.label}`}
+              className="hidden rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive group-hover:block focus-visible:block"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>

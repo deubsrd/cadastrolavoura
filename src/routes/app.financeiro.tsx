@@ -12,6 +12,8 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -81,7 +83,17 @@ function Financeiro() {
   const store = useFinanceiro(unidadeId);
 
   if (loadingUnidade || store.loading) {
-    return <div className="text-sm text-muted-foreground">Carregando...</div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
   }
 
   if (!unidadeId) {
@@ -259,12 +271,11 @@ function Dashboard({ store }: { store: ReturnType<typeof useFinanceiro> }) {
                         {formatCurrency(item.value)} ({pct.toFixed(1)}%)
                       </span>
                     </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-secondary">
-                      <div
-                        className="h-full rounded-full bg-primary/70 transition-all"
-                        style={{ width: `${Math.min(pct, 100)}%` }}
-                      />
-                    </div>
+                    <Progress
+                      value={Math.min(pct, 100)}
+                      className="h-2 bg-secondary"
+                      indicatorClassName="bg-primary/70"
+                    />
                   </div>
                 );
               })}

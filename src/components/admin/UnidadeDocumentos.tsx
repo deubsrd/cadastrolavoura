@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -77,7 +78,7 @@ function vencimentoStatus(data: string | null): {
     return {
       variant: "default",
       label: `Vence em ${diff}d (${formatDateBR(data)})`,
-      className: "bg-yellow-500 text-yellow-950 hover:bg-yellow-500",
+      className: "bg-warning text-warning-foreground hover:bg-warning",
     };
   return { variant: "secondary", label: `Vence ${formatDateBR(data)}` };
 }
@@ -338,7 +339,10 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
       <div className="space-y-3">
         <h3 className="text-sm font-semibold">Documentos ativos</h3>
         {loading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
+          <div className="space-y-2">
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
         ) : ativos.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum documento enviado ainda.</p>
         ) : (
@@ -409,6 +413,7 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
                           <button
                             type="button"
                             onClick={() => toggleHist(d.id)}
+                            aria-expanded={aberto}
                             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                           >
                             {aberto ? (
@@ -438,6 +443,7 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
                                       variant="ghost"
                                       onClick={() => view(h)}
                                       className="h-7 w-7 p-0"
+                                      title="Visualizar"
                                     >
                                       <Eye className="h-3 w-3" />
                                     </Button>
@@ -446,6 +452,7 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
                                       variant="ghost"
                                       onClick={() => download(h)}
                                       className="h-7 w-7 p-0"
+                                      title="Baixar"
                                     >
                                       <Download className="h-3 w-3" />
                                     </Button>
@@ -454,6 +461,7 @@ export function UnidadeDocumentos({ unidadeId }: { unidadeId: string }) {
                                       variant="ghost"
                                       onClick={() => remove(h)}
                                       className="h-7 w-7 p-0"
+                                      title="Excluir versão"
                                     >
                                       <Trash2 className="h-3 w-3" />
                                     </Button>

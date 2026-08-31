@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, Circle, Presentation } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { gerarApresentacaoHTML, type ApresentacaoData } from "@/lib/gerar-apresentacao-quinzenal";
@@ -190,12 +191,7 @@ function AdminJornada() {
                 <p className="text-sm font-medium text-foreground">Progresso geral</p>
                 <span className="text-sm font-bold text-primary">{pct}%</span>
               </div>
-              <div className="h-3 w-full overflow-hidden rounded-full bg-secondary">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-500"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
+              <Progress value={pct} className="h-3 bg-secondary" />
               <p className="mt-2 text-xs text-muted-foreground">{totalConcluidos} de {totalSubitens} itens concluídos · Etapa atual: <span className="font-semibold text-foreground">{etapas.find((e) => e.numero === etapaAtualNumero)?.nome}</span></p>
             </CardContent>
           </Card>
@@ -211,14 +207,14 @@ function AdminJornada() {
               return (
                 <Card key={etapa.id} className={cn(
                   "transition-all",
-                  etapaConcluida && "border-green-500/40 bg-green-50/30 dark:bg-green-950/10",
+                  etapaConcluida && "border-success/40 bg-success/5",
                   etapaAtiva && !etapaConcluida && "border-primary/50 shadow-sm"
                 )}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {etapaConcluida ? (
-                          <CheckCircle2 className="h-6 w-6 text-green-500 shrink-0" />
+                          <CheckCircle2 className="h-6 w-6 text-success shrink-0" />
                         ) : etapaAtiva ? (
                           <Circle className="h-6 w-6 text-primary shrink-0" />
                         ) : (

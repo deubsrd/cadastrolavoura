@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Monitor,
@@ -108,9 +109,9 @@ function SectionCard({
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         <div className="mt-3">
           {isComingSoon ? (
-            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <Badge variant="secondary" className="text-xs uppercase tracking-wide">
               Em breve
-            </span>
+            </Badge>
           ) : isInternal ? (
             <a href={href} className="text-sm font-medium text-primary hover:underline">
               Acessar
@@ -182,6 +183,8 @@ function Central() {
                       key={link.href}
                       asChild
                       size="sm"
+                      // WhatsApp's own brand green — intentionally outside the design-token
+                      // palette so the button reads as WhatsApp, not as a themed action.
                       className="bg-[#25D366] text-white hover:bg-[#1ebe5d]"
                     >
                       <a href={link.href} target="_blank" rel="noopener noreferrer">
