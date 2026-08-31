@@ -531,18 +531,18 @@ function AdminObra() {
               )}
             </CardContent>
           </Card>
+
+          {/* Acompanhamento de Gastos */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Acompanhamento de Gastos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <GastosObra unidadeId={unidadeId} isAdmin={true} />
+            </CardContent>
+          </Card>
         </>
       )}
-
-      {/* Acompanhamento de Gastos */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Acompanhamento de Gastos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <GastosObra unidadeId={unidadeId} isAdmin={true} />
-        </CardContent>
-      </Card>
 
       {/* Preview foto */}
       <Dialog open={!!previewFoto} onOpenChange={() => setPreviewFoto(null)}>
