@@ -286,6 +286,35 @@ export type Database = {
         }
         Relationships: []
       }
+      socio_app_state: {
+        Row: {
+          socio_id: string
+          tour_completo: boolean
+          ultima_atualizacao_vista_em: string | null
+          updated_at: string
+        }
+        Insert: {
+          socio_id: string
+          tour_completo?: boolean
+          ultima_atualizacao_vista_em?: string | null
+          updated_at?: string
+        }
+        Update: {
+          socio_id?: string
+          tour_completo?: boolean
+          ultima_atualizacao_vista_em?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "socio_app_state_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: true
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       socios: {
         Row: {
           bairro: string

@@ -2,10 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useFranqueado } from "@/hooks/use-franqueado";
+import { useSocioAppState } from "@/hooks/use-socio-app-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UpdatesCard } from "@/components/onboarding/UpdatesCard";
+import { getUpdatesNaoVistas } from "@/lib/sistema-updates";
 import { FileText, Download, Eye, Building2 } from "lucide-react";
 
 const TIPO_LABEL: Record<string, string> = {
@@ -34,6 +37,10 @@ export const Route = createFileRoute("/app/")({
 function MinhaUnidade() {
   const { loading, socio, unidade, unidadeId } = useFranqueado();
   const [docs, setDocs] = useState<Documento[]>([]);
+  const { ultimaAtualizacaoVistaEm, markAtualizacoesVistas } = useSocioAppState(
+    socio?.id ?? null,
+  );
+  const novidades = getUpdatesNaoVistas(ultimaAtualizacaoVistaEm);
 
   useEffect(() => {
     if (!unidadeId) return;
@@ -79,6 +86,8 @@ function MinhaUnidade() {
           Dados cadastrais e documentos da sua unidade Lavoura.
         </p>
       </div>
+
+      <UpdatesCard updates={novidades} onDismiss={markAtualizacoesVistas} />
 
       <Card>
         <CardHeader className="flex flex-row items-center gap-2">
