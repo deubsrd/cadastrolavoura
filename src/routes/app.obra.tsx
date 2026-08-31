@@ -60,7 +60,7 @@ function Obra() {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    if (!unidadeId) return;
+    if (!unidadeId) { setLoading(false); return; }
     setLoading(true);
     const [{ data: checklist }, { data: docs }] = await Promise.all([
       supabase

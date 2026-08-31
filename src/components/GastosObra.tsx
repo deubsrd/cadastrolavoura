@@ -43,6 +43,7 @@ export function GastosObra({ unidadeId, isAdmin = false }: Props) {
   const debounceRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   const load = useCallback(async () => {
+    if (!unidadeId || unidadeId === "") { setLoading(false); return; }
     setLoading(true);
     const { data, error } = await supabase
       .from("obra_gastos")
@@ -88,6 +89,7 @@ export function GastosObra({ unidadeId, isAdmin = false }: Props) {
   };
 
   const addItem = async () => {
+    if (!unidadeId || unidadeId === "") return;
     if (!novoItem.categoria.trim() || !novoItem.descricao.trim()) return toast.error("Informe categoria e descrição.");
     setAdicionando(true);
     const ordem = gastos.filter((g) => g.categoria === novoItem.categoria.trim()).length + 1;
