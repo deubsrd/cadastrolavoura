@@ -100,62 +100,14 @@ async function gerarPreContrato(dados: {
   testemunha2_nome: string;
   testemunha2_cpf: string;
 }) {
-  // Usa a API do Claude para revisar/confirmar os dados e gerar o texto final de confirmação
-  const prompt = `Você é um assistente jurídico da Lavoura Lavanderia Franchise Ltda. Confirme os dados abaixo que serão usados no Pré-Contrato de Franquia e retorne APENAS um JSON válido com os dados formatados corretamente (nomes em maiúsculas, CPF no formato 000.000.000-00, datas por extenso quando necessário). Não adicione nenhum texto além do JSON.
-
-Dados informados:
-- Nome do candidato: ${dados.candidato_nome}
-- RG: ${dados.candidato_rg}
-- CPF: ${dados.candidato_cpf}
-- Endereço: ${dados.candidato_endereco}
-- Data recebimento COF: ${dados.data_recebimento_cof}
-- Área pretendida: ${dados.area_ponto}
-- Modalidade: ${dados.modalidade}
-- Dados bancários: ${dados.dados_bancarios}
-- Outras condições: ${dados.outras_condicoes}
-- Data de assinatura: ${dados.data_assinatura_dia} de ${dados.data_assinatura_mes} de ${dados.data_assinatura_ano}
-- Testemunha 1: ${dados.testemunha1_nome} - CPF: ${dados.testemunha1_cpf}
-- Testemunha 2: ${dados.testemunha2_nome} - CPF: ${dados.testemunha2_cpf}
-
-Retorne exatamente este JSON com os valores corrigidos/formatados:
-{
-  "candidato_nome": "",
-  "candidato_rg": "",
-  "candidato_cpf": "",
-  "candidato_endereco": "",
-  "data_recebimento_cof": "",
-  "area_ponto": "",
-  "modalidade": "",
-  "dados_bancarios": "",
-  "outras_condicoes": "",
-  "data_assinatura_dia": "",
-  "data_assinatura_mes": "",
-  "data_assinatura_ano": "",
-  "testemunha1_nome": "",
-  "testemunha1_cpf": "",
-  "testemunha2_nome": "",
-  "testemunha2_cpf": ""
-}`;
-
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1000,
-      messages: [{ role: "user", content: prompt }],
-    }),
+  // Chama a Edge Function que faz a chamada server-side para a API do Claude
+  const { data, error } = await supabase.functions.invoke("gerar-precontrato", {
+    body: dados,
   });
 
-  const result = await response.json();
-  const text = result.content?.[0]?.text ?? "";
-  let dadosFormatados = dados;
-  try {
-    const clean = text.replace(/```json|```/g, "").trim();
-    dadosFormatados = { ...dados, ...JSON.parse(clean) };
-  } catch {
-    // usa dados originais se falhar o parse
-  }
+  if (error) throw new Error(error.message);
+
+  const dadosFormatados = data?.dados ?? dados;
 
   // Gera o HTML do documento para download como .html (abre no Word/LibreOffice)
   const d = dadosFormatados;
