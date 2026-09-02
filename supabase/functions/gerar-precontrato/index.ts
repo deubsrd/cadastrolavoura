@@ -143,7 +143,7 @@ function gerarDocx(d: Record<string, string>): Promise<Uint8Array> {
       margins: { top: 120, bottom: 120, left: 120, right: 120 },
       children: [new Paragraph({ children: [
         new TextRun({ text: "LAVOURA LAVANDERIA FRANCHISE LTDA.", bold: true, size: 20, font: FONT }),
-        new TextRun({ text: ", pessoa jurídica de direito privado, com sede e foro em Boa Vista/RR, inscrita no CNPJ sob o nº 63.586.665/0001-49, representada conforme seu Contrato Social, doravante simplesmente denominada "FRANQUEADORA";", size: 20, font: FONT }),
+        new TextRun({ text: ', pessoa jurídica de direito privado, com sede e foro em Boa Vista/RR, inscrita no CNPJ sob o nº 63.586.665/0001-49, representada conforme seu Contrato Social, doravante simplesmente denominada "FRANQUEADORA";', size: 20, font: FONT }),
       ]})],
     })]}),
     new TableRow({ children: [new TableCell({
