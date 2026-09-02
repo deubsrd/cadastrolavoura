@@ -24,6 +24,7 @@ import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
 import { Route as AdminObraRouteImport } from './routes/admin.obra'
 import { Route as AdminJornadaRouteImport } from './routes/admin.jornada'
 import { Route as AdminDuvidasRouteImport } from './routes/admin.duvidas'
+import { Route as AdminDocumentosRouteImport } from './routes/admin.documentos'
 
 const ObrigadoRoute = ObrigadoRouteImport.update({
   id: '/obrigado',
@@ -100,6 +101,11 @@ const AdminDuvidasRoute = AdminDuvidasRouteImport.update({
   path: '/duvidas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDocumentosRoute = AdminDocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/documentos': typeof AdminDocumentosRoute
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/documentos': typeof AdminDocumentosRoute
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/documentos': typeof AdminDocumentosRoute
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/obrigado'
+    | '/admin/documentos'
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cadastro'
     | '/obrigado'
+    | '/admin/documentos'
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
@@ -191,6 +202,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/obrigado'
+    | '/admin/documentos'
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
@@ -318,10 +330,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDuvidasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/documentos': {
+      id: '/admin/documentos'
+      path: '/documentos'
+      fullPath: '/admin/documentos'
+      preLoaderRoute: typeof AdminDocumentosRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminDocumentosRoute: typeof AdminDocumentosRoute
   AdminDuvidasRoute: typeof AdminDuvidasRoute
   AdminJornadaRoute: typeof AdminJornadaRoute
   AdminObraRoute: typeof AdminObraRoute
@@ -330,6 +350,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminDocumentosRoute: AdminDocumentosRoute,
   AdminDuvidasRoute: AdminDuvidasRoute,
   AdminJornadaRoute: AdminJornadaRoute,
   AdminObraRoute: AdminObraRoute,
