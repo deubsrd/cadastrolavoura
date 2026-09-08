@@ -7,7 +7,7 @@
 // Sem imports de ../_shared — cada function é autocontida.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import satori from "npm:satori@0.10.13";
-import { Resvg } from "npm:@resvg/resvg-js@2";
+import { render as renderSvgToPng } from "https://deno.land/x/resvg_wasm/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -196,8 +196,7 @@ Deno.serve(async (req) => {
       },
     );
 
-    const resvg = new Resvg(svg, { fitTo: { mode: "width", value: WIDTH } });
-    const pngBuffer = resvg.render().asPng();
+    const pngBuffer = await renderSvgToPng(svg);
 
     const path = `${socioId}/${post_id}.png`;
     const { error: uploadError } = await service.storage
