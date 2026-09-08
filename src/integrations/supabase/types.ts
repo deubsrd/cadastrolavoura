@@ -14,6 +14,73 @@ export type Database = {
   }
   public: {
     Tables: {
+      canva_connections: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string
+          refresh_token: string
+          scope: string | null
+          socio_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          expires_at: string
+          refresh_token: string
+          scope?: string | null
+          socio_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string
+          refresh_token?: string
+          scope?: string | null
+          socio_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canva_connections_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: true
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      canva_oauth_state: {
+        Row: {
+          code_verifier: string
+          created_at: string
+          socio_id: string
+          state: string
+        }
+        Insert: {
+          code_verifier: string
+          created_at?: string
+          socio_id: string
+          state: string
+        }
+        Update: {
+          code_verifier?: string
+          created_at?: string
+          socio_id?: string
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "canva_oauth_state_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_conhecimento: {
         Row: {
           created_at: string
@@ -132,6 +199,78 @@ export type Database = {
             columns: ["unidade_id"]
             isOneToOne: false
             referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generated_posts: {
+        Row: {
+          briefing_id: string
+          canva_design_id: string | null
+          canva_edit_url: string | null
+          canva_import_job_id: string | null
+          canva_view_url: string | null
+          caption: string | null
+          created_at: string
+          final_image_url: string | null
+          hashtags: string[] | null
+          headline: string | null
+          id: string
+          image_url: string | null
+          pillar: string | null
+          socio_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          briefing_id: string
+          canva_design_id?: string | null
+          canva_edit_url?: string | null
+          canva_import_job_id?: string | null
+          canva_view_url?: string | null
+          caption?: string | null
+          created_at?: string
+          final_image_url?: string | null
+          hashtags?: string[] | null
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          pillar?: string | null
+          socio_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          briefing_id?: string
+          canva_design_id?: string | null
+          canva_edit_url?: string | null
+          canva_import_job_id?: string | null
+          canva_view_url?: string | null
+          caption?: string | null
+          created_at?: string
+          final_image_url?: string | null
+          hashtags?: string[] | null
+          headline?: string | null
+          id?: string
+          image_url?: string | null
+          pillar?: string | null
+          socio_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_posts_briefing_id_fkey"
+            columns: ["briefing_id"]
+            isOneToOne: false
+            referencedRelation: "post_briefings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generated_posts_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
             referencedColumns: ["id"]
           },
         ]
@@ -357,6 +496,82 @@ export type Database = {
           quantidade_sugerida?: string | null
         }
         Relationships: []
+      }
+      post_briefings: {
+        Row: {
+          briefing_text: string
+          created_at: string
+          id: string
+          photo_url: string | null
+          pillar: string | null
+          socio_id: string
+          status: string
+        }
+        Insert: {
+          briefing_text: string
+          created_at?: string
+          id?: string
+          photo_url?: string | null
+          pillar?: string | null
+          socio_id: string
+          status?: string
+        }
+        Update: {
+          briefing_text?: string
+          created_at?: string
+          id?: string
+          photo_url?: string | null
+          pillar?: string | null
+          socio_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_briefings_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_caption_versions: {
+        Row: {
+          caption: string
+          created_at: string
+          hashtags: string[] | null
+          headline: string | null
+          id: string
+          post_id: string
+          version: number
+        }
+        Insert: {
+          caption: string
+          created_at?: string
+          hashtags?: string[] | null
+          headline?: string | null
+          id?: string
+          post_id: string
+          version: number
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          hashtags?: string[] | null
+          headline?: string | null
+          id?: string
+          post_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_caption_versions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "generated_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       socio_app_state: {
         Row: {
