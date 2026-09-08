@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Wallet, LifeBuoy, HardHat, TrendingUp, LogOut } from "lucide-react";
+import { Building2, Wallet, LifeBuoy, HardHat, TrendingUp, LogOut, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lavouraLogo from "@/assets/lavoura-logo.png";
 import { useFranqueado } from "@/hooks/use-franqueado";
@@ -16,6 +16,7 @@ const NAV_TOUR_TARGET: Record<string, string> = {
   "/app/central": "nav-central",
   "/app/obra": "nav-obra",
   "/app/progresso": "nav-progresso",
+  "/app/marketing": "nav-marketing",
 };
 
 export const Route = createFileRoute("/app")({
@@ -108,6 +109,7 @@ function AppLayout() {
           {navItem("/app/central", "Central de Suporte", LifeBuoy)}
           {navItem("/app/obra", "Obra", HardHat)}
           {navItem("/app/progresso", "Progresso", TrendingUp)}
+          {navItem("/app/marketing", "Marketing", Megaphone)}
         </nav>
         <Button
           variant="ghost"
@@ -160,6 +162,13 @@ function AppLayout() {
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Progresso
+          </Link>
+          <Link
+            to="/app/marketing"
+            data-tour="nav-marketing"
+            className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            Marketing
           </Link>
         </nav>
         <main className="flex-1 overflow-auto p-4 sm:p-6">
