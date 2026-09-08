@@ -8,6 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Sparkles, Wand2, ImageIcon, ExternalLink, Download, Link2 } from "lucide-react";
 
+function sanitizeFileName(name: string): string {
+  const semAcentos = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return semAcentos.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
 export const Route = createFileRoute("/app/marketing")({
   head: () => ({ meta: [{ title: "Marketing — Sistema Lavoura" }] }),
   component: MarketingPage,
@@ -55,7 +60,7 @@ function MarketingPage() {
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Não autenticado.");
 
-    const path = `${user.id}/${Date.now()}-${photoFile.name}`;
+    const path = `${user.id}/${Date.now()}-${sanitizeFileName(photoFile.name)}`;
     const { error: uploadError } = await supabase.storage
       .from("marketing-posts")
       .upload(path, photoFile, { upsert: true });
