@@ -18,6 +18,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppProgressoRouteImport } from './routes/app.progresso'
 import { Route as AppObraRouteImport } from './routes/app.obra'
+import { Route as AppMarketingRouteImport } from './routes/app.marketing'
 import { Route as AppFinanceiroRouteImport } from './routes/app.financeiro'
 import { Route as AppCentralRouteImport } from './routes/app.central'
 import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
@@ -71,6 +72,11 @@ const AppObraRoute = AppObraRouteImport.update({
   path: '/obra',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMarketingRoute = AppMarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppFinanceiroRoute = AppFinanceiroRouteImport.update({
   id: '/financeiro',
   path: '/financeiro',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/central': typeof AppCentralRoute
   '/app/financeiro': typeof AppFinanceiroRoute
+  '/app/marketing': typeof AppMarketingRoute
   '/app/obra': typeof AppObraRoute
   '/app/progresso': typeof AppProgressoRoute
   '/admin/': typeof AdminIndexRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/central': typeof AppCentralRoute
   '/app/financeiro': typeof AppFinanceiroRoute
+  '/app/marketing': typeof AppMarketingRoute
   '/app/obra': typeof AppObraRoute
   '/app/progresso': typeof AppProgressoRoute
   '/admin': typeof AdminIndexRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/central': typeof AppCentralRoute
   '/app/financeiro': typeof AppFinanceiroRoute
+  '/app/marketing': typeof AppMarketingRoute
   '/app/obra': typeof AppObraRoute
   '/app/progresso': typeof AppProgressoRoute
   '/admin/': typeof AdminIndexRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/admin/unidades'
     | '/app/central'
     | '/app/financeiro'
+    | '/app/marketing'
     | '/app/obra'
     | '/app/progresso'
     | '/admin/'
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/admin/unidades'
     | '/app/central'
     | '/app/financeiro'
+    | '/app/marketing'
     | '/app/obra'
     | '/app/progresso'
     | '/admin'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/admin/unidades'
     | '/app/central'
     | '/app/financeiro'
+    | '/app/marketing'
     | '/app/obra'
     | '/app/progresso'
     | '/admin/'
@@ -288,6 +300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppObraRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/marketing': {
+      id: '/app/marketing'
+      path: '/marketing'
+      fullPath: '/app/marketing'
+      preLoaderRoute: typeof AppMarketingRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/financeiro': {
       id: '/app/financeiro'
       path: '/financeiro'
@@ -363,6 +382,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface AppRouteChildren {
   AppCentralRoute: typeof AppCentralRoute
   AppFinanceiroRoute: typeof AppFinanceiroRoute
+  AppMarketingRoute: typeof AppMarketingRoute
   AppObraRoute: typeof AppObraRoute
   AppProgressoRoute: typeof AppProgressoRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -371,6 +391,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppCentralRoute: AppCentralRoute,
   AppFinanceiroRoute: AppFinanceiroRoute,
+  AppMarketingRoute: AppMarketingRoute,
   AppObraRoute: AppObraRoute,
   AppProgressoRoute: AppProgressoRoute,
   AppIndexRoute: AppIndexRoute,

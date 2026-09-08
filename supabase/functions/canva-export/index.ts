@@ -66,14 +66,17 @@ Deno.serve(async (req) => {
       .upload(path, pngBuffer, { contentType: "image/png", upsert: true });
     if (uploadError) throw uploadError;
 
-    const { data: publicUrl } = service.storage.from("marketing-posts").getPublicUrl(path);
+    const { data: signed, error: signedError } = await service.storage
+      .from("marketing-posts")
+      .createSignedUrl(path, 60 * 60 * 24 * 7);
+    if (signedError || !signed) throw signedError ?? new Error("Falha ao assinar a URL do PNG final.");
 
     await service
       .from("generated_posts")
-      .update({ final_image_url: publicUrl.publicUrl, status: "approved" })
+      .update({ final_image_url: signed.signedUrl, status: "approved" })
       .eq("id", post_id);
 
-    return json({ post_id, final_image_url: publicUrl.publicUrl });
+    return json({ post_id, final_image_url: signed.signedUrl });
   } catch (err) {
     console.error(err);
     return json({ error: err instanceof Error ? err.message : "Erro inesperado." }, 500);

@@ -165,14 +165,19 @@ Deno.serve(async (req) => {
       .upload(path, pngBuffer, { contentType: "image/png", upsert: true });
     if (uploadError) throw uploadError;
 
-    const { data: publicUrl } = service.storage.from("marketing-posts").getPublicUrl(path);
+    // Bucket privado: usamos URL assinada de longa duração (7 dias), que o
+    // navegador do franqueado e o Canva conseguem baixar.
+    const { data: signed, error: signedError } = await service.storage
+      .from("marketing-posts")
+      .createSignedUrl(path, 60 * 60 * 24 * 7);
+    if (signedError || !signed) throw signedError ?? new Error("Falha ao assinar a URL da arte.");
 
     await service
       .from("generated_posts")
-      .update({ image_url: publicUrl.publicUrl, status: "draft" })
+      .update({ image_url: signed.signedUrl, status: "draft" })
       .eq("id", post_id);
 
-    return json({ post_id, image_url: publicUrl.publicUrl });
+    return json({ post_id, image_url: signed.signedUrl });
   } catch (err) {
     console.error(err);
     return json({ error: err instanceof Error ? err.message : "Erro inesperado." }, 500);
