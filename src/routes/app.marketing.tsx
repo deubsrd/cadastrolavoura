@@ -61,8 +61,11 @@ function MarketingPage() {
       .upload(path, photoFile, { upsert: true });
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage.from("marketing-posts").getPublicUrl(path);
-    return data.publicUrl;
+    const { data, error: signError } = await supabase.storage
+      .from("marketing-posts")
+      .createSignedUrl(path, 60 * 60 * 24 * 7);
+    if (signError || !data) throw signError ?? new Error("Falha ao preparar a foto.");
+    return data.signedUrl;
   }
 
   async function handleGerar() {
