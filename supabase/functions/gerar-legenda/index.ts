@@ -3,8 +3,53 @@
 // Cria (ou atualiza) o briefing, chama a Claude API com o prompt de marca
 // fixo, grava o post gerado e uma nova versão de legenda (permite
 // "Refinar legenda" mantendo histórico).
-import { corsHeaders, json } from "../_shared/cors.ts";
-import { getSocioIdFromRequest, serviceClient } from "../_shared/canva.ts";
+//
+// Sem imports de ../_shared — cada function é autocontida (mesmo padrão de
+// chat-duvidas/gerar-precontrato/convidar-socio já usado neste repo).
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+};
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function serviceClient() {
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+}
+
+async function getSocioIdFromRequest(req: Request): Promise<string> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) throw new Error("Não autenticado.");
+
+  const userClient = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!,
+    { global: { headers: { Authorization: authHeader } } },
+  );
+  const { data: userData, error: userError } = await userClient.auth.getUser();
+  if (userError || !userData.user) throw new Error("Sessão inválida.");
+
+  const service = serviceClient();
+  const { data: socio, error: socioError } = await service
+    .from("socios")
+    .select("id")
+    .eq("user_id", userData.user.id)
+    .maybeSingle();
+  if (socioError || !socio) throw new Error("Usuário sem sócio vinculado.");
+
+  return socio.id as string;
+}
 
 const BRAND_SYSTEM_PROMPT = `Você escreve legendas de Instagram para a Lavoura,
 uma rede de franquias de lavanderia autosserviço no Brasil. Nunca use o termo
@@ -97,7 +142,6 @@ Deno.serve(async (req) => {
 
     let currentPostId = post_id as string | undefined;
     if (currentPostId) {
-      // Garante que o post pertence a este sócio antes de atualizar
       const { data: existing, error: existingError } = await service
         .from("generated_posts")
         .select("socio_id")

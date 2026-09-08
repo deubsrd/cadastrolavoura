@@ -3,7 +3,24 @@
 // Sem verify_jwt (ver supabase/config.toml) — quem chama é o navegador do
 // franqueado sendo redirecionado pelo Canva, não um request autenticado
 // do nosso frontend.
-import { basicAuthHeader, CANVA_TOKEN_URL, serviceClient } from "../_shared/canva.ts";
+//
+// Sem imports de ../_shared — cada function é autocontida.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const CANVA_TOKEN_URL = "https://api.canva.com/rest/v1/oauth/token";
+
+function basicAuthHeader() {
+  const id = Deno.env.get("CANVA_CLIENT_ID")!;
+  const secret = Deno.env.get("CANVA_CLIENT_SECRET")!;
+  return "Basic " + btoa(`${id}:${secret}`);
+}
+
+function serviceClient() {
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+}
 
 Deno.serve(async (req) => {
   try {

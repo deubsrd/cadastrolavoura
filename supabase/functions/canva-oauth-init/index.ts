@@ -3,8 +3,53 @@
 // o franqueado clica em "Conectar Canva". Gera o par PKCE, guarda o
 // code_verifier atrelado a um `state` de uso único, e devolve a URL de
 // autorização do Canva pro frontend redirecionar o navegador.
-import { corsHeaders, json } from "../_shared/cors.ts";
-import { getSocioIdFromRequest, serviceClient } from "../_shared/canva.ts";
+//
+// Sem imports de ../_shared — cada function é autocontida (mesmo padrão de
+// chat-duvidas/gerar-precontrato/convidar-socio já usado neste repo).
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+};
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function serviceClient() {
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+}
+
+async function getSocioIdFromRequest(req: Request): Promise<string> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) throw new Error("Não autenticado.");
+
+  const userClient = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!,
+    { global: { headers: { Authorization: authHeader } } },
+  );
+  const { data: userData, error: userError } = await userClient.auth.getUser();
+  if (userError || !userData.user) throw new Error("Sessão inválida.");
+
+  const service = serviceClient();
+  const { data: socio, error: socioError } = await service
+    .from("socios")
+    .select("id")
+    .eq("user_id", userData.user.id)
+    .maybeSingle();
+  if (socioError || !socio) throw new Error("Usuário sem sócio vinculado.");
+
+  return socio.id as string;
+}
 
 const CANVA_AUTHORIZE_URL = "https://www.canva.com/api/oauth/authorize";
 const SCOPES = [

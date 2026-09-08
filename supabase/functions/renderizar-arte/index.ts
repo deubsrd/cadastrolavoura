@@ -3,10 +3,54 @@
 // Monta o template do pilar (Satori -> SVG), converte pra PNG (resvg) e
 // sobe pro bucket marketing-posts. Templates simples e legíveis — ajuste
 // livremente o layout depois de ver o primeiro resultado real.
+//
+// Sem imports de ../_shared — cada function é autocontida.
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import satori from "npm:satori@0.10.13";
 import { Resvg } from "npm:@resvg/resvg-js@2";
-import { corsHeaders, json } from "../_shared/cors.ts";
-import { getSocioIdFromRequest, serviceClient } from "../_shared/canva.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+};
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function serviceClient() {
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+}
+
+async function getSocioIdFromRequest(req: Request): Promise<string> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) throw new Error("Não autenticado.");
+
+  const userClient = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!,
+    { global: { headers: { Authorization: authHeader } } },
+  );
+  const { data: userData, error: userError } = await userClient.auth.getUser();
+  if (userError || !userData.user) throw new Error("Sessão inválida.");
+
+  const service = serviceClient();
+  const { data: socio, error: socioError } = await service
+    .from("socios")
+    .select("id")
+    .eq("user_id", userData.user.id)
+    .maybeSingle();
+  if (socioError || !socio) throw new Error("Usuário sem sócio vinculado.");
+
+  return socio.id as string;
+}
 
 const WIDTH = 1080;
 const HEIGHT = 1350;
@@ -25,8 +69,6 @@ async function loadFont(url: string) {
   return await res.arrayBuffer();
 }
 
-// Árvore de elementos no formato que o Satori espera (mesma shape de
-// React.createElement, sem depender de React/JSX no runtime da function).
 function buildTemplate(opts: { pillar: string; headline: string; photoDataUrl: string | null }) {
   const badgeColor = opts.pillar === "comprar" ? BRAND.orange : BRAND.green;
 
@@ -133,8 +175,6 @@ Deno.serve(async (req) => {
       photoDataUrl = `data:${contentType};base64,${base64}`;
     }
 
-    // Fontes via Google Fonts — troque por assets embutidos se quiser evitar
-    // essa dependência externa ou ganhar velocidade de render.
     const [dmSans, playfair] = await Promise.all([
       loadFont(
         "https://raw.githubusercontent.com/google/fonts/main/ofl/dmsans/DMSans%5Bopsz%2Cwght%5D.ttf",
@@ -165,19 +205,17 @@ Deno.serve(async (req) => {
       .upload(path, pngBuffer, { contentType: "image/png", upsert: true });
     if (uploadError) throw uploadError;
 
-    // Bucket privado: usamos URL assinada de longa duração (7 dias), que o
-    // navegador do franqueado e o Canva conseguem baixar.
-    const { data: signed, error: signedError } = await service.storage
+    const { data: signedUrlData, error: signedUrlError } = await service.storage
       .from("marketing-posts")
       .createSignedUrl(path, 60 * 60 * 24 * 7);
-    if (signedError || !signed) throw signedError ?? new Error("Falha ao assinar a URL da arte.");
+    if (signedUrlError) throw signedUrlError;
 
     await service
       .from("generated_posts")
-      .update({ image_url: signed.signedUrl, status: "draft" })
+      .update({ image_url: signedUrlData.signedUrl, status: "draft" })
       .eq("id", post_id);
 
-    return json({ post_id, image_url: signed.signedUrl });
+    return json({ post_id, image_url: signedUrlData.signedUrl });
   } catch (err) {
     console.error(err);
     return json({ error: err instanceof Error ? err.message : "Erro inesperado." }, 500);
