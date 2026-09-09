@@ -59,6 +59,11 @@ function Obra() {
   const [pranchas, setPranchas] = useState<Prancha[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Trim + valida esquema http(s) — um valor em branco/só espaço ou mal
+  // formado no cadastro da unidade não deve virar um botão que abre aba vazia.
+  const projeto3dUrl = unidade?.link_projeto_3d?.trim();
+  const projeto3dValido = !!projeto3dUrl && /^https?:\/\//i.test(projeto3dUrl);
+
   const load = async () => {
     if (!unidadeId) { setLoading(false); return; }
     setLoading(true);
@@ -153,10 +158,15 @@ function Obra() {
               ))}
             </div>
           )}
-          {unidade?.link_projeto_3d && (
+          {unidade?.link_projeto_3d && !projeto3dValido && (
+            <p className="mt-4 pt-4 border-t border-border text-sm text-muted-foreground">
+              O projeto 3D ainda está em elaboração pela franqueadora.
+            </p>
+          )}
+          {projeto3dValido && (
             <div className="mt-4 pt-4 border-t border-border">
               <a
-                href={unidade.link_projeto_3d}
+                href={projeto3dUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-6 py-4 text-base font-semibold text-primary transition-colors hover:bg-primary/10"

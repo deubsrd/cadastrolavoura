@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Building2, Wallet, LifeBuoy, HardHat, TrendingUp, LogOut, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lavouraLogo from "@/assets/lavoura-logo.png";
-import { useFranqueado } from "@/hooks/use-franqueado";
+import { useFranqueado, FranqueadoProvider } from "@/hooks/use-franqueado";
 import { useSocioAppState } from "@/hooks/use-socio-app-state";
 import { GuidedTour } from "@/components/onboarding/GuidedTour";
 import { ONBOARDING_TOUR_STEPS } from "@/lib/onboarding-tour";
@@ -26,7 +26,6 @@ export const Route = createFileRoute("/app")({
 
 function AppLayout() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [status, setStatus] = useState<"checking" | "ready" | "denied">("checking");
 
   useEffect(() => {
@@ -53,13 +52,34 @@ function AppLayout() {
       setStatus("ready");
     };
 
+    // onAuthStateChange já dispara imediatamente com a sessão atual
+    // (evento INITIAL_SESSION) — chamar getSession() de novo aqui disparava
+    // a checagem de user_roles duas vezes a cada carregamento de página.
     const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
       check(session);
     });
-    supabase.auth.getSession().then(({ data }) => check(data.session));
 
     return () => sub.subscription.unsubscribe();
   }, [navigate]);
+
+  if (status !== "ready") {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
+        Carregando...
+      </div>
+    );
+  }
+
+  return (
+    <FranqueadoProvider>
+      <AppLayoutContent />
+    </FranqueadoProvider>
+  );
+}
+
+function AppLayoutContent() {
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const logout = async () => {
     await supabase.auth.signOut();
@@ -70,14 +90,6 @@ function AppLayout() {
   const { loading: appStateLoading, tourCompleto, markTourCompleto } = useSocioAppState(
     socio?.id ?? null,
   );
-
-  if (status !== "ready") {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Carregando...
-      </div>
-    );
-  }
 
   const navItem = (to: string, label: string, Icon: typeof Building2) => {
     const active = location.pathname === to;

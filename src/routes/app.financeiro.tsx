@@ -254,6 +254,11 @@ function Dashboard({ store }: { store: ReturnType<typeof useFinanceiro> }) {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Mostrando os {chartData.length} {chartData.length === 1 ? "mês lançado" : "meses lançados"}.
+              Meses sem um lançamento na aba "Planilha DRE" não aparecem no gráfico — use "Adicionar
+              mês" no seletor acima para incluir o mês atual.
+            </p>
           </CardContent>
         </Card>
 

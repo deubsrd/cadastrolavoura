@@ -130,7 +130,10 @@ function MinhaUnidade() {
         </CardHeader>
         <CardContent>
           {docs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum documento disponível ainda.</p>
+            <p className="text-sm text-muted-foreground">
+              Nenhum documento disponível ainda. Assim que a franqueadora anexar o contrato, a
+              COF ou as plantas da obra, eles aparecem aqui.
+            </p>
           ) : (
             <div className="space-y-2">
               {docs.map((d) => (

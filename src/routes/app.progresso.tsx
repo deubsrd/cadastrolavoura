@@ -5,6 +5,7 @@ import { useFranqueado } from "@/hooks/use-franqueado";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2, Circle, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -59,7 +60,13 @@ function Progresso() {
   })();
 
   if (loadingUnidade || loading) {
-    return <div className="text-sm text-muted-foreground">Carregando...</div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
   }
 
   return (
@@ -97,7 +104,11 @@ function Progresso() {
             const concluidos = subs.filter((s) => isConcluido(s.id)).length;
             const etapaConcluida = concluidos === subs.length && subs.length > 0;
             const etapaAtiva = etapa.numero === etapaAtualNumero;
-            const etapaBloqueada = etapa.numero > etapaAtualNumero;
+            // Uma etapa concluída nunca deve aparecer como "bloqueada"/"Em
+            // breve" — mesmo que uma etapa numericamente anterior ainda
+            // esteja pendente (dado fora de ordem), a própria etapa já
+            // concluída tem prioridade sobre o cálculo de "etapa atual".
+            const etapaBloqueada = !etapaConcluida && etapa.numero > etapaAtualNumero;
             const etapaPct = subs.length > 0 ? Math.round((concluidos / subs.length) * 100) : 0;
 
             return (

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Unidade = {
@@ -20,7 +20,22 @@ export type Socio = {
   unidade_id: string | null;
 };
 
-export function useFranqueado() {
+type FranqueadoState = {
+  loading: boolean;
+  socio: Socio | null;
+  unidade: Unidade | null;
+  unidadeId: string | null;
+  error: string | null;
+  reload: () => Promise<void>;
+};
+
+const FranqueadoContext = createContext<FranqueadoState | null>(null);
+
+// Busca socio + unidade UMA vez por sessão de navegação e compartilha o
+// resultado via contexto — antes, o layout /app e cada página chamavam essa
+// query separadamente, duplicando as consultas a `socios` e `unidades` em
+// toda troca de tela.
+export function FranqueadoProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [socio, setSocio] = useState<Socio | null>(null);
   const [unidade, setUnidade] = useState<Unidade | null>(null);
@@ -69,5 +84,22 @@ export function useFranqueado() {
     load();
   }, [load]);
 
-  return { loading, socio, unidade, unidadeId: socio?.unidade_id ?? null, error, reload: load };
+  const value: FranqueadoState = {
+    loading,
+    socio,
+    unidade,
+    unidadeId: socio?.unidade_id ?? null,
+    error,
+    reload: load,
+  };
+
+  return <FranqueadoContext.Provider value={value}>{children}</FranqueadoContext.Provider>;
+}
+
+export function useFranqueado(): FranqueadoState {
+  const ctx = useContext(FranqueadoContext);
+  if (!ctx) {
+    throw new Error("useFranqueado precisa estar dentro de um FranqueadoProvider (layout /app)");
+  }
+  return ctx;
 }
