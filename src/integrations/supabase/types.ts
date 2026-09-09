@@ -212,10 +212,12 @@ export type Database = {
           canva_view_url: string | null
           caption: string | null
           created_at: string
+          final_image_path: string | null
           final_image_url: string | null
           hashtags: string[] | null
           headline: string | null
           id: string
+          image_path: string | null
           image_url: string | null
           pillar: string | null
           socio_id: string
@@ -230,10 +232,12 @@ export type Database = {
           canva_view_url?: string | null
           caption?: string | null
           created_at?: string
+          final_image_path?: string | null
           final_image_url?: string | null
           hashtags?: string[] | null
           headline?: string | null
           id?: string
+          image_path?: string | null
           image_url?: string | null
           pillar?: string | null
           socio_id: string
@@ -248,10 +252,12 @@ export type Database = {
           canva_view_url?: string | null
           caption?: string | null
           created_at?: string
+          final_image_path?: string | null
           final_image_url?: string | null
           hashtags?: string[] | null
           headline?: string | null
           id?: string
+          image_path?: string | null
           image_url?: string | null
           pillar?: string | null
           socio_id?: string
@@ -363,6 +369,57 @@ export type Database = {
             columns: ["etapa_id"]
             isOneToOne: false
             referencedRelation: "jornada_etapas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_calendario: {
+        Row: {
+          created_at: string
+          id: string
+          mes: string
+          pilar: string
+          post_id: string | null
+          socio_id: string
+          status: string
+          tema: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mes: string
+          pilar: string
+          post_id?: string | null
+          socio_id: string
+          status?: string
+          tema: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mes?: string
+          pilar?: string
+          post_id?: string | null
+          socio_id?: string
+          status?: string
+          tema?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_calendario_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "generated_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_calendario_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
             referencedColumns: ["id"]
           },
         ]
