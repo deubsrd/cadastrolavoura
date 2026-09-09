@@ -79,7 +79,22 @@ type GeneratedPost = {
 
 async function invoke<T>(fn: string, body: Record<string, unknown>): Promise<T> {
   const { data, error } = await supabase.functions.invoke(fn, { body });
-  if (error) throw new Error(error.message ?? "Falha ao chamar a função.");
+  if (error) {
+    // supabase-js só devolve uma mensagem genérica em error.message quando a
+    // function responde um status != 2xx ("Edge Function returned a non-2xx
+    // status code") — a mensagem real que a nossa function mandou fica no
+    // corpo da resposta, acessível via error.context (um objeto Response).
+    const context = (error as { context?: Response }).context;
+    if (context) {
+      try {
+        const body = await context.clone().json();
+        throw new Error(body?.error ?? error.message ?? "Falha ao chamar a função.");
+      } catch {
+        // corpo não era JSON (ou já foi consumido) — cai no fallback abaixo
+      }
+    }
+    throw new Error(error.message ?? "Falha ao chamar a função.");
+  }
   if (data?.error) throw new Error(data.error);
   return data as T;
 }
