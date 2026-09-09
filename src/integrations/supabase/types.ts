@@ -288,6 +288,7 @@ export type Database = {
           nome: string
           numero: number
           ordem: number
+          video_url: string | null
         }
         Insert: {
           descricao?: string | null
@@ -295,6 +296,7 @@ export type Database = {
           nome: string
           numero: number
           ordem?: number
+          video_url?: string | null
         }
         Update: {
           descricao?: string | null
@@ -302,6 +304,7 @@ export type Database = {
           nome?: string
           numero?: number
           ordem?: number
+          video_url?: string | null
         }
         Relationships: []
       }
