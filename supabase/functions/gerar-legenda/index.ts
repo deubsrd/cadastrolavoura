@@ -76,6 +76,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
+  let currentBriefingId: string | undefined;
   try {
     const socioId = await getSocioIdFromRequest(req);
     const { briefing_text, photo_url, pillar, briefing_id, post_id } = await req.json();
@@ -83,7 +84,7 @@ Deno.serve(async (req) => {
 
     const service = serviceClient();
 
-    let currentBriefingId = briefing_id as string | undefined;
+    currentBriefingId = briefing_id as string | undefined;
     if (!currentBriefingId) {
       const { data: briefing, error: briefingError } = await service
         .from("post_briefings")
@@ -100,7 +101,12 @@ Deno.serve(async (req) => {
       currentBriefingId = briefing.id;
     }
 
-    const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
+    const anthropicController = new AbortController();
+    const anthropicTimeout = setTimeout(() => anthropicController.abort(), 30000);
+    let anthropicRes: Response;
+    try {
+      anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
+        signal: anthropicController.signal,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -120,7 +126,10 @@ Deno.serve(async (req) => {
           },
         ],
       }),
-    });
+      });
+    } finally {
+      clearTimeout(anthropicTimeout);
+    }
     if (!anthropicRes.ok) {
       throw new Error(`Claude API falhou: ${anthropicRes.status} ${await anthropicRes.text()}`);
     }
@@ -199,6 +208,13 @@ Deno.serve(async (req) => {
     return json({ briefing_id: currentBriefingId, post_id: currentPostId, ...parsed });
   } catch (err) {
     console.error(err);
+    if (currentBriefingId) {
+      try {
+        await serviceClient().from("post_briefings").update({ status: "error" }).eq("id", currentBriefingId);
+      } catch (updateErr) {
+        console.error("Falha ao marcar briefing como error:", updateErr);
+      }
+    }
     return json({ error: err instanceof Error ? err.message : "Erro inesperado." }, 500);
   }
 });

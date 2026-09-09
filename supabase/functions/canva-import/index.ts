@@ -114,9 +114,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
+  let post_id: string | undefined;
   try {
     const socioId = await getSocioIdFromRequest(req);
-    const { post_id } = await req.json();
+    ({ post_id } = await req.json());
     if (!post_id) return json({ error: "post_id é obrigatório" }, 400);
 
     const service = serviceClient();
@@ -183,6 +184,13 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error(err);
+    if (post_id) {
+      try {
+        await serviceClient().from("generated_posts").update({ status: "error" }).eq("id", post_id);
+      } catch (updateErr) {
+        console.error("Falha ao marcar post como error:", updateErr);
+      }
+    }
     return json({ error: err instanceof Error ? err.message : "Erro inesperado." }, 500);
   }
 });

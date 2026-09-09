@@ -64,9 +64,18 @@ const PILLAR_LABEL: Record<string, string> = {
   comprar: "COMPRAR",
 };
 
-async function loadFont(url: string) {
-  const res = await fetch(url);
-  return await res.arrayBuffer();
+async function loadFont(url: string): Promise<ArrayBuffer> {
+  // Timeout explícito — sem isso, uma fonte externa lenta/travada deixava a
+  // function presa pra sempre em status "rendering", sem nunca cair no catch.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) throw new Error(`Falha ao baixar fonte (${res.status}): ${url}`);
+    return await res.arrayBuffer();
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function buildTemplate(opts: { pillar: string; headline: string; photoDataUrl: string | null }) {
@@ -148,9 +157,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
+  let post_id: string | undefined;
   try {
     const socioId = await getSocioIdFromRequest(req);
-    const { post_id } = await req.json();
+    ({ post_id } = await req.json());
     if (!post_id) return json({ error: "post_id é obrigatório" }, 400);
 
     const service = serviceClient();
@@ -168,19 +178,25 @@ Deno.serve(async (req) => {
     let photoDataUrl: string | null = null;
     const photoUrl = (post as { post_briefings?: { photo_url?: string } }).post_briefings?.photo_url;
     if (photoUrl) {
-      const photoRes = await fetch(photoUrl);
-      const photoBuf = await photoRes.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(photoBuf)));
-      const contentType = photoRes.headers.get("content-type") ?? "image/jpeg";
-      photoDataUrl = `data:${contentType};base64,${base64}`;
+      const photoController = new AbortController();
+      const photoTimeout = setTimeout(() => photoController.abort(), 12000);
+      try {
+        const photoRes = await fetch(photoUrl, { signal: photoController.signal });
+        const photoBuf = await photoRes.arrayBuffer();
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(photoBuf)));
+        const contentType = photoRes.headers.get("content-type") ?? "image/jpeg";
+        photoDataUrl = `data:${contentType};base64,${base64}`;
+      } finally {
+        clearTimeout(photoTimeout);
+      }
     }
 
     const [dmSans, playfair] = await Promise.all([
       loadFont(
-        "https://raw.githubusercontent.com/google/fonts/main/ofl/dmsans/DMSans%5Bopsz%2Cwght%5D.ttf",
+        "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/dmsans/DMSans%5Bopsz%2Cwght%5D.ttf",
       ),
       loadFont(
-        "https://raw.githubusercontent.com/google/fonts/main/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf",
+        "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/playfairdisplay/PlayfairDisplay%5Bwght%5D.ttf",
       ),
     ]);
 
@@ -217,6 +233,15 @@ Deno.serve(async (req) => {
     return json({ post_id, image_url: signedUrlData.signedUrl });
   } catch (err) {
     console.error(err);
+    // Sem isso, uma falha depois do status virar "rendering" deixava o post
+    // preso nesse estado pra sempre, sem nenhum sinal visível do erro real.
+    if (post_id) {
+      try {
+        await serviceClient().from("generated_posts").update({ status: "error" }).eq("id", post_id);
+      } catch (updateErr) {
+        console.error("Falha ao marcar post como error:", updateErr);
+      }
+    }
     return json({ error: err instanceof Error ? err.message : "Erro inesperado." }, 500);
   }
 });
