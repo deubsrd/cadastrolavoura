@@ -22,9 +22,7 @@ import {
   Sparkles,
   Wand2,
   ImageIcon,
-  ExternalLink,
   Download,
-  Link2,
   CalendarDays,
   History,
   Plus,
@@ -77,8 +75,6 @@ type GeneratedPost = {
   caption: string;
   hashtags: string[];
   image_url?: string;
-  canva_edit_url?: string;
-  final_image_url?: string;
 };
 
 async function invoke<T>(fn: string, body: Record<string, unknown>): Promise<T> {
@@ -166,9 +162,7 @@ function GerarPostTab({
   const [briefing, setBriefing] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [caption, setCaption] = useState("");
-  const [loadingStep, setLoadingStep] = useState<
-    "idle" | "gerando" | "refinando" | "importando" | "exportando"
-  >("idle");
+  const [loadingStep, setLoadingStep] = useState<"idle" | "gerando" | "refinando">("idle");
   const [post, setPost] = useState<GeneratedPost | null>(null);
 
   useEffect(() => {
@@ -240,54 +234,9 @@ function GerarPostTab({
     }
   }
 
-  async function handleAbrirNoCanva() {
-    if (!post) return;
-    setLoadingStep("importando");
-    try {
-      const resultado = await invoke<{ edit_url?: string; status?: string }>("canva-import", {
-        post_id: post.post_id,
-      });
-      if (resultado.edit_url) {
-        window.open(resultado.edit_url, "_blank");
-        setPost({ ...post, canva_edit_url: resultado.edit_url });
-      } else {
-        toast.error(`Import ainda em andamento (status: ${resultado.status}). Tente de novo em instantes.`);
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao abrir no Canva.");
-    } finally {
-      setLoadingStep("idle");
-    }
-  }
-
-  async function handleAprovarEBaixar() {
-    if (!post) return;
-    setLoadingStep("exportando");
-    try {
-      const resultado = await invoke<{ final_image_url?: string; status?: string }>("canva-export", {
-        post_id: post.post_id,
-      });
-      if (resultado.final_image_url) {
-        setPost({ ...post, final_image_url: resultado.final_image_url });
-        window.open(resultado.final_image_url, "_blank");
-        toast.success("Post aprovado! PNG final pronto pra baixar.");
-      } else {
-        toast.error(`Export ainda em andamento (status: ${resultado.status}). Tente de novo em instantes.`);
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao exportar do Canva.");
-    } finally {
-      setLoadingStep("idle");
-    }
-  }
-
-  async function handleConectarCanva() {
-    try {
-      const { authorize_url } = await invoke<{ authorize_url: string }>("canva-oauth-init", {});
-      window.location.href = authorize_url;
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao conectar o Canva.");
-    }
+  function handleBaixarPng() {
+    if (!post?.image_url) return;
+    window.open(post.image_url, "_blank");
   }
 
   function handleTrocarFoto() {
@@ -299,11 +248,8 @@ function GerarPostTab({
     <div className="space-y-4">
       {!post && (
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle className="text-base">Novo post</CardTitle>
-            <Button variant="outline" size="sm" onClick={handleConectarCanva}>
-              <Link2 className="mr-2 h-4 w-4" /> Conectar Canva
-            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
@@ -356,9 +302,9 @@ function GerarPostTab({
             </Badge>
           </CardHeader>
           <CardContent className="space-y-4">
-            {(post.final_image_url ?? post.image_url) ? (
+            {post.image_url ? (
               <img
-                src={post.final_image_url ?? post.image_url}
+                src={post.image_url}
                 alt="Arte gerada"
                 className="w-full rounded-lg border border-border"
               />
@@ -382,21 +328,9 @@ function GerarPostTab({
               <Button variant="outline" size="sm" onClick={handleTrocarFoto} disabled={loadingStep !== "idle"}>
                 Trocar foto
               </Button>
-              <Button variant="outline" size="sm" onClick={handleAbrirNoCanva} disabled={loadingStep !== "idle"}>
-                {loadingStep === "importando" ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                )}
-                Abrir no Canva
-              </Button>
-              <Button size="sm" onClick={handleAprovarEBaixar} disabled={loadingStep !== "idle"}>
-                {loadingStep === "exportando" ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="mr-2 h-4 w-4" />
-                )}
-                Aprovar e baixar PNG
+              <Button size="sm" onClick={handleBaixarPng} disabled={loadingStep !== "idle" || !post.image_url}>
+                <Download className="mr-2 h-4 w-4" />
+                Baixar PNG
               </Button>
             </div>
           </CardContent>
@@ -610,19 +544,13 @@ type HistoricoPost = {
   headline: string | null;
   caption: string | null;
   status: string;
-  canva_edit_url: string | null;
   created_at: string;
   image_url: string | null;
-  final_image_url: string | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
-  draft: "Rascunho",
+  draft: "Pronto",
   rendering: "Renderizando",
-  imported_to_canva: "Importado no Canva",
-  editing: "Editando no Canva",
-  exporting: "Exportando",
-  approved: "Aprovado",
   error: "Erro",
 };
 
@@ -664,9 +592,9 @@ function HistoricoTab() {
       {posts.map((post) => (
         <Card key={post.id}>
           <CardContent className="flex gap-4 p-4">
-            {post.final_image_url ?? post.image_url ? (
+            {post.image_url ? (
               <img
-                src={post.final_image_url ?? post.image_url ?? undefined}
+                src={post.image_url}
                 alt={post.headline ?? "Post"}
                 className="h-20 w-20 shrink-0 rounded-md border border-border object-cover"
               />
@@ -695,14 +623,14 @@ function HistoricoTab() {
               {post.caption && (
                 <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{post.caption}</p>
               )}
-              {post.canva_edit_url && (
+              {post.image_url && (
                 <a
-                  href={post.canva_edit_url}
+                  href={post.image_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                 >
-                  <ExternalLink className="h-3 w-3" /> Abrir no Canva
+                  <Download className="h-3 w-3" /> Baixar PNG
                 </a>
               )}
             </div>

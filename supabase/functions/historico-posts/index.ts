@@ -50,7 +50,7 @@ async function getSocioIdFromRequest(req: Request): Promise<string> {
   return socio.id as string;
 }
 
-const SIGNED_URL_TTL = 60 * 60 * 24 * 7; // 7 dias, igual renderizar-arte/canva-export
+const SIGNED_URL_TTL = 60 * 60 * 24 * 7; // 7 dias, igual renderizar-arte
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -62,9 +62,7 @@ Deno.serve(async (req) => {
 
     const { data: posts, error } = await service
       .from("generated_posts")
-      .select(
-        "id, pillar, headline, caption, status, image_path, final_image_path, canva_edit_url, created_at",
-      )
+      .select("id, pillar, headline, caption, status, image_path, created_at")
       .eq("socio_id", socioId)
       .order("created_at", { ascending: false })
       .limit(30);
@@ -72,20 +70,12 @@ Deno.serve(async (req) => {
 
     const withFreshUrls = await Promise.all(
       (posts ?? []).map(async (post) => {
-        const [imageUrl, finalImageUrl] = await Promise.all([
-          post.image_path
-            ? service.storage
-                .from("marketing-posts")
-                .createSignedUrl(post.image_path, SIGNED_URL_TTL)
-                .then((r) => r.data?.signedUrl ?? null)
-            : null,
-          post.final_image_path
-            ? service.storage
-                .from("marketing-posts")
-                .createSignedUrl(post.final_image_path, SIGNED_URL_TTL)
-                .then((r) => r.data?.signedUrl ?? null)
-            : null,
-        ]);
+        const imageUrl = post.image_path
+          ? await service.storage
+              .from("marketing-posts")
+              .createSignedUrl(post.image_path, SIGNED_URL_TTL)
+              .then((r) => r.data?.signedUrl ?? null)
+          : null;
 
         return {
           id: post.id,
@@ -93,10 +83,8 @@ Deno.serve(async (req) => {
           headline: post.headline,
           caption: post.caption,
           status: post.status,
-          canva_edit_url: post.canva_edit_url,
           created_at: post.created_at,
           image_url: imageUrl,
-          final_image_url: finalImageUrl,
         };
       }),
     );
