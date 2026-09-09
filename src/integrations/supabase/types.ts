@@ -14,73 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      canva_connections: {
-        Row: {
-          access_token: string
-          created_at: string
-          expires_at: string
-          refresh_token: string
-          scope: string | null
-          socio_id: string
-          updated_at: string
-        }
-        Insert: {
-          access_token: string
-          created_at?: string
-          expires_at: string
-          refresh_token: string
-          scope?: string | null
-          socio_id: string
-          updated_at?: string
-        }
-        Update: {
-          access_token?: string
-          created_at?: string
-          expires_at?: string
-          refresh_token?: string
-          scope?: string | null
-          socio_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "canva_connections_socio_id_fkey"
-            columns: ["socio_id"]
-            isOneToOne: true
-            referencedRelation: "socios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      canva_oauth_state: {
-        Row: {
-          code_verifier: string
-          created_at: string
-          socio_id: string
-          state: string
-        }
-        Insert: {
-          code_verifier: string
-          created_at?: string
-          socio_id: string
-          state: string
-        }
-        Update: {
-          code_verifier?: string
-          created_at?: string
-          socio_id?: string
-          state?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "canva_oauth_state_socio_id_fkey"
-            columns: ["socio_id"]
-            isOneToOne: false
-            referencedRelation: "socios"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       chat_conhecimento: {
         Row: {
           created_at: string
@@ -206,14 +139,8 @@ export type Database = {
       generated_posts: {
         Row: {
           briefing_id: string
-          canva_design_id: string | null
-          canva_edit_url: string | null
-          canva_import_job_id: string | null
-          canva_view_url: string | null
           caption: string | null
           created_at: string
-          final_image_path: string | null
-          final_image_url: string | null
           hashtags: string[] | null
           headline: string | null
           id: string
@@ -226,14 +153,8 @@ export type Database = {
         }
         Insert: {
           briefing_id: string
-          canva_design_id?: string | null
-          canva_edit_url?: string | null
-          canva_import_job_id?: string | null
-          canva_view_url?: string | null
           caption?: string | null
           created_at?: string
-          final_image_path?: string | null
-          final_image_url?: string | null
           hashtags?: string[] | null
           headline?: string | null
           id?: string
@@ -246,14 +167,8 @@ export type Database = {
         }
         Update: {
           briefing_id?: string
-          canva_design_id?: string | null
-          canva_edit_url?: string | null
-          canva_import_job_id?: string | null
-          canva_view_url?: string | null
           caption?: string | null
           created_at?: string
-          final_image_path?: string | null
-          final_image_url?: string | null
           hashtags?: string[] | null
           headline?: string | null
           id?: string
