@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Monitor,
   Coffee,
@@ -53,13 +56,9 @@ const trainingItems = [
     href: "/manual-operacoes-lavoura.pdf",
     icon: BookOpen,
   },
-  {
-    title: "Vídeos de Treinamento",
-    description: "Tutoriais em vídeo sobre abertura, fechamento e manutenção das máquinas.",
-    href: "#",
-    icon: PlayCircle,
-  },
 ];
+
+type EtapaVideo = { numero: number; nome: string; video_url: string | null };
 
 const supportItems = [
   {
@@ -133,6 +132,62 @@ function SectionCard({
   );
 }
 
+function VideosTreinamentoCard() {
+  const [etapas, setEtapas] = useState<EtapaVideo[] | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from("jornada_etapas")
+      .select("numero, nome, video_url")
+      .order("numero")
+      .then(({ data }) => setEtapas((data as EtapaVideo[]) ?? []));
+  }, []);
+
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <PlayCircle className="h-5 w-5" />
+        </div>
+        <h3 className="mt-3 text-base font-semibold text-foreground">Vídeos de Treinamento</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Um vídeo curto por etapa da jornada, sobre abertura, fechamento e manutenção das máquinas.
+        </p>
+        <div className="mt-3 space-y-1.5">
+          {etapas === null ? (
+            <Skeleton className="h-16 w-full" />
+          ) : (
+            etapas.map((etapa) => (
+              <div
+                key={etapa.numero}
+                className="flex items-center justify-between rounded-md border border-border px-3 py-2"
+              >
+                <span className="text-sm">
+                  Etapa {etapa.numero} — {etapa.nome}
+                </span>
+                {etapa.video_url ? (
+                  <a
+                    href={etapa.video_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  >
+                    Assistir <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : (
+                  <Badge variant="secondary" className="text-xs uppercase tracking-wide">
+                    Em breve
+                  </Badge>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function Central() {
   return (
     <div className="space-y-8">
@@ -197,6 +252,7 @@ function Central() {
           {trainingItems.map((s) => (
             <SectionCard key={s.title} {...s} />
           ))}
+          <VideosTreinamentoCard />
         </div>
       </section>
     </div>

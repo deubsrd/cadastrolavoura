@@ -211,7 +211,7 @@ Deno.serve(async (req) => {
 
     await service
       .from("generated_posts")
-      .update({ image_url: signedUrlData.signedUrl, status: "draft" })
+      .update({ image_url: signedUrlData.signedUrl, image_path: path, status: "draft" })
       .eq("id", post_id);
 
     return json({ post_id, image_url: signedUrlData.signedUrl });

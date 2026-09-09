@@ -174,7 +174,7 @@ Deno.serve(async (req) => {
 
     await service
       .from("generated_posts")
-      .update({ final_image_url: signedUrlData.signedUrl, status: "approved" })
+      .update({ final_image_url: signedUrlData.signedUrl, final_image_path: path, status: "approved" })
       .eq("id", post_id);
 
     return json({ post_id, final_image_url: signedUrlData.signedUrl });
