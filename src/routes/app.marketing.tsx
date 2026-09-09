@@ -85,15 +85,20 @@ async function invoke<T>(fn: string, body: Record<string, unknown>): Promise<T> 
     // status code") — a mensagem real que a nossa function mandou fica no
     // corpo da resposta, acessível via error.context (um objeto Response).
     const context = (error as { context?: Response }).context;
+    let message = error.message ?? "Falha ao chamar a função.";
     if (context) {
       try {
-        const body = await context.clone().json();
-        throw new Error(body?.error ?? error.message ?? "Falha ao chamar a função.");
+        const parsed = await context.clone().json();
+        // Nossas próprias functions respondem { error: "..." }; um bloqueio
+        // do gateway do Supabase (antes de chegar no nosso código, ex: JWT
+        // inválido) responde { message: "...", code: ... } — cobrindo os
+        // dois formatos em vez de só um.
+        message = parsed?.error ?? parsed?.message ?? message;
       } catch {
-        // corpo não era JSON (ou já foi consumido) — cai no fallback abaixo
+        // corpo não era JSON — mantém a mensagem genérica
       }
     }
-    throw new Error(error.message ?? "Falha ao chamar a função.");
+    throw new Error(message);
   }
   if (data?.error) throw new Error(data.error);
   return data as T;
