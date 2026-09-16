@@ -21,11 +21,13 @@ import { Route as AppObraRouteImport } from './routes/app.obra'
 import { Route as AppMarketingRouteImport } from './routes/app.marketing'
 import { Route as AppFinanceiroRouteImport } from './routes/app.financeiro'
 import { Route as AppCentralRouteImport } from './routes/app.central'
+import { Route as AppCamisasRouteImport } from './routes/app.camisas'
 import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
 import { Route as AdminObraRouteImport } from './routes/admin.obra'
 import { Route as AdminJornadaRouteImport } from './routes/admin.jornada'
 import { Route as AdminDuvidasRouteImport } from './routes/admin.duvidas'
 import { Route as AdminDocumentosRouteImport } from './routes/admin.documentos'
+import { Route as AdminCamisasRouteImport } from './routes/admin.camisas'
 
 const ObrigadoRoute = ObrigadoRouteImport.update({
   id: '/obrigado',
@@ -87,6 +89,11 @@ const AppCentralRoute = AppCentralRouteImport.update({
   path: '/central',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCamisasRoute = AppCamisasRouteImport.update({
+  id: '/camisas',
+  path: '/camisas',
+  getParentRoute: () => AppRoute,
+} as any)
 const AdminUnidadesRoute = AdminUnidadesRouteImport.update({
   id: '/unidades',
   path: '/unidades',
@@ -112,6 +119,11 @@ const AdminDocumentosRoute = AdminDocumentosRouteImport.update({
   path: '/documentos',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCamisasRoute = AdminCamisasRouteImport.update({
+  id: '/camisas',
+  path: '/camisas',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -119,11 +131,13 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/camisas': typeof AdminCamisasRoute
   '/admin/documentos': typeof AdminDocumentosRoute
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
+  '/app/camisas': typeof AppCamisasRoute
   '/app/central': typeof AppCentralRoute
   '/app/financeiro': typeof AppFinanceiroRoute
   '/app/marketing': typeof AppMarketingRoute
@@ -136,11 +150,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/camisas': typeof AdminCamisasRoute
   '/admin/documentos': typeof AdminDocumentosRoute
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
+  '/app/camisas': typeof AppCamisasRoute
   '/app/central': typeof AppCentralRoute
   '/app/financeiro': typeof AppFinanceiroRoute
   '/app/marketing': typeof AppMarketingRoute
@@ -156,11 +172,13 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
   '/obrigado': typeof ObrigadoRoute
+  '/admin/camisas': typeof AdminCamisasRoute
   '/admin/documentos': typeof AdminDocumentosRoute
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
   '/admin/unidades': typeof AdminUnidadesRoute
+  '/app/camisas': typeof AppCamisasRoute
   '/app/central': typeof AppCentralRoute
   '/app/financeiro': typeof AppFinanceiroRoute
   '/app/marketing': typeof AppMarketingRoute
@@ -177,11 +195,13 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/obrigado'
+    | '/admin/camisas'
     | '/admin/documentos'
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
     | '/admin/unidades'
+    | '/app/camisas'
     | '/app/central'
     | '/app/financeiro'
     | '/app/marketing'
@@ -194,11 +214,13 @@ export interface FileRouteTypes {
     | '/'
     | '/cadastro'
     | '/obrigado'
+    | '/admin/camisas'
     | '/admin/documentos'
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
     | '/admin/unidades'
+    | '/app/camisas'
     | '/app/central'
     | '/app/financeiro'
     | '/app/marketing'
@@ -213,11 +235,13 @@ export interface FileRouteTypes {
     | '/app'
     | '/cadastro'
     | '/obrigado'
+    | '/admin/camisas'
     | '/admin/documentos'
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
     | '/admin/unidades'
+    | '/app/camisas'
     | '/app/central'
     | '/app/financeiro'
     | '/app/marketing'
@@ -321,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCentralRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/camisas': {
+      id: '/app/camisas'
+      path: '/camisas'
+      fullPath: '/app/camisas'
+      preLoaderRoute: typeof AppCamisasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/admin/unidades': {
       id: '/admin/unidades'
       path: '/unidades'
@@ -356,10 +387,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDocumentosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/camisas': {
+      id: '/admin/camisas'
+      path: '/camisas'
+      fullPath: '/admin/camisas'
+      preLoaderRoute: typeof AdminCamisasRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
 interface AdminRouteChildren {
+  AdminCamisasRoute: typeof AdminCamisasRoute
   AdminDocumentosRoute: typeof AdminDocumentosRoute
   AdminDuvidasRoute: typeof AdminDuvidasRoute
   AdminJornadaRoute: typeof AdminJornadaRoute
@@ -369,6 +408,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCamisasRoute: AdminCamisasRoute,
   AdminDocumentosRoute: AdminDocumentosRoute,
   AdminDuvidasRoute: AdminDuvidasRoute,
   AdminJornadaRoute: AdminJornadaRoute,
@@ -380,6 +420,7 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AppRouteChildren {
+  AppCamisasRoute: typeof AppCamisasRoute
   AppCentralRoute: typeof AppCentralRoute
   AppFinanceiroRoute: typeof AppFinanceiroRoute
   AppMarketingRoute: typeof AppMarketingRoute
@@ -389,6 +430,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCamisasRoute: AppCamisasRoute,
   AppCentralRoute: AppCentralRoute,
   AppFinanceiroRoute: AppFinanceiroRoute,
   AppMarketingRoute: AppMarketingRoute,
