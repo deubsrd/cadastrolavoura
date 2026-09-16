@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      camisa_pedido_itens: {
+        Row: {
+          id: string
+          pedido_id: string
+          quantidade: number
+          tamanho: string
+        }
+        Insert: {
+          id?: string
+          pedido_id: string
+          quantidade: number
+          tamanho: string
+        }
+        Update: {
+          id?: string
+          pedido_id?: string
+          quantidade?: number
+          tamanho?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "camisa_pedido_itens_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "camisa_pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      camisa_pedidos: {
+        Row: {
+          created_at: string
+          id: string
+          observacoes: string | null
+          socio_id: string
+          status: string
+          unidade_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          socio_id: string
+          status?: string
+          unidade_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          socio_id?: string
+          status?: string
+          unidade_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "camisa_pedidos_socio_id_fkey"
+            columns: ["socio_id"]
+            isOneToOne: false
+            referencedRelation: "socios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camisa_pedidos_unidade_id_fkey"
+            columns: ["unidade_id"]
+            isOneToOne: false
+            referencedRelation: "unidades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_conhecimento: {
         Row: {
           created_at: string
