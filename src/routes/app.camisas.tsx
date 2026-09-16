@@ -18,12 +18,20 @@ export const Route = createFileRoute("/app/camisas")({
 
 const PRECO_UNITARIO = 65;
 const TAMANHOS = ["PP", "P", "M", "G", "GG", "XG"] as const;
+const GENEROS = [
+  { value: "masculino", label: "Masculino" },
+  { value: "feminino", label: "Feminino" },
+] as const;
+
+function chave(genero: string, tamanho: string) {
+  return `${genero}:${tamanho}`;
+}
 
 type Pedido = {
   id: string;
   status: "pendente" | "atendido";
   created_at: string;
-  camisa_pedido_itens: { tamanho: string; quantidade: number }[];
+  camisa_pedido_itens: { tamanho: string; quantidade: number; genero: string }[];
 };
 
 function CamisasPage() {
@@ -37,7 +45,7 @@ function CamisasPage() {
     setLoadingPedidos(true);
     const { data, error } = await supabase
       .from("camisa_pedidos")
-      .select("id, status, created_at, camisa_pedido_itens(tamanho, quantidade)")
+      .select("id, status, created_at, camisa_pedido_itens(tamanho, quantidade, genero)")
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setPedidos((data as Pedido[]) ?? []);
@@ -48,7 +56,11 @@ function CamisasPage() {
     loadPedidos();
   }, []);
 
-  const totalItens = TAMANHOS.reduce((sum, t) => sum + (parseInt(quantidades[t] || "0", 10) || 0), 0);
+  const totalItens = GENEROS.reduce(
+    (sum, g) =>
+      sum + TAMANHOS.reduce((s, t) => s + (parseInt(quantidades[chave(g.value, t)] || "0", 10) || 0), 0),
+    0,
+  );
   const totalValor = totalItens * PRECO_UNITARIO;
 
   async function handleEnviar() {
@@ -66,7 +78,7 @@ function CamisasPage() {
       return;
     }
     if (totalItens === 0) {
-      toast.error("Preencha a quantidade de pelo menos um tamanho.");
+      toast.error("Preencha a quantidade de pelo menos um item.");
       return;
     }
 
@@ -83,11 +95,14 @@ function CamisasPage() {
       return;
     }
 
-    const itens = TAMANHOS.filter((t) => (parseInt(quantidades[t] || "0", 10) || 0) > 0).map((t) => ({
-      pedido_id: pedido.id,
-      tamanho: t,
-      quantidade: parseInt(quantidades[t] || "0", 10),
-    }));
+    const itens = GENEROS.flatMap((g) =>
+      TAMANHOS.filter((t) => (parseInt(quantidades[chave(g.value, t)] || "0", 10) || 0) > 0).map((t) => ({
+        pedido_id: pedido.id,
+        tamanho: t,
+        genero: g.value,
+        quantidade: parseInt(quantidades[chave(g.value, t)] || "0", 10),
+      })),
+    );
 
     const { error: itensError } = await supabase.from("camisa_pedido_itens").insert(itens);
     setEnviando(false);
@@ -111,7 +126,7 @@ function CamisasPage() {
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Camisas da Lavoura</h1>
         <p className="text-sm text-muted-foreground">
-          Peça as camisas da equipe da sua unidade. Preencha a quantidade por tamanho.
+          Peça as camisas da equipe da sua unidade. Preencha a quantidade por modelo e tamanho.
         </p>
       </div>
 
@@ -136,22 +151,29 @@ function CamisasPage() {
         <CardHeader>
           <CardTitle className="text-base">Novo pedido</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-            {TAMANHOS.map((t) => (
-              <div key={t} className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">{t}</label>
-                <Input
-                  type="number"
-                  min={0}
-                  inputMode="numeric"
-                  value={quantidades[t] ?? ""}
-                  onChange={(e) => setQuantidades((prev) => ({ ...prev, [t]: e.target.value }))}
-                  placeholder="0"
-                />
+        <CardContent className="space-y-5">
+          {GENEROS.map((g) => (
+            <div key={g.value} className="space-y-2">
+              <p className="text-sm font-medium text-foreground">{g.label}</p>
+              <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+                {TAMANHOS.map((t) => (
+                  <div key={chave(g.value, t)} className="space-y-1">
+                    <label className="text-xs font-medium text-muted-foreground">{t}</label>
+                    <Input
+                      type="number"
+                      min={0}
+                      inputMode="numeric"
+                      value={quantidades[chave(g.value, t)] ?? ""}
+                      onChange={(e) =>
+                        setQuantidades((prev) => ({ ...prev, [chave(g.value, t)]: e.target.value }))
+                      }
+                      placeholder="0"
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
 
           <div className="flex items-center justify-between rounded-md bg-muted px-4 py-3 text-sm">
             <span className="text-muted-foreground">
@@ -182,7 +204,9 @@ function CamisasPage() {
         ) : (
           pedidos.map((p) => {
             const qtd = p.camisa_pedido_itens.reduce((s, i) => s + i.quantidade, 0);
-            const resumo = p.camisa_pedido_itens.map((i) => `${i.quantidade}× ${i.tamanho}`).join(", ");
+            const resumo = p.camisa_pedido_itens
+              .map((i) => `${i.quantidade}× ${i.tamanho} (${i.genero === "feminino" ? "Fem" : "Masc"})`)
+              .join(", ");
             return (
               <Card key={p.id}>
                 <CardContent className="flex items-center justify-between gap-3 p-4">

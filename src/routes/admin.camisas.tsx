@@ -25,8 +25,16 @@ export const Route = createFileRoute("/admin/camisas")({
 
 const PRECO_UNITARIO = 65;
 const TAMANHOS = ["PP", "P", "M", "G", "GG", "XG"] as const;
+const GENEROS = [
+  { value: "masculino", label: "Masculino" },
+  { value: "feminino", label: "Feminino" },
+] as const;
 
-type Item = { tamanho: string; quantidade: number };
+function chave(genero: string, tamanho: string) {
+  return `${genero}:${tamanho}`;
+}
+
+type Item = { tamanho: string; quantidade: number; genero: string };
 type Pedido = {
   id: string;
   status: "pendente" | "atendido";
@@ -60,7 +68,7 @@ function AdminCamisas() {
     const { data, error } = await supabase
       .from("camisa_pedidos")
       .select(
-        "id, status, created_at, socios(nome_completo), unidades(numero, nome), camisa_pedido_itens(tamanho, quantidade)",
+        "id, status, created_at, socios(nome_completo), unidades(numero, nome), camisa_pedido_itens(tamanho, quantidade, genero)",
       )
       .order("created_at", { ascending: false });
     if (error) toast.error(error.message);
@@ -72,17 +80,19 @@ function AdminCamisas() {
     load();
   }, []);
 
-  const totaisPorTamanho = useMemo(() => {
-    const totals: Record<string, number> = Object.fromEntries(TAMANHOS.map((t) => [t, 0]));
+  const totaisPorGeneroTamanho = useMemo(() => {
+    const totals: Record<string, number> = {};
+    for (const g of GENEROS) for (const t of TAMANHOS) totals[chave(g.value, t)] = 0;
     for (const p of pedidos) {
       for (const i of p.camisa_pedido_itens) {
-        totals[i.tamanho] = (totals[i.tamanho] ?? 0) + i.quantidade;
+        const k = chave(i.genero, i.tamanho);
+        totals[k] = (totals[k] ?? 0) + i.quantidade;
       }
     }
     return totals;
   }, [pedidos]);
 
-  const totalGeral = Object.values(totaisPorTamanho).reduce((a, b) => a + b, 0);
+  const totalGeral = Object.values(totaisPorGeneroTamanho).reduce((a, b) => a + b, 0);
 
   async function handleMarcarAtendido(id: string) {
     const { error } = await supabase.from("camisa_pedidos").update({ status: "atendido" }).eq("id", id);
@@ -134,29 +144,42 @@ function AdminCamisas() {
     y += 24;
     doc.setTextColor(0);
 
-    // Totais por tamanho
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.setTextColor(57, 79, 62);
-    doc.text("Total consolidado por tamanho", marginX, y);
-    y += 6;
-    doc.setDrawColor(220);
-    doc.line(marginX, y, pageW - marginX, y);
-    y += 16;
-    doc.setTextColor(0);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    for (const t of TAMANHOS) {
-      ensureSpace(18);
-      const qtd = totaisPorTamanho[t] ?? 0;
-      doc.text(t, marginX, y);
-      doc.text(String(qtd), marginX + 60, y);
-      doc.text(`R$ ${(qtd * PRECO_UNITARIO).toFixed(2).replace(".", ",")}`, marginX + 120, y);
+    // Totais por gênero + tamanho
+    for (const g of GENEROS) {
+      ensureSpace(30);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(57, 79, 62);
+      doc.text(`Total consolidado — ${g.label}`, marginX, y);
+      y += 6;
+      doc.setDrawColor(220);
+      doc.line(marginX, y, pageW - marginX, y);
       y += 16;
+      doc.setTextColor(0);
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      let subtotalGenero = 0;
+      for (const t of TAMANHOS) {
+        ensureSpace(18);
+        const qtd = totaisPorGeneroTamanho[chave(g.value, t)] ?? 0;
+        subtotalGenero += qtd;
+        doc.text(t, marginX, y);
+        doc.text(String(qtd), marginX + 60, y);
+        doc.text(`R$ ${(qtd * PRECO_UNITARIO).toFixed(2).replace(".", ",")}`, marginX + 120, y);
+        y += 16;
+      }
+      ensureSpace(20);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Subtotal ${g.label}`, marginX, y);
+      doc.text(String(subtotalGenero), marginX + 60, y);
+      doc.text(`R$ ${(subtotalGenero * PRECO_UNITARIO).toFixed(2).replace(".", ",")}`, marginX + 120, y);
+      y += 26;
     }
+
     ensureSpace(20);
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
     doc.text("Total geral", marginX, y);
     doc.text(String(totalGeral), marginX + 60, y);
     doc.text(`R$ ${(totalGeral * PRECO_UNITARIO).toFixed(2).replace(".", ",")}`, marginX + 120, y);
@@ -183,7 +206,9 @@ function AdminCamisas() {
       y += 14;
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      const resumo = p.camisa_pedido_itens.map((i) => `${i.quantidade}× ${i.tamanho}`).join(", ");
+      const resumo = p.camisa_pedido_itens
+        .map((i) => `${i.quantidade}× ${i.tamanho} (${i.genero === "feminino" ? "Fem" : "Masc"})`)
+        .join(", ");
       const dataStr = new Date(p.created_at).toLocaleDateString("pt-BR");
       const lines = doc.splitTextToSize(`${resumo} — ${dataStr} — ${p.status === "atendido" ? "Atendido" : "Pendente"}`, pageW - marginX * 2);
       doc.text(lines, marginX, y);
@@ -225,17 +250,24 @@ function AdminCamisas() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Total consolidado por tamanho</CardTitle>
+          <CardTitle className="text-base">Total consolidado por gênero e tamanho</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-            {TAMANHOS.map((t) => (
-              <div key={t} className="rounded-md border border-border p-3 text-center">
-                <p className="text-xs font-medium text-muted-foreground">{t}</p>
-                <p className="text-xl font-semibold text-foreground">{totaisPorTamanho[t] ?? 0}</p>
+        <CardContent className="space-y-4">
+          {GENEROS.map((g) => (
+            <div key={g.value}>
+              <p className="mb-2 text-sm font-medium text-foreground">{g.label}</p>
+              <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+                {TAMANHOS.map((t) => (
+                  <div key={chave(g.value, t)} className="rounded-md border border-border p-3 text-center">
+                    <p className="text-xs font-medium text-muted-foreground">{t}</p>
+                    <p className="text-xl font-semibold text-foreground">
+                      {totaisPorGeneroTamanho[chave(g.value, t)] ?? 0}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
 
@@ -271,7 +303,9 @@ function AdminCamisas() {
                       </TableCell>
                       <TableCell>{p.socios?.nome_completo ?? "—"}</TableCell>
                       <TableCell>
-                        {p.camisa_pedido_itens.map((i) => `${i.quantidade}× ${i.tamanho}`).join(", ")}
+                        {p.camisa_pedido_itens
+                          .map((i) => `${i.quantidade}× ${i.tamanho} (${i.genero === "feminino" ? "Fem" : "Masc"})`)
+                          .join(", ")}
                       </TableCell>
                       <TableCell>{new Date(p.created_at).toLocaleDateString("pt-BR")}</TableCell>
                       <TableCell>R$ {(qtd * PRECO_UNITARIO).toFixed(2).replace(".", ",")}</TableCell>
