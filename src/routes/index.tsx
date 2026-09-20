@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
+import { Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { setRememberMe } from "@/lib/remember-me";
 import lavouraLogo from "@/assets/lavoura-logo.png";
 
 const ADMIN_EMAIL = "lavanderialavoura2025@gmail.com";
@@ -52,6 +53,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMeState] = useState(true);
   const [loading, setLoading] = useState(false);
 
   const [showReset, setShowReset] = useState(false);
@@ -68,6 +70,7 @@ function LoginPage() {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setRememberMe(rememberMe);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setLoading(false);
@@ -146,6 +149,16 @@ function LoginPage() {
                   Esqueceu sua senha?
                 </button>
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="remember-me"
+                checked={rememberMe}
+                onCheckedChange={(v) => setRememberMeState(v === true)}
+              />
+              <Label htmlFor="remember-me" className="text-sm font-normal text-muted-foreground">
+                Lembrar de mim
+              </Label>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               Entrar

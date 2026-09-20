@@ -1,7 +1,10 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 import { Toaster } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { enforceRememberMe } from "@/lib/remember-me";
 
 function NotFoundComponent() {
   return (
@@ -77,5 +80,22 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Link de convite (convidar-socio) ou de "esqueceu senha" caem aqui com
+    // uma sessão temporária de recovery — sem isso, a pessoa era logada
+    // silenciosamente sem nunca ser pedida pra criar uma senha.
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        navigate({ to: "/definir-senha" });
+      }
+    });
+
+    enforceRememberMe();
+
+    return () => sub.subscription.unsubscribe();
+  }, [navigate]);
+
   return <Outlet />;
 }
