@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +30,14 @@ import {
   Trash2,
   CheckCircle2,
 } from "lucide-react";
+import {
+  AnuncioTemplate,
+  escolherLogo,
+  exportarPng,
+  type AnuncioTemplateProps,
+} from "@/components/marketing/AnuncioTemplate";
+import logoEscura from "@/assets/lavoura-logo-escura.svg";
+import logoBranca from "@/assets/lavoura-logo-branca.svg";
 
 export const Route = createFileRoute("/app/marketing")({
   head: () => ({ meta: [{ title: "Marketing — Sistema Lavoura" }] }),
@@ -67,11 +76,21 @@ const SUGESTOES: { pilar: string; titulo: string; texto: string }[] = [
   },
 ];
 
+const PILLAR_ACCENT: Record<string, string> = {
+  comprar: "#e17c4c",
+  confiar: "#394f3e",
+  conhecer: "#5a7a61",
+  gostar: "#5a7a61",
+};
+
 type GeneratedPost = {
   briefing_id: string;
   post_id: string;
   pillar: string;
-  headline: string;
+  tarja: string;
+  impacto: string;
+  subtitulo: string;
+  cta: string;
   caption: string;
   hashtags: string[];
   image_url?: string;
@@ -102,6 +121,66 @@ async function invoke<T>(fn: string, body: Record<string, unknown>): Promise<T> 
   }
   if (data?.error) throw new Error(data.error);
   return data as T;
+}
+
+function dataUrlToBlob(dataUrl: string): Blob {
+  const [header, base64] = dataUrl.split(",");
+  const mime = header.match(/:(.*?);/)?.[1] ?? "image/png";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
+/**
+ * Monta o AnuncioTemplate fora da tela (não em display:none — precisa de
+ * layout/paint de verdade pro html-to-image conseguir rasterizar), espera
+ * fontes e a foto de fundo carregarem, exporta o PNG e desmonta.
+ * Independente do ciclo de render do componente visível: monta sua própria
+ * raiz React numa div solta, então não depende de timing de setState.
+ */
+async function renderizarArtePng(props: AnuncioTemplateProps): Promise<string> {
+  const container = document.createElement("div");
+  container.style.position = "fixed";
+  container.style.left = "-9999px";
+  container.style.top = "0";
+  container.style.pointerEvents = "none";
+  document.body.appendChild(container);
+
+  const root = createRoot(container);
+  let node: HTMLDivElement | null = null;
+
+  await new Promise<void>((resolve) => {
+    root.render(
+      <AnuncioTemplate
+        ref={(el) => {
+          node = el;
+        }}
+        {...props}
+      />,
+    );
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
+
+  try {
+    if (document.fonts?.ready) {
+      await document.fonts.ready;
+    }
+    if (props.fotoSrc) {
+      const img = node?.querySelector("img");
+      if (img && !img.complete) {
+        await new Promise((resolve) => {
+          img.addEventListener("load", resolve, { once: true });
+          img.addEventListener("error", resolve, { once: true });
+        });
+      }
+    }
+
+    return await exportarPng(node!);
+  } finally {
+    root.unmount();
+    document.body.removeChild(container);
+  }
 }
 
 function MarketingPage() {
@@ -184,6 +263,9 @@ function GerarPostTab({
   const [caption, setCaption] = useState("");
   const [loadingStep, setLoadingStep] = useState<"idle" | "gerando" | "refinando">("idle");
   const [post, setPost] = useState<GeneratedPost | null>(null);
+  // Guarda a signed URL da foto original usada na última geração, pra
+  // "Refinar legenda" conseguir re-renderizar a arte com o mesmo fundo.
+  const [fotoUrlAtual, setFotoUrlAtual] = useState<string | null>(null);
 
   useEffect(() => {
     if (prefill) setBriefing(prefill.tema);
@@ -214,6 +296,40 @@ function GerarPostTab({
     return data.signedUrl;
   }
 
+  async function gerarEUploadArte(gerado: GeneratedPost, photoUrl: string | null): Promise<string> {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Não autenticado.");
+
+    const fundo = photoUrl ? "escuro-ou-foto" : "claro";
+    const logoSrc = escolherLogo(fundo, { escura: logoEscura, branca: logoBranca });
+    const accent = PILLAR_ACCENT[gerado.pillar] ?? "#e17c4c";
+
+    const dataUrl = await renderizarArtePng({
+      tarja: gerado.tarja,
+      impacto: gerado.impacto,
+      subtitulo: gerado.subtitulo,
+      cta: gerado.cta,
+      logoSrc,
+      fotoSrc: photoUrl ?? undefined,
+      accent,
+    });
+
+    const blob = dataUrlToBlob(dataUrl);
+    const path = `${user.id}/${gerado.post_id}.png`;
+    const { error: uploadError } = await supabase.storage
+      .from("marketing-posts")
+      .upload(path, blob, { contentType: "image/png", upsert: true });
+    if (uploadError) throw uploadError;
+
+    const final = await invoke<{ image_url: string }>("finalizar-arte", {
+      post_id: gerado.post_id,
+      image_path: path,
+    });
+    return final.image_url;
+  }
+
   async function handleGerar() {
     if (!briefing.trim()) return;
     setLoadingStep("gerando");
@@ -223,11 +339,10 @@ function GerarPostTab({
         briefing_text: briefing,
         photo_url: photoUrl,
       });
-      const arte = await invoke<{ image_url: string }>("renderizar-arte", {
-        post_id: gerado.post_id,
-      });
-      setPost({ ...gerado, image_url: arte.image_url });
+      const imageUrl = await gerarEUploadArte(gerado, photoUrl);
+      setPost({ ...gerado, image_url: imageUrl });
       setCaption(gerado.caption);
+      setFotoUrlAtual(photoUrl);
       await onGerado();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao gerar o post.");
@@ -245,7 +360,11 @@ function GerarPostTab({
         briefing_id: post.briefing_id,
         post_id: post.post_id,
       });
-      setPost({ ...post, ...gerado });
+      // A tarja/impacto/subtítulo podem ter mudado no refinamento — re-renderiza
+      // a arte (com a mesma foto de fundo original, se houver) pra não deixar
+      // o PNG com texto desatualizado.
+      const imageUrl = await gerarEUploadArte(gerado, fotoUrlAtual);
+      setPost({ ...post, ...gerado, image_url: imageUrl });
       setCaption(gerado.caption);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao refinar a legenda.");
@@ -262,6 +381,8 @@ function GerarPostTab({
   function handleTrocarFoto() {
     setPost(null);
     setCaption("");
+    setFotoUrlAtual(null);
+    setPhotoFile(null);
   }
 
   return (
@@ -561,7 +682,10 @@ function CalendarioTab({
 type HistoricoPost = {
   id: string;
   pillar: string;
-  headline: string | null;
+  tarja: string | null;
+  impacto: string | null;
+  subtitulo: string | null;
+  cta: string | null;
   caption: string | null;
   status: string;
   created_at: string;
@@ -570,7 +694,6 @@ type HistoricoPost = {
 
 const STATUS_LABEL: Record<string, string> = {
   draft: "Pronto",
-  rendering: "Renderizando",
   error: "Erro",
 };
 
@@ -615,7 +738,7 @@ function HistoricoTab() {
             {post.image_url ? (
               <img
                 src={post.image_url}
-                alt={post.headline ?? "Post"}
+                alt={post.impacto ?? "Post"}
                 className="h-20 w-20 shrink-0 rounded-md border border-border object-cover"
               />
             ) : (
@@ -639,7 +762,12 @@ function HistoricoTab() {
                   })}
                 </span>
               </div>
-              {post.headline && <p className="text-sm font-medium">{post.headline}</p>}
+              {post.impacto && (
+                <p className="text-sm font-medium">
+                  {post.tarja && <span className="text-muted-foreground">{post.tarja} — </span>}
+                  {post.impacto}
+                </p>
+              )}
               {post.caption && (
                 <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{post.caption}</p>
               )}

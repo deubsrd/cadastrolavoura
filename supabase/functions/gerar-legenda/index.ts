@@ -67,7 +67,10 @@ Existem 4 pilares de conteúdo, e cada post pertence a exatamente um:
 Devolva SOMENTE um JSON válido, sem markdown, sem comentários, no formato:
 {
   "pillar": "conhecer" | "gostar" | "confiar" | "comprar",
-  "headline": "frase curta de destaque para a arte, até 8 palavras",
+  "tarja": "texto curto de contexto para a tarja verde do topo do título, poucas palavras (ex: 'Toda terça-feira')",
+  "impacto": "a palavra ou número de maior impacto do post — preço, nome da unidade nova, etc. — bem curto, vira o texto gigante da arte (ex: 'R$13,90')",
+  "subtitulo": "uma frase curta de apoio, abaixo do título",
+  "cta": "texto curto do botão/CTA no rodapé da arte (ex: 'Venha aproveitar. Só na Lavoura.')",
   "caption": "legenda completa para o Instagram, 2 a 4 parágrafos curtos",
   "hashtags": ["#lavoura", "#..."]
 }`;
@@ -144,7 +147,10 @@ Deno.serve(async (req) => {
 
     const parsed = JSON.parse(rawText) as {
       pillar: string;
-      headline: string;
+      tarja: string;
+      impacto: string;
+      subtitulo: string;
+      cta: string;
       caption: string;
       hashtags: string[];
     };
@@ -163,7 +169,10 @@ Deno.serve(async (req) => {
         .from("generated_posts")
         .update({
           pillar: parsed.pillar,
-          headline: parsed.headline,
+          tarja: parsed.tarja,
+          impacto: parsed.impacto,
+          subtitulo: parsed.subtitulo,
+          cta: parsed.cta,
           caption: parsed.caption,
           hashtags: parsed.hashtags,
         })
@@ -176,7 +185,10 @@ Deno.serve(async (req) => {
           briefing_id: currentBriefingId,
           socio_id: socioId,
           pillar: parsed.pillar,
-          headline: parsed.headline,
+          tarja: parsed.tarja,
+          impacto: parsed.impacto,
+          subtitulo: parsed.subtitulo,
+          cta: parsed.cta,
           caption: parsed.caption,
           hashtags: parsed.hashtags,
           status: "draft",
@@ -197,7 +209,10 @@ Deno.serve(async (req) => {
       version: (count ?? 0) + 1,
       caption: parsed.caption,
       hashtags: parsed.hashtags,
-      headline: parsed.headline,
+      tarja: parsed.tarja,
+      impacto: parsed.impacto,
+      subtitulo: parsed.subtitulo,
+      cta: parsed.cta,
     });
 
     await service

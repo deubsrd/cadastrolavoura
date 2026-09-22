@@ -50,7 +50,7 @@ async function getSocioIdFromRequest(req: Request): Promise<string> {
   return socio.id as string;
 }
 
-const SIGNED_URL_TTL = 60 * 60 * 24 * 7; // 7 dias, igual renderizar-arte
+const SIGNED_URL_TTL = 60 * 60 * 24 * 7; // 7 dias
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
 
     const { data: posts, error } = await service
       .from("generated_posts")
-      .select("id, pillar, headline, caption, status, image_path, created_at")
+      .select("id, pillar, tarja, impacto, subtitulo, cta, caption, status, image_path, created_at")
       .eq("socio_id", socioId)
       .order("created_at", { ascending: false })
       .limit(30);
@@ -80,7 +80,10 @@ Deno.serve(async (req) => {
         return {
           id: post.id,
           pillar: post.pillar,
-          headline: post.headline,
+          tarja: post.tarja,
+          impacto: post.impacto,
+          subtitulo: post.subtitulo,
+          cta: post.cta,
           caption: post.caption,
           status: post.status,
           created_at: post.created_at,
