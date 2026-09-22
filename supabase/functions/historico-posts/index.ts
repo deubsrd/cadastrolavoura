@@ -7,6 +7,18 @@
 // Sem imports de ../_shared — cada function é autocontida.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+function mensagemDeErro(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  // Erros do Postgrest/Supabase (ex: coluna inexistente, violação de
+  // constraint) não são instâncias de Error — são objetos simples
+  // { message, details, hint, code }. Sem isso, a causa real virava
+  // sempre "Erro inesperado." e escondia o problema de verdade.
+  if (err && typeof err === "object" && "message" in err && typeof (err as { message: unknown }).message === "string") {
+    return (err as { message: string }).message;
+  }
+  return "Erro inesperado.";
+}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -95,6 +107,6 @@ Deno.serve(async (req) => {
     return json({ posts: withFreshUrls });
   } catch (err) {
     console.error(err);
-    return json({ error: err instanceof Error ? err.message : "Erro inesperado." }, 500);
+    return json({ error: mensagemDeErro(err) }, 500);
   }
 });
