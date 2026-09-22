@@ -38,6 +38,7 @@ import {
 } from "@/components/marketing/AnuncioTemplate";
 import logoEscura from "@/assets/lavoura-logo-escura.svg";
 import logoBranca from "@/assets/lavoura-logo-branca.svg";
+import heic2any from "heic2any";
 
 export const Route = createFileRoute("/app/marketing")({
   head: () => ({ meta: [{ title: "Marketing — Sistema Lavoura" }] }),
@@ -123,8 +124,16 @@ async function invoke<T>(fn: string, body: Record<string, unknown>): Promise<T> 
   return data as T;
 }
 
-function dataUrlToBlob(dataUrl: string): Blob {
-  const [header, base64] = dataUrl.split(",");
+function mensagemDeErro(err: unknown, fallback: string): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "string") return err;
+  if (err && typeof err === "object" && "message" in err && typeof err.message === "string") {
+    return err.message;
+  }
+  return fallback;
+}
+
+function dataUrlToBlob(dataUrl: string): Blob {  const [header, base64] = dataUrl.split(",");
   const mime = header.match(/:(.*?);/)?.[1] ?? "image/png";
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
@@ -276,6 +285,28 @@ function GerarPostTab({
     return semAcentos.replace(/[^a-zA-Z0-9._-]/g, "_");
   }
 
+  /**
+   * Fotos de iPhone costumam vir em HEIC, que nenhum navegador além do
+   * Safari consegue exibir num <img> — isso quebrava a renderização da
+   * arte silenciosamente (a foto nunca carregava). Converte pra JPEG
+   * antes de tudo se detectar esse formato.
+   */
+  async function converterSeHeic(file: File): Promise<File> {
+    const isHeic = /\.hei[cf]$/i.test(file.name) || /^image\/hei[cf]$/i.test(file.type);
+    if (!isHeic) return file;
+
+    try {
+      const resultado = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+      const blob = Array.isArray(resultado) ? resultado[0] : resultado;
+      const novoNome = file.name.replace(/\.hei[cf]$/i, ".jpg");
+      return new File([blob], novoNome, { type: "image/jpeg" });
+    } catch {
+      throw new Error(
+        "Não consegui converter essa foto (formato HEIC do iPhone). Tenta exportar como JPEG antes de enviar.",
+      );
+    }
+  }
+
   async function uploadPhoto(): Promise<string | null> {
     if (!photoFile) return null;
     const {
@@ -283,10 +314,11 @@ function GerarPostTab({
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Não autenticado.");
 
-    const path = `${user.id}/${Date.now()}-${sanitizeFileName(photoFile.name)}`;
+    const arquivo = await converterSeHeic(photoFile);
+    const path = `${user.id}/${Date.now()}-${sanitizeFileName(arquivo.name)}`;
     const { error: uploadError } = await supabase.storage
       .from("marketing-posts")
-      .upload(path, photoFile, { upsert: true });
+      .upload(path, arquivo, { upsert: true });
     if (uploadError) throw uploadError;
 
     const { data, error: signedUrlError } = await supabase.storage
@@ -345,7 +377,7 @@ function GerarPostTab({
       setFotoUrlAtual(photoUrl);
       await onGerado();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao gerar o post.");
+      toast.error(mensagemDeErro(err, "Erro ao gerar o post."));
     } finally {
       setLoadingStep("idle");
     }
@@ -367,7 +399,7 @@ function GerarPostTab({
       setPost({ ...post, ...gerado, image_url: imageUrl });
       setCaption(gerado.caption);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao refinar a legenda.");
+      toast.error(mensagemDeErro(err, "Erro ao refinar a legenda."));
     } finally {
       setLoadingStep("idle");
     }
