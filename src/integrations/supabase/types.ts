@@ -16,18 +16,21 @@ export type Database = {
     Tables: {
       camisa_pedido_itens: {
         Row: {
+          genero: string
           id: string
           pedido_id: string
           quantidade: number
           tamanho: string
         }
         Insert: {
+          genero?: string
           id?: string
           pedido_id: string
           quantidade: number
           tamanho: string
         }
         Update: {
+          genero?: string
           id?: string
           pedido_id?: string
           quantidade?: number
