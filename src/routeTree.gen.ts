@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ObrigadoRouteImport } from './routes/obrigado'
+import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
 import { Route as CadastroRouteImport } from './routes/cadastro'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -32,6 +33,11 @@ import { Route as AdminCamisasRouteImport } from './routes/admin.camisas'
 const ObrigadoRoute = ObrigadoRouteImport.update({
   id: '/obrigado',
   path: '/obrigado',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DefinirSenhaRoute = DefinirSenhaRouteImport.update({
+  id: '/definir-senha',
+  path: '/definir-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CadastroRoute = CadastroRouteImport.update({
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
+  '/definir-senha': typeof DefinirSenhaRoute
   '/obrigado': typeof ObrigadoRoute
   '/admin/camisas': typeof AdminCamisasRoute
   '/admin/documentos': typeof AdminDocumentosRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
+  '/definir-senha': typeof DefinirSenhaRoute
   '/obrigado': typeof ObrigadoRoute
   '/admin/camisas': typeof AdminCamisasRoute
   '/admin/documentos': typeof AdminDocumentosRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/app': typeof AppRouteWithChildren
   '/cadastro': typeof CadastroRoute
+  '/definir-senha': typeof DefinirSenhaRoute
   '/obrigado': typeof ObrigadoRoute
   '/admin/camisas': typeof AdminCamisasRoute
   '/admin/documentos': typeof AdminDocumentosRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/cadastro'
+    | '/definir-senha'
     | '/obrigado'
     | '/admin/camisas'
     | '/admin/documentos'
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/cadastro'
+    | '/definir-senha'
     | '/obrigado'
     | '/admin/camisas'
     | '/admin/documentos'
@@ -234,6 +245,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/cadastro'
+    | '/definir-senha'
     | '/obrigado'
     | '/admin/camisas'
     | '/admin/documentos'
@@ -256,6 +268,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AppRoute: typeof AppRouteWithChildren
   CadastroRoute: typeof CadastroRoute
+  DefinirSenhaRoute: typeof DefinirSenhaRoute
   ObrigadoRoute: typeof ObrigadoRoute
 }
 
@@ -266,6 +279,13 @@ declare module '@tanstack/react-router' {
       path: '/obrigado'
       fullPath: '/obrigado'
       preLoaderRoute: typeof ObrigadoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/definir-senha': {
+      id: '/definir-senha'
+      path: '/definir-senha'
+      fullPath: '/definir-senha'
+      preLoaderRoute: typeof DefinirSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cadastro': {
@@ -446,6 +466,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AppRoute: AppRouteWithChildren,
   CadastroRoute: CadastroRoute,
+  DefinirSenhaRoute: DefinirSenhaRoute,
   ObrigadoRoute: ObrigadoRoute,
 }
 export const routeTree = rootRouteImport

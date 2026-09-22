@@ -148,13 +148,13 @@ async function renderizarArtePng(props: AnuncioTemplateProps): Promise<string> {
   document.body.appendChild(container);
 
   const root = createRoot(container);
-  let node: HTMLDivElement | null = null;
+  const nodeRef: { current: HTMLDivElement | null } = { current: null };
 
   await new Promise<void>((resolve) => {
     root.render(
       <AnuncioTemplate
         ref={(el) => {
-          node = el;
+          nodeRef.current = el;
         }}
         {...props}
       />,
@@ -167,7 +167,7 @@ async function renderizarArtePng(props: AnuncioTemplateProps): Promise<string> {
       await document.fonts.ready;
     }
     if (props.fotoSrc) {
-      const img = node?.querySelector("img");
+      const img = nodeRef.current?.querySelector("img");
       if (img && !img.complete) {
         await new Promise((resolve) => {
           img.addEventListener("load", resolve, { once: true });
@@ -176,7 +176,7 @@ async function renderizarArtePng(props: AnuncioTemplateProps): Promise<string> {
       }
     }
 
-    return await exportarPng(node!);
+    return await exportarPng(nodeRef.current!);
   } finally {
     root.unmount();
     document.body.removeChild(container);
