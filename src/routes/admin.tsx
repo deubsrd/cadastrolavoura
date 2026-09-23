@@ -90,7 +90,7 @@ function AdminLayout() {
       </aside>
 
       {/* Mobile top bar */}
-      <div className="flex flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col">
         <header
           className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden"
           style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
@@ -144,7 +144,7 @@ function AdminLayout() {
             Camisas
           </Link>
         </nav>
-        <main className="flex-1 overflow-auto p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">
           <Outlet />
         </main>
       </div>
