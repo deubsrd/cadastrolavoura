@@ -111,8 +111,8 @@ function AppLayoutContent() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-60 flex-col bg-sidebar p-4 md:flex">
+    <div className="flex h-dvh bg-background">
+      <aside className="hidden w-60 flex-col overflow-y-auto bg-sidebar p-4 md:flex">
         <div className="mb-8 px-2">
           <img src={lavouraLogo} alt="Lavoura" className="h-12 w-auto brightness-0 invert" />
         </div>
@@ -135,7 +135,10 @@ function AppLayoutContent() {
       </aside>
 
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden">
+        <header
+          className="flex items-center justify-between border-b border-border bg-card px-4 py-3 md:hidden"
+          style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
+        >
           <img src={lavouraLogo} alt="Lavoura" className="h-9 w-auto" />
           <Button variant="ghost" size="sm" onClick={logout} aria-label="Sair">
             <LogOut className="h-4 w-4" />

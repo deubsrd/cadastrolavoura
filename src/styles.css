@@ -165,6 +165,15 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+
+  /* Mobile-first: aumenta a fonte base só em telas pequenas — escala junto
+     todo texto definido em rem (a maioria dos componentes) sem precisar
+     tocar arquivo por arquivo. Desktop fica como já estava. */
+  @media (max-width: 767px) {
+    html {
+      font-size: 18px;
+    }
+  }
 }
 
 @layer utilities {
