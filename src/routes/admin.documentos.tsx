@@ -136,7 +136,7 @@ function AdminDocumentos() {
   const [unidadeEndereco, setUnidadeEndereco] = useState<string | null>(null);
   const [destinoEndereco, setDestinoEndereco] = useState("");
   const [destinoCep, setDestinoCep] = useState("");
-  const [conjuntos, setConjuntos] = useState<"3" | "5">("3");
+  const [conjuntos, setConjuntos] = useState<"3" | "4" | "5">("3");
   const [valorNf, setValorNf] = useState("89.970,00");
   const [gerandoCotacao, setGerandoCotacao] = useState(false);
 
@@ -341,6 +341,7 @@ function AdminDocumentos() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="3 conjuntos de máquinas">3 conjuntos de máquinas</SelectItem>
+                  <SelectItem value="4 conjuntos de máquinas">4 conjuntos de máquinas</SelectItem>
                   <SelectItem value="5 conjuntos de máquinas">5 conjuntos de máquinas</SelectItem>
                 </SelectContent>
               </Select>
@@ -498,12 +499,27 @@ function AdminDocumentos() {
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label>Conjuntos de máquinas</Label>
-                <Select value={conjuntos} onValueChange={(v) => setConjuntos(v as "3" | "5")}>
+                <Select
+                  value={conjuntos}
+                  onValueChange={(v) => {
+                    const val = v as "3" | "4" | "5";
+                    setConjuntos(val);
+                    // Sugestão proporcional ao valor de 3 conjuntos (R$89.970,00) —
+                    // confirme o valor real da NF antes de gerar, isso é só ponto de partida.
+                    const sugestoes: Record<"3" | "4" | "5", string> = {
+                      "3": "89.970,00",
+                      "4": "119.960,00",
+                      "5": "149.950,00",
+                    };
+                    setValorNf(sugestoes[val]);
+                  }}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="3">3 conjuntos</SelectItem>
+                    <SelectItem value="4">4 conjuntos</SelectItem>
                     <SelectItem value="5">5 conjuntos</SelectItem>
                   </SelectContent>
                 </Select>
