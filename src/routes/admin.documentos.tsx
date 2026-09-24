@@ -267,7 +267,7 @@ function AdminDocumentos() {
       );
       doc.text(nota, marginX, y);
 
-      doc.save(`Cotação de Frete - ${cotacaoSocio.nome_completo}.pdf`);
+      doc.save(`Cotação de Frete (${origem.label}) - ${cotacaoSocio.nome_completo}.pdf`);
       toast.success("Cotação gerada!");
     } catch (e) {
       toast.error("Falha ao gerar a cotação.");
