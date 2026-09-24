@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Lock } from "lucide-react";
+import { FileText, Download, Lock, Truck } from "lucide-react";
+import jsPDF from "jspdf";
 
 export const Route = createFileRoute("/admin/documentos")({
   head: () => ({ meta: [{ title: "Documentos — Lavoura" }] }),
@@ -110,6 +111,171 @@ function AdminDocumentos() {
 
   const set = (key: string, value: string) => setForm((p) => ({ ...p, [key]: value }));
 
+  // ──────────────────────────────────────────
+  // Cotação de frete
+  // ──────────────────────────────────────────
+  const ORIGENS = {
+    guarulhos: {
+      label: "Guarulhos/SP",
+      cnpj: "38.391.636/0001-84",
+      cep: "07174-000",
+      endereco:
+        "Guarulhos/SP (matriz) – Avenida Papa João Paulo I, nº 687, Galpão 09 Bloco A, Jardim Presidente Dutra",
+    },
+    cabedelo: {
+      label: "Cabedelo/PB",
+      cnpj: "38.391.636/0001-84",
+      cep: "58105-066",
+      endereco: "Galpão Paylav – R. Castro Alves, 61 - Recanto do Poço, Cabedelo - PB",
+    },
+  } as const;
+
+  const [origemKey, setOrigemKey] = useState<keyof typeof ORIGENS>("guarulhos");
+  const [cotacaoSocioId, setCotacaoSocioId] = useState("");
+  const [cotacaoSocio, setCotacaoSocio] = useState<Socio | null>(null);
+  const [unidadeEndereco, setUnidadeEndereco] = useState<string | null>(null);
+  const [destinoEndereco, setDestinoEndereco] = useState("");
+  const [destinoCep, setDestinoCep] = useState("");
+  const [conjuntos, setConjuntos] = useState<"3" | "5">("3");
+  const [valorNf, setValorNf] = useState("89.970,00");
+  const [gerandoCotacao, setGerandoCotacao] = useState(false);
+
+  useEffect(() => {
+    if (!cotacaoSocioId) {
+      setCotacaoSocio(null);
+      setUnidadeEndereco(null);
+      setDestinoEndereco("");
+      return;
+    }
+    const s = socios.find((s) => s.id === cotacaoSocioId) ?? null;
+    setCotacaoSocio(s);
+    if (!s?.unidade_id) {
+      setUnidadeEndereco(null);
+      setDestinoEndereco("");
+      return;
+    }
+    supabase
+      .from("unidades")
+      .select("endereco")
+      .eq("id", s.unidade_id)
+      .maybeSingle()
+      .then(({ data }) => {
+        const endereco = data?.endereco || null;
+        setUnidadeEndereco(endereco);
+        setDestinoEndereco(endereco ?? "");
+      });
+  }, [cotacaoSocioId, socios]);
+
+  const gerarCotacao = () => {
+    if (!cotacaoSocio) return toast.error("Selecione um franqueado.");
+    if (!destinoEndereco.trim()) return toast.error("Preencha o endereço de entrega.");
+    if (!destinoCep.trim()) return toast.error("Preencha o CEP de destino.");
+
+    setGerandoCotacao(true);
+    try {
+      const origem = ORIGENS[origemKey];
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+      const pageW = doc.internal.pageSize.getWidth();
+      const marginX = 40;
+      let y = 50;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(57, 79, 62);
+      doc.text("Cotação de Frete — Lavoura", marginX, y);
+      y += 8;
+      doc.setDrawColor(57, 79, 62);
+      doc.setLineWidth(1);
+      doc.line(marginX, y, pageW - marginX, y);
+      y += 26;
+      doc.setTextColor(0);
+
+      const linha = (label: string, valor: string) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text(label, marginX, y);
+        doc.setFont("helvetica", "normal");
+        const lines = doc.splitTextToSize(valor, pageW - marginX * 2 - 140);
+        doc.text(lines, marginX + 140, y);
+        y += Math.max(18, lines.length * 15);
+      };
+
+      linha("Destinatário:", cotacaoSocio.nome_completo);
+      linha("Item:", "Conjuntos de equipamentos LG GIANT C 13Kg");
+      linha("Quantidade:", `${conjuntos} lavadoras e ${conjuntos} secadoras`);
+      linha("Valor da NF:", `R$ ${valorNf}`);
+      y += 10;
+
+      const secao = (titulo: string) => {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.setTextColor(57, 79, 62);
+        doc.text(titulo, marginX, y);
+        y += 6;
+        doc.setDrawColor(220);
+        doc.line(marginX, y, pageW - marginX, y);
+        y += 18;
+        doc.setTextColor(0);
+      };
+
+      secao("Informações de origem");
+      linha("CNPJ:", origem.cnpj);
+      linha("CEP:", origem.cep);
+      linha("Endereço:", origem.endereco);
+      y += 10;
+
+      secao("Informações de destino");
+      linha("CPF:", cotacaoSocio.cpf);
+      linha("Endereço:", destinoEndereco);
+      linha("CEP:", destinoCep);
+      y += 16;
+
+      secao("Informações dos equipamentos — LG Giant C 13kg");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text("Equipamento", marginX, y);
+      doc.text("Largura", marginX + 130, y);
+      doc.text("Altura", marginX + 210, y);
+      doc.text("Profund.", marginX + 280, y);
+      doc.text("Peso aprox.", marginX + 360, y);
+      y += 16;
+      doc.setDrawColor(220);
+      doc.line(marginX, y - 6, pageW - marginX, y - 6);
+
+      doc.setFont("helvetica", "normal");
+      const equipamentos = [
+        ["Lavadora Giant C 13kg", "686mm", "983mm", "767mm", "87kg"],
+        ["Secadora Giant C 13kg", "686mm", "983mm", "764mm", "59kg"],
+      ];
+      for (const [nome, l, a, p, peso] of equipamentos) {
+        doc.text(nome, marginX, y);
+        doc.text(l, marginX + 130, y);
+        doc.text(a, marginX + 210, y);
+        doc.text(p, marginX + 280, y);
+        doc.text(peso, marginX + 360, y);
+        y += 18;
+      }
+      y += 8;
+      linha("Medidas da caixa:", "760 x 1.170 x 795 mm (L x A x P)");
+      y += 4;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(120);
+      const nota = doc.splitTextToSize(
+        "As dimensões da lavadora e secadora são praticamente iguais em largura e altura, facilitando o empilhamento ou transporte conjunto.",
+        pageW - marginX * 2,
+      );
+      doc.text(nota, marginX, y);
+
+      doc.save(`Cotação de Frete - ${cotacaoSocio.nome_completo}.pdf`);
+      toast.success("Cotação gerada!");
+    } catch (e) {
+      toast.error("Falha ao gerar a cotação.");
+      console.error(e);
+    }
+    setGerandoCotacao(false);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -117,7 +283,7 @@ function AdminDocumentos() {
         <p className="text-sm text-muted-foreground">Gere documentos contratuais com dados do sistema, revisados pelo Claude.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* Pré-contrato */}
         <Card className="border-border/50">
           <CardHeader className="pb-3">
@@ -247,6 +413,110 @@ function AdminDocumentos() {
             <Button className="w-full" disabled>
               <Lock className="mr-2 h-4 w-4" />
               Em breve
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Cotação de frete */}
+        <Card className="border-border/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Truck className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base">Cotação de frete</CardTitle>
+              </div>
+              <Badge variant="default">Disponível</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Pedido de cotação dos conjuntos LG Giant C 13kg, saindo de Guarulhos ou Cabedelo.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Origem</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={origemKey === "guarulhos" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setOrigemKey("guarulhos")}
+                >
+                  Guarulhos/SP
+                </Button>
+                <Button
+                  type="button"
+                  variant={origemKey === "cabedelo" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setOrigemKey("cabedelo")}
+                >
+                  Cabedelo/PB
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Franqueado / destinatário</Label>
+              <Select value={cotacaoSocioId} onValueChange={setCotacaoSocioId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o franqueado..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {socios.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.nome_completo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {cotacaoSocioId && (
+              <div className="space-y-1.5">
+                <Label>Endereço de entrega</Label>
+                <Input
+                  value={destinoEndereco}
+                  onChange={(e) => setDestinoEndereco(e.target.value)}
+                  placeholder="Endereço completo da unidade"
+                />
+                {!unidadeEndereco && (
+                  <p className="text-xs text-muted-foreground">
+                    A unidade ainda não tem endereço cadastrado — preencha manualmente.
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label>CEP de destino</Label>
+              <Input
+                value={destinoCep}
+                onChange={(e) => setDestinoCep(e.target.value)}
+                placeholder="ex: 69314-550"
+              />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Conjuntos de máquinas</Label>
+                <Select value={conjuntos} onValueChange={(v) => setConjuntos(v as "3" | "5")}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="3">3 conjuntos</SelectItem>
+                    <SelectItem value="5">5 conjuntos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Valor da NF (R$)</Label>
+                <Input value={valorNf} onChange={(e) => setValorNf(e.target.value)} placeholder="89.970,00" />
+              </div>
+            </div>
+
+            <Button className="w-full" onClick={gerarCotacao} disabled={gerandoCotacao || !cotacaoSocioId}>
+              <Download className="mr-2 h-4 w-4" />
+              {gerandoCotacao ? "Gerando..." : "Gerar cotação"}
             </Button>
           </CardContent>
         </Card>
