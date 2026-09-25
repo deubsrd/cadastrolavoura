@@ -50,6 +50,7 @@ function AdminDocumentos() {
     data_recebimento_cof: "",
     area_ponto: "",
     modalidade: "3 conjuntos de máquinas",
+    taxa_franquia: "R$ 25.900,00 (vinte e cinco mil e novecentos reais)",
     dados_bancarios: "",
     outras_condicoes: "",
     data_assinatura_dia: String(new Date().getDate()),
@@ -60,6 +61,8 @@ function AdminDocumentos() {
     testemunha2_nome: "",
     testemunha2_cpf: "",
   });
+  const [taxaTipo, setTaxaTipo] = useState<"padrao" | "outro">("padrao");
+  const [taxaOutroValor, setTaxaOutroValor] = useState("");
 
   useEffect(() => {
     supabase.from("socios").select("*").eq("tipo", "administrador").order("nome_completo")
@@ -74,6 +77,9 @@ function AdminDocumentos() {
 
   const gerar = async () => {
     if (!socio) return toast.error("Selecione um franqueado.");
+    if (taxaTipo === "outro" && !taxaOutroValor.trim()) {
+      return toast.error("Preencha o valor da taxa de franquia.");
+    }
     setGerando(true);
     try {
       const dados = {
@@ -110,6 +116,18 @@ function AdminDocumentos() {
   };
 
   const set = (key: string, value: string) => setForm((p) => ({ ...p, [key]: value }));
+
+  useEffect(() => {
+    set(
+      "taxa_franquia",
+      taxaTipo === "padrao"
+        ? "R$ 25.900,00 (vinte e cinco mil e novecentos reais)"
+        : taxaOutroValor
+          ? `R$ ${taxaOutroValor}`
+          : "",
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taxaTipo, taxaOutroValor]);
 
   // ──────────────────────────────────────────
   // Cotação de frete
@@ -345,6 +363,36 @@ function AdminDocumentos() {
                   <SelectItem value="5 conjuntos de máquinas">5 conjuntos de máquinas</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Taxa Inicial de Franquia</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={taxaTipo === "padrao" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setTaxaTipo("padrao")}
+                >
+                  Padrão (R$ 25.900,00)
+                </Button>
+                <Button
+                  type="button"
+                  variant={taxaTipo === "outro" ? "default" : "outline"}
+                  className="flex-1"
+                  onClick={() => setTaxaTipo("outro")}
+                >
+                  Outro valor
+                </Button>
+              </div>
+              {taxaTipo === "outro" && (
+                <Input
+                  className="mt-2"
+                  placeholder="ex: 30.000,00 (trinta mil reais)"
+                  value={taxaOutroValor}
+                  onChange={(e) => setTaxaOutroValor(e.target.value)}
+                />
+              )}
             </div>
 
             <div className="space-y-1.5">

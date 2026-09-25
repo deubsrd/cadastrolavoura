@@ -131,7 +131,7 @@ function gerarDocx(d: Record<string, string>): Promise<Uint8Array> {
     ["Data em que recebeu a COF e assinou a declaração", d.data_recebimento_cof || "_________________"],
     ["Área pretendida para localização do ponto", d.area_ponto || "_________________"],
     ["Modalidade de Franquia pretendida", d.modalidade || "_________________"],
-    ["Taxa Inicial de Franquia", "R$ 25.900,00 (vinte e cinco mil e novecentos reais)"],
+    ["Taxa Inicial de Franquia", d.taxa_franquia || "R$ 25.900,00 (vinte e cinco mil e novecentos reais)"],
     ["Dados Bancários para Pagamento da Taxa de Franquia", d.dados_bancarios || "_________________"],
     ["Atualização monetária", "variação positiva do IGP-M/FGV na menor periodicidade prevista em lei;"],
     ...(d.outras_condicoes?.trim() ? [["Outras Condições", d.outras_condicoes]] : []),
@@ -194,7 +194,7 @@ function gerarDocx(d: Record<string, string>): Promise<Uint8Array> {
       headers: { default: header },
       footers: { default: footer },
       children: [
-        shadedTitle("Anexo V — Minuta do Pré-Contrato de Franquia"),
+        shadedTitle("Pré-Contrato de Franquia"),
         sectionTitle("Das Partes:"),
         new Table({ width: { size: W1 + W2, type: WidthType.DXA }, columnWidths: [W1 + W2], rows: partesRows }),
         new Paragraph({ text: "", spacing: { after: 200 } }),
@@ -213,9 +213,26 @@ function gerarDocx(d: Record<string, string>): Promise<Uint8Array> {
         new Paragraph({ text: "", spacing: { after: 200 } }),
         body("FRANQUEADORA. Assinatura: ______________________________________"),
         new Paragraph({ text: "", spacing: { after: 200 } }),
-        body(`CANDIDATO(A). Nome: ${d.candidato_nome || "______________________"}   Assinatura: ______________________`),
+        body(`CANDIDATO(A). Nome: ${d.candidato_nome || "______________________"}`),
         new Paragraph({ text: "", spacing: { after: 200 } }),
-        body(`TESTEMUNHAS:\n1. Nome: ${d.testemunha1_nome || "____________________"}  CPF: ${d.testemunha1_cpf || "____________________"}\n2. Nome: ${d.testemunha2_nome || "____________________"}  CPF: ${d.testemunha2_cpf || "____________________"}`),
+        new Paragraph({
+          spacing: { after: 160 },
+          children: [
+            new TextRun({ text: "TESTEMUNHAS:", size: 21, font: FONT }),
+            new TextRun({
+              text: `Nome: ${d.testemunha1_nome || "____________________"}  CPF: ${d.testemunha1_cpf || "____________________"}.`,
+              size: 21,
+              font: FONT,
+              break: 7,
+            }),
+            new TextRun({
+              text: `Nome: ${d.testemunha2_nome || "____________________"}  CPF: ${d.testemunha2_cpf || "____________________"}`,
+              size: 21,
+              font: FONT,
+              break: 7,
+            }),
+          ],
+        }),
       ],
     }],
   });
