@@ -27,7 +27,6 @@ import {
   TrendingUp,
   TrendingDown,
   DollarSign,
-  Percent,
   BarChart3,
   Wallet,
   Plus,
@@ -147,7 +146,6 @@ function Dashboard({ store }: { store: ReturnType<typeof useFinanceiro> }) {
     activeRecord.removedItems || [],
   );
   const revenue = calc.fat_bruto || 1;
-  const margemPct = ((calc.margem_contribuicao / revenue) * 100).toFixed(1);
   const ebitdaPct = ((calc.ebitda / revenue) * 100).toFixed(1);
 
   const chartData = records.map((r) => {
@@ -178,13 +176,6 @@ function Dashboard({ store }: { store: ReturnType<typeof useFinanceiro> }) {
           value={formatCurrency(calc.fat_bruto)}
           icon={DollarSign}
           trend="neutral"
-        />
-        <KPICard
-          label="Margem de Contribuição"
-          value={formatCurrency(calc.margem_contribuicao)}
-          subtitle={`${margemPct}% do faturamento`}
-          icon={Percent}
-          trend="up"
         />
         <KPICard
           label="EBITDA"
