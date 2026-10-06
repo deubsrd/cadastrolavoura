@@ -27,7 +27,6 @@ import {
   TrendingUp,
   TrendingDown,
   DollarSign,
-  Percent,
   BarChart3,
   Wallet,
   Plus,
