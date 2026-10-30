@@ -5,3 +5,20 @@ verify_jwt = false
 
 [functions.gerar-precontrato]
 verify_jwt = false
+
+# Social Selling — webhook/callback/link são públicos (validam assinatura/estado por conta própria);
+# ss-engine e ss-ai checam o JWT de admin ou o segredo interno dentro da função.
+[functions.ig-webhook]
+verify_jwt = false
+
+[functions.ig-oauth]
+verify_jwt = false
+
+[functions.ss-link]
+verify_jwt = false
+
+[functions.ss-engine]
+verify_jwt = false
+
+[functions.ss-ai]
+verify_jwt = false
