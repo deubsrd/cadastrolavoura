@@ -1,7 +1,17 @@
 import { createFileRoute, Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Building2, HardHat, Map, LogOut, MessageCircleQuestion, FileText, Shirt } from "lucide-react";
+import {
+  Users,
+  Building2,
+  HardHat,
+  Map,
+  LogOut,
+  MessageCircleQuestion,
+  FileText,
+  Shirt,
+  Megaphone,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lavouraLogo from "@/assets/lavoura-logo.png";
 
@@ -49,7 +59,8 @@ function AdminLayout() {
   }
 
   const navItem = (to: string, label: string, Icon: typeof Users) => {
-    const active = location.pathname === to || (to === "/admin" && location.pathname === "/admin");
+    const active =
+      to === "/admin" ? location.pathname === "/admin" : location.pathname.startsWith(to);
     return (
       <Link
         to={to}
@@ -79,6 +90,7 @@ function AdminLayout() {
           {navItem("/admin/documentos", "Documentos", FileText)}
           {navItem("/admin/duvidas", "Dúvidas", MessageCircleQuestion)}
           {navItem("/admin/camisas", "Camisas", Shirt)}
+          {navItem("/admin/social", "Social Selling", Megaphone)}
         </nav>
         <Button
           variant="ghost"
@@ -142,6 +154,12 @@ function AdminLayout() {
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Camisas
+          </Link>
+          <Link
+            to="/admin/social"
+            className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            Social Selling
           </Link>
         </nav>
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">

@@ -1,0 +1,56 @@
+feature,area,priority,original,clone,notes
+Conectar conta Instagram profissional (login oficial Meta),canais,must,yes,yes,Instagram API com Instagram Login
+Receber webhooks de comentário/DM/story,canais,must,yes,yes,
+Gatilho comentário no feed ou reels,gatilhos,must,yes,yes,
+Gatilho mensagem recebida (DM),gatilhos,must,yes,yes,
+Gatilho resposta a story,gatilhos,must,yes,yes,
+Gatilho menção em story,gatilhos,should,yes,yes,
+Gatilho comentário em live,gatilhos,could,yes,yes,
+Palavras-chave: qualquer / exata / contém / começa com,gatilhos,must,yes,yes,
+Escopo de post: específico / qualquer / próximo post,gatilhos,must,yes,yes,
+Resposta pública ao comentário com variações aleatórias,gatilhos,must,yes,yes,
+Gerar respostas públicas com IA no tom da marca,gatilhos,should,yes,yes,
+Resposta privada (DM) a partir do comentário,blocos,must,yes,yes,
+Bloco Mensagem texto + botões de link,blocos,must,yes,yes,
+Bloco Pergunta (salva resposta em campo),blocos,must,yes,yes,
+Bloco Cartões (carrossel),blocos,should,yes,yes,
+Bloco Imagem / Vídeo / Áudio / PDF,blocos,should,yes,yes,
+Bloco Aguardar (delay),blocos,must,yes,yes,
+Bloco Condicional,blocos,must,yes,yes,
+Bloco Etiquetas (adicionar/remover),blocos,must,yes,yes,
+Bloco Distribuir (teste A/B),blocos,should,yes,yes,
+Bloco Campo personalizado,blocos,should,yes,yes,
+Bloco Iniciar / Pausar automação,blocos,could,yes,yes,
+Bloco Matemática,blocos,could,yes,yes,
+Bloco Requisição HTTP (ex.: Z-API / CRM),blocos,should,yes,yes,
+Bloco Google Sheets,blocos,could,yes,yes,via Web App do Apps Script
+Bloco Código,blocos,could,yes,skip,rodaria junto da chave de serviço; bloco HTTP cobre os casos
+Bloco Peça à IA (resposta gerada),blocos,should,yes,yes,
+Editor visual em canvas com salvar automático,editor,must,yes,yes,
+Desfazer/refazer e organizar nós,editor,should,yes,yes,
+Testar e publicar / pausar,editor,must,yes,yes,
+Métricas por automação,editor,should,yes,yes,
+Criar automação com IA a partir de descrição,editor,should,yes,yes,
+Templates próprios + biblioteca Lavoura,templates,should,yes,yes,
+Lista de automações com busca/filtros/pastas,automações,must,yes,yes,
+Listas de respostas reutilizáveis,automações,should,yes,yes,
+Rastreamento de cliques em links,métricas,must,yes,yes,redirect próprio
+Dashboard geral (KPIs + interações por tipo + gráfico diário),métricas,must,yes,yes,
+Sentimento das interações (IA),métricas,could,yes,yes,
+Contatos com filtros e filtros salvos,leads,must,yes,yes,
+Ações em massa nos contatos,leads,should,yes,yes,
+Ranking com pontos configuráveis por interação,leads,should,yes,yes,
+Etiquetas e campos personalizados,leads,must,yes,yes,
+Bloqueios (não automatizar para X),leads,should,yes,yes,
+LiveChat (responder DM manualmente),inbox,must,yes,yes,
+Inbox kanban com colunas classificadas por IA,inbox,should,yes,yes,
+Atalhos de chat,inbox,should,yes,yes,
+Iniciadores de conversa (ice breakers),canais,could,yes,yes,
+Canal WhatsApp,canais,could,yes,partial,via bloco HTTP + Z-API
+Membros da equipe e níveis,conta,could,yes,skip,só o admin acessa a área da franqueadora
+Log de auditoria,conta,could,yes,skip,só o admin acessa a área da franqueadora
+Variáveis globais,conta,could,yes,yes,
+Assistente IA: analisar perfil / recomendar automação,ia,could,yes,yes,
+Missões e recompensas de onboarding,onboarding,could,yes,skip,mecânica de venda da Gaio
+Marca d'água e limite de contatos,planos,could,yes,skip,não faz sentido em uso próprio
+Comunidade de templates de terceiros,templates,could,yes,skip,rede de usuários deles

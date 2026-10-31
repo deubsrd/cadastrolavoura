@@ -24,11 +24,23 @@ import { Route as AppFinanceiroRouteImport } from './routes/app.financeiro'
 import { Route as AppCentralRouteImport } from './routes/app.central'
 import { Route as AppCamisasRouteImport } from './routes/app.camisas'
 import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
+import { Route as AdminSocialRouteImport } from './routes/admin.social'
 import { Route as AdminObraRouteImport } from './routes/admin.obra'
 import { Route as AdminJornadaRouteImport } from './routes/admin.jornada'
 import { Route as AdminDuvidasRouteImport } from './routes/admin.duvidas'
 import { Route as AdminDocumentosRouteImport } from './routes/admin.documentos'
 import { Route as AdminCamisasRouteImport } from './routes/admin.camisas'
+import { Route as AdminSocialIndexRouteImport } from './routes/admin.social.index'
+import { Route as AdminSocialTemplatesRouteImport } from './routes/admin.social.templates'
+import { Route as AdminSocialRespostasRouteImport } from './routes/admin.social.respostas'
+import { Route as AdminSocialRankingRouteImport } from './routes/admin.social.ranking'
+import { Route as AdminSocialInboxRouteImport } from './routes/admin.social.inbox'
+import { Route as AdminSocialContatosRouteImport } from './routes/admin.social.contatos'
+import { Route as AdminSocialConfigRouteImport } from './routes/admin.social.config'
+import { Route as AdminSocialChatRouteImport } from './routes/admin.social.chat'
+import { Route as AdminSocialAssistenteRouteImport } from './routes/admin.social.assistente'
+import { Route as AdminSocialAutomacoesIndexRouteImport } from './routes/admin.social.automacoes.index'
+import { Route as AdminSocialAutomacoesIdRouteImport } from './routes/admin.social.automacoes.$id'
 
 const ObrigadoRoute = ObrigadoRouteImport.update({
   id: '/obrigado',
@@ -105,6 +117,11 @@ const AdminUnidadesRoute = AdminUnidadesRouteImport.update({
   path: '/unidades',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSocialRoute = AdminSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminObraRoute = AdminObraRouteImport.update({
   id: '/obra',
   path: '/obra',
@@ -130,6 +147,62 @@ const AdminCamisasRoute = AdminCamisasRouteImport.update({
   path: '/camisas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSocialIndexRoute = AdminSocialIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialTemplatesRoute = AdminSocialTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialRespostasRoute = AdminSocialRespostasRouteImport.update({
+  id: '/respostas',
+  path: '/respostas',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialRankingRoute = AdminSocialRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialInboxRoute = AdminSocialInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialContatosRoute = AdminSocialContatosRouteImport.update({
+  id: '/contatos',
+  path: '/contatos',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialConfigRoute = AdminSocialConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialChatRoute = AdminSocialChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialAssistenteRoute = AdminSocialAssistenteRouteImport.update({
+  id: '/assistente',
+  path: '/assistente',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialAutomacoesIndexRoute =
+  AdminSocialAutomacoesIndexRouteImport.update({
+    id: '/automacoes/',
+    path: '/automacoes/',
+    getParentRoute: () => AdminSocialRoute,
+  } as any)
+const AdminSocialAutomacoesIdRoute = AdminSocialAutomacoesIdRouteImport.update({
+  id: '/automacoes/$id',
+  path: '/automacoes/$id',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -143,6 +216,7 @@ export interface FileRoutesByFullPath {
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
+  '/admin/social': typeof AdminSocialRouteWithChildren
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/camisas': typeof AppCamisasRoute
   '/app/central': typeof AppCentralRoute
@@ -152,6 +226,17 @@ export interface FileRoutesByFullPath {
   '/app/progresso': typeof AppProgressoRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/admin/social/assistente': typeof AdminSocialAssistenteRoute
+  '/admin/social/chat': typeof AdminSocialChatRoute
+  '/admin/social/config': typeof AdminSocialConfigRoute
+  '/admin/social/contatos': typeof AdminSocialContatosRoute
+  '/admin/social/inbox': typeof AdminSocialInboxRoute
+  '/admin/social/ranking': typeof AdminSocialRankingRoute
+  '/admin/social/respostas': typeof AdminSocialRespostasRoute
+  '/admin/social/templates': typeof AdminSocialTemplatesRoute
+  '/admin/social/': typeof AdminSocialIndexRoute
+  '/admin/social/automacoes/$id': typeof AdminSocialAutomacoesIdRoute
+  '/admin/social/automacoes/': typeof AdminSocialAutomacoesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -172,6 +257,17 @@ export interface FileRoutesByTo {
   '/app/progresso': typeof AppProgressoRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/admin/social/assistente': typeof AdminSocialAssistenteRoute
+  '/admin/social/chat': typeof AdminSocialChatRoute
+  '/admin/social/config': typeof AdminSocialConfigRoute
+  '/admin/social/contatos': typeof AdminSocialContatosRoute
+  '/admin/social/inbox': typeof AdminSocialInboxRoute
+  '/admin/social/ranking': typeof AdminSocialRankingRoute
+  '/admin/social/respostas': typeof AdminSocialRespostasRoute
+  '/admin/social/templates': typeof AdminSocialTemplatesRoute
+  '/admin/social': typeof AdminSocialIndexRoute
+  '/admin/social/automacoes/$id': typeof AdminSocialAutomacoesIdRoute
+  '/admin/social/automacoes': typeof AdminSocialAutomacoesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -186,6 +282,7 @@ export interface FileRoutesById {
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
+  '/admin/social': typeof AdminSocialRouteWithChildren
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/camisas': typeof AppCamisasRoute
   '/app/central': typeof AppCentralRoute
@@ -195,6 +292,17 @@ export interface FileRoutesById {
   '/app/progresso': typeof AppProgressoRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/admin/social/assistente': typeof AdminSocialAssistenteRoute
+  '/admin/social/chat': typeof AdminSocialChatRoute
+  '/admin/social/config': typeof AdminSocialConfigRoute
+  '/admin/social/contatos': typeof AdminSocialContatosRoute
+  '/admin/social/inbox': typeof AdminSocialInboxRoute
+  '/admin/social/ranking': typeof AdminSocialRankingRoute
+  '/admin/social/respostas': typeof AdminSocialRespostasRoute
+  '/admin/social/templates': typeof AdminSocialTemplatesRoute
+  '/admin/social/': typeof AdminSocialIndexRoute
+  '/admin/social/automacoes/$id': typeof AdminSocialAutomacoesIdRoute
+  '/admin/social/automacoes/': typeof AdminSocialAutomacoesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -210,6 +318,7 @@ export interface FileRouteTypes {
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
+    | '/admin/social'
     | '/admin/unidades'
     | '/app/camisas'
     | '/app/central'
@@ -219,6 +328,17 @@ export interface FileRouteTypes {
     | '/app/progresso'
     | '/admin/'
     | '/app/'
+    | '/admin/social/assistente'
+    | '/admin/social/chat'
+    | '/admin/social/config'
+    | '/admin/social/contatos'
+    | '/admin/social/inbox'
+    | '/admin/social/ranking'
+    | '/admin/social/respostas'
+    | '/admin/social/templates'
+    | '/admin/social/'
+    | '/admin/social/automacoes/$id'
+    | '/admin/social/automacoes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -239,6 +359,17 @@ export interface FileRouteTypes {
     | '/app/progresso'
     | '/admin'
     | '/app'
+    | '/admin/social/assistente'
+    | '/admin/social/chat'
+    | '/admin/social/config'
+    | '/admin/social/contatos'
+    | '/admin/social/inbox'
+    | '/admin/social/ranking'
+    | '/admin/social/respostas'
+    | '/admin/social/templates'
+    | '/admin/social'
+    | '/admin/social/automacoes/$id'
+    | '/admin/social/automacoes'
   id:
     | '__root__'
     | '/'
@@ -252,6 +383,7 @@ export interface FileRouteTypes {
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
+    | '/admin/social'
     | '/admin/unidades'
     | '/app/camisas'
     | '/app/central'
@@ -261,6 +393,17 @@ export interface FileRouteTypes {
     | '/app/progresso'
     | '/admin/'
     | '/app/'
+    | '/admin/social/assistente'
+    | '/admin/social/chat'
+    | '/admin/social/config'
+    | '/admin/social/contatos'
+    | '/admin/social/inbox'
+    | '/admin/social/ranking'
+    | '/admin/social/respostas'
+    | '/admin/social/templates'
+    | '/admin/social/'
+    | '/admin/social/automacoes/$id'
+    | '/admin/social/automacoes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -379,6 +522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUnidadesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/social': {
+      id: '/admin/social'
+      path: '/social'
+      fullPath: '/admin/social'
+      preLoaderRoute: typeof AdminSocialRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/obra': {
       id: '/admin/obra'
       path: '/obra'
@@ -414,8 +564,117 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCamisasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/social/': {
+      id: '/admin/social/'
+      path: '/'
+      fullPath: '/admin/social/'
+      preLoaderRoute: typeof AdminSocialIndexRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/templates': {
+      id: '/admin/social/templates'
+      path: '/templates'
+      fullPath: '/admin/social/templates'
+      preLoaderRoute: typeof AdminSocialTemplatesRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/respostas': {
+      id: '/admin/social/respostas'
+      path: '/respostas'
+      fullPath: '/admin/social/respostas'
+      preLoaderRoute: typeof AdminSocialRespostasRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/ranking': {
+      id: '/admin/social/ranking'
+      path: '/ranking'
+      fullPath: '/admin/social/ranking'
+      preLoaderRoute: typeof AdminSocialRankingRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/inbox': {
+      id: '/admin/social/inbox'
+      path: '/inbox'
+      fullPath: '/admin/social/inbox'
+      preLoaderRoute: typeof AdminSocialInboxRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/contatos': {
+      id: '/admin/social/contatos'
+      path: '/contatos'
+      fullPath: '/admin/social/contatos'
+      preLoaderRoute: typeof AdminSocialContatosRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/config': {
+      id: '/admin/social/config'
+      path: '/config'
+      fullPath: '/admin/social/config'
+      preLoaderRoute: typeof AdminSocialConfigRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/chat': {
+      id: '/admin/social/chat'
+      path: '/chat'
+      fullPath: '/admin/social/chat'
+      preLoaderRoute: typeof AdminSocialChatRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/assistente': {
+      id: '/admin/social/assistente'
+      path: '/assistente'
+      fullPath: '/admin/social/assistente'
+      preLoaderRoute: typeof AdminSocialAssistenteRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/automacoes/': {
+      id: '/admin/social/automacoes/'
+      path: '/automacoes'
+      fullPath: '/admin/social/automacoes/'
+      preLoaderRoute: typeof AdminSocialAutomacoesIndexRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/automacoes/$id': {
+      id: '/admin/social/automacoes/$id'
+      path: '/automacoes/$id'
+      fullPath: '/admin/social/automacoes/$id'
+      preLoaderRoute: typeof AdminSocialAutomacoesIdRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
   }
 }
+
+interface AdminSocialRouteChildren {
+  AdminSocialAssistenteRoute: typeof AdminSocialAssistenteRoute
+  AdminSocialChatRoute: typeof AdminSocialChatRoute
+  AdminSocialConfigRoute: typeof AdminSocialConfigRoute
+  AdminSocialContatosRoute: typeof AdminSocialContatosRoute
+  AdminSocialInboxRoute: typeof AdminSocialInboxRoute
+  AdminSocialRankingRoute: typeof AdminSocialRankingRoute
+  AdminSocialRespostasRoute: typeof AdminSocialRespostasRoute
+  AdminSocialTemplatesRoute: typeof AdminSocialTemplatesRoute
+  AdminSocialIndexRoute: typeof AdminSocialIndexRoute
+  AdminSocialAutomacoesIdRoute: typeof AdminSocialAutomacoesIdRoute
+  AdminSocialAutomacoesIndexRoute: typeof AdminSocialAutomacoesIndexRoute
+}
+
+const AdminSocialRouteChildren: AdminSocialRouteChildren = {
+  AdminSocialAssistenteRoute: AdminSocialAssistenteRoute,
+  AdminSocialChatRoute: AdminSocialChatRoute,
+  AdminSocialConfigRoute: AdminSocialConfigRoute,
+  AdminSocialContatosRoute: AdminSocialContatosRoute,
+  AdminSocialInboxRoute: AdminSocialInboxRoute,
+  AdminSocialRankingRoute: AdminSocialRankingRoute,
+  AdminSocialRespostasRoute: AdminSocialRespostasRoute,
+  AdminSocialTemplatesRoute: AdminSocialTemplatesRoute,
+  AdminSocialIndexRoute: AdminSocialIndexRoute,
+  AdminSocialAutomacoesIdRoute: AdminSocialAutomacoesIdRoute,
+  AdminSocialAutomacoesIndexRoute: AdminSocialAutomacoesIndexRoute,
+}
+
+const AdminSocialRouteWithChildren = AdminSocialRoute._addFileChildren(
+  AdminSocialRouteChildren,
+)
 
 interface AdminRouteChildren {
   AdminCamisasRoute: typeof AdminCamisasRoute
@@ -423,6 +682,7 @@ interface AdminRouteChildren {
   AdminDuvidasRoute: typeof AdminDuvidasRoute
   AdminJornadaRoute: typeof AdminJornadaRoute
   AdminObraRoute: typeof AdminObraRoute
+  AdminSocialRoute: typeof AdminSocialRouteWithChildren
   AdminUnidadesRoute: typeof AdminUnidadesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -433,6 +693,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDuvidasRoute: AdminDuvidasRoute,
   AdminJornadaRoute: AdminJornadaRoute,
   AdminObraRoute: AdminObraRoute,
+  AdminSocialRoute: AdminSocialRouteWithChildren,
   AdminUnidadesRoute: AdminUnidadesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
