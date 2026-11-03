@@ -1,0 +1,1 @@
+ALTER TABLE public.ss_channel_secrets ADD COLUMN IF NOT EXISTS page_id text, ADD COLUMN IF NOT EXISTS ig_user_id text, ADD COLUMN IF NOT EXISTS ig_username text;

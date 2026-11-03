@@ -9,13 +9,11 @@
 // Autocontida, sem ../_shared, no mesmo padrão das outras functions do repo.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const GRAPH = `https://graph.instagram.com/${Deno.env.get("IG_GRAPH_VERSION") ?? "v24.0"}`;
-const SCOPES = [
-  "instagram_business_basic",
-  "instagram_business_manage_messages",
-  "instagram_business_manage_comments",
-].join(",");
-const WEBHOOK_FIELDS = "comments,live_comments,messages,messaging_postbacks";
+// Login unificado (Facebook Login for Business) — config_id define as permissões.
+const GRAPH_VERSION = "v26.0";
+const GRAPH = `https://graph.facebook.com/${GRAPH_VERSION}`;
+const PREFERRED_IG = "lavanderialavourabr";
+const WEBHOOK_FIELDS = "messages,messaging_postbacks,feed";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -71,44 +69,57 @@ async function handleCallback(url: URL) {
     if (!code || !nonce || sig !== (await hmac(nonce))) throw new Error("state inválido");
     if (Date.now() - Number(ts) > 15 * 60_000) throw new Error("login expirou, tente de novo");
 
-    // 1) code -> token curto
-    const form = new FormData();
-    form.set("client_id", env("IG_APP_ID"));
-    form.set("client_secret", env("IG_APP_SECRET"));
-    form.set("grant_type", "authorization_code");
-    form.set("redirect_uri", redirectUri());
-    form.set("code", code.replace(/#_$/, ""));
-    const short = await igJson(await fetch("https://api.instagram.com/oauth/access_token", { method: "POST", body: form }));
+    // 1) code -> token curto de usuário
+    const q1 = new URLSearchParams({
+      client_id: env("IG_APP_ID"), client_secret: env("IG_APP_SECRET"),
+      redirect_uri: redirectUri(), code: code.replace(/#_$/, ""),
+    });
+    const short = await igJson(await fetch(`${GRAPH}/oauth/access_token?${q1}`));
 
-    // 2) token curto -> token longo (60 dias)
-    const long = await igJson(await fetch(
-      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${env("IG_APP_SECRET")}&access_token=${short.access_token}`,
+    // 2) token curto -> token longo de usuário
+    const q2 = new URLSearchParams({
+      grant_type: "fb_exchange_token", client_id: env("IG_APP_ID"),
+      client_secret: env("IG_APP_SECRET"), fb_exchange_token: short.access_token,
+    });
+    const long = await igJson(await fetch(`${GRAPH}/oauth/access_token?${q2}`));
+
+    // 3) Páginas + conta IG profissional vinculada
+    const accounts = await igJson(await fetch(
+      `${GRAPH}/me/accounts?fields=id,name,access_token,instagram_business_account{id,username}&limit=100&access_token=${long.access_token}`,
     ));
-    const token: string = long.access_token;
-    const expiresAt = new Date(Date.now() + (long.expires_in ?? 5_184_000) * 1000).toISOString();
+    const pages: any[] = accounts.data ?? [];
+    const withIg = pages.filter((p) => p.instagram_business_account?.id);
+    const page = withIg.find((p) => p.instagram_business_account.username === PREFERRED_IG) ?? withIg[0];
+    if (!page) throw new Error("Nenhuma Página com Instagram profissional vinculado foi autorizada.");
+    const ig = page.instagram_business_account;
+    const pageToken: string = page.access_token;
 
-    // 3) quem é
-    const me = await igJson(await fetch(`${GRAPH}/me?fields=user_id,username,name,profile_picture_url&access_token=${token}`));
-
-    // 4) salva
+    // 4) salva (page token derivado de token longo não expira)
     const db = service();
     const { data: ch, error } = await db.from("ss_channels").upsert({
       kind: "instagram",
-      external_id: String(me.user_id ?? me.id),
-      username: me.username,
-      name: me.name,
-      avatar_url: me.profile_picture_url,
-      token_expires_at: expiresAt,
+      external_id: String(ig.id),
+      username: ig.username,
+      name: page.name,
+      token_expires_at: null,
       status: "connected",
     }, { onConflict: "kind,external_id" }).select("id").single();
     if (error) throw error;
     const { error: e2 } = await db.from("ss_channel_secrets").upsert({
-      channel_id: ch.id, access_token: token, updated_at: new Date().toISOString(),
+      channel_id: ch.id, access_token: pageToken, page_id: String(page.id),
+      ig_user_id: String(ig.id), ig_username: ig.username, updated_at: new Date().toISOString(),
     });
     if (e2) throw e2;
 
-    // 5) assina webhooks desta conta no app
-    await igJson(await fetch(`${GRAPH}/me/subscribed_apps?subscribed_fields=${WEBHOOK_FIELDS}&access_token=${token}`, { method: "POST" }));
+    // 5) assina webhooks da Página (falha só é registrada, não quebra a conexão)
+    try {
+      await igJson(await fetch(
+        `${GRAPH}/${page.id}/subscribed_apps?subscribed_fields=${WEBHOOK_FIELDS}&access_token=${pageToken}`,
+        { method: "POST" },
+      ));
+    } catch (e) {
+      console.error("ig-oauth subscribed_apps falhou (provável falta de pages_manage_metadata):", e instanceof Error ? e.message : e);
+    }
 
     return back("ig=ok");
   } catch (e) {
@@ -117,27 +128,27 @@ async function handleCallback(url: URL) {
   }
 }
 
+// Page token derivado de token longo não expira: só checa via debug_token e registra.
 async function refreshTokens() {
   const db = service();
-  const soon = new Date(Date.now() + 15 * 86_400_000).toISOString();
-  const { data: chans } = await db.from("ss_channels").select("id").eq("kind", "instagram")
-    .eq("status", "connected").lt("token_expires_at", soon);
+  const appToken = `${env("IG_APP_ID")}|${env("IG_APP_SECRET")}`;
+  const { data: chans } = await db.from("ss_channels").select("id").eq("kind", "instagram").eq("status", "connected");
   let ok = 0;
   for (const c of chans ?? []) {
-    const { data: s } = await db.from("ss_channel_secrets").select("access_token").eq("channel_id", c.id).single();
+    const { data: s } = await db.from("ss_channel_secrets").select("access_token").eq("channel_id", c.id).maybeSingle();
     if (!s) continue;
     try {
       const r = await igJson(await fetch(
-        `https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=${s.access_token}`,
+        `${GRAPH}/debug_token?input_token=${encodeURIComponent(s.access_token)}&access_token=${encodeURIComponent(appToken)}`,
       ));
-      await db.from("ss_channel_secrets").update({ access_token: r.access_token, updated_at: new Date().toISOString() }).eq("channel_id", c.id);
-      await db.from("ss_channels").update({
-        token_expires_at: new Date(Date.now() + (r.expires_in ?? 5_184_000) * 1000).toISOString(),
-      }).eq("id", c.id);
-      ok++;
+      const d = r.data ?? {};
+      console.log("ig-oauth debug_token", c.id, JSON.stringify({
+        is_valid: d.is_valid, type: d.type, expires_at: d.expires_at,
+        data_access_expires_at: d.data_access_expires_at, scopes: d.scopes,
+      }));
+      if (d.is_valid) ok++;
     } catch (e) {
-      console.error("refresh", c.id, e);
-      await db.from("ss_channels").update({ status: "expired" }).eq("id", c.id);
+      console.error("ig-oauth debug_token erro", c.id, e instanceof Error ? e.message : e);
     }
   }
   return ok;
@@ -160,13 +171,11 @@ Deno.serve(async (req) => {
     if (body.action === "start") {
       const nonce = `${crypto.randomUUID()}-${Date.now()}`;
       const state = `${nonce}.${await hmac(nonce)}`;
-      const auth = new URL("https://www.instagram.com/oauth/authorize");
-      auth.searchParams.set("enable_fb_login", "0");
-      auth.searchParams.set("force_authentication", "1");
+      const auth = new URL(`https://www.facebook.com/${GRAPH_VERSION}/dialog/oauth`);
       auth.searchParams.set("client_id", env("IG_APP_ID"));
       auth.searchParams.set("redirect_uri", redirectUri());
+      auth.searchParams.set("config_id", env("FB_LOGIN_CONFIG_ID"));
       auth.searchParams.set("response_type", "code");
-      auth.searchParams.set("scope", SCOPES);
       auth.searchParams.set("state", state);
       return json({ url: auth.toString() });
     }
