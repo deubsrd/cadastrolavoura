@@ -820,6 +820,72 @@ export type Database = {
         }
         Relationships: []
       }
+      ss_consultor: {
+        Row: {
+          ativo: boolean
+          id: boolean
+          igsid: string | null
+          status: string
+          ultima_mensagem_em: string | null
+          ultimo_envio_em: string | null
+          ultimo_erro: string | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          id?: boolean
+          igsid?: string | null
+          status?: string
+          ultima_mensagem_em?: string | null
+          ultimo_envio_em?: string | null
+          ultimo_erro?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          id?: boolean
+          igsid?: string | null
+          status?: string
+          ultima_mensagem_em?: string | null
+          ultimo_envio_em?: string | null
+          ultimo_erro?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      ss_consultor_fila: {
+        Row: {
+          created_at: string
+          enviada_em: string | null
+          id: string
+          status: string
+          tentativas: number
+          texto: string
+          ultimo_erro: string | null
+        }
+        Insert: {
+          created_at?: string
+          enviada_em?: string | null
+          id?: string
+          status?: string
+          tentativas?: number
+          texto: string
+          ultimo_erro?: string | null
+        }
+        Update: {
+          created_at?: string
+          enviada_em?: string | null
+          id?: string
+          status?: string
+          tentativas?: number
+          texto?: string
+          ultimo_erro?: string | null
+        }
+        Relationships: []
+      }
       ss_contact_tags: {
         Row: {
           contact_id: string
