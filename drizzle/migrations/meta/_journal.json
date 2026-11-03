@@ -36,6 +36,13 @@
       "when": 1793737860920,
       "tag": "0004_ss_consultor_notificacoes",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793739367154,
+      "tag": "0005_tighten_unidades_jornada_storage_policies",
+      "breakpoints": true
     }
   ]
 }
