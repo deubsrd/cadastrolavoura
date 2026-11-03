@@ -9,57 +9,42 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ObrigadoRouteImport } from './routes/obrigado'
-import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
-import { Route as CadastroRouteImport } from './routes/cadastro'
-import { Route as AppRouteImport } from './routes/app'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as CadastroRouteImport } from './routes/cadastro'
+import { Route as DefinirSenhaRouteImport } from './routes/definir-senha'
+import { Route as ObrigadoRouteImport } from './routes/obrigado'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AppProgressoRouteImport } from './routes/app.progresso'
-import { Route as AppObraRouteImport } from './routes/app.obra'
-import { Route as AppMarketingRouteImport } from './routes/app.marketing'
-import { Route as AppFinanceiroRouteImport } from './routes/app.financeiro'
-import { Route as AppCentralRouteImport } from './routes/app.central'
-import { Route as AppCamisasRouteImport } from './routes/app.camisas'
-import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
-import { Route as AdminSocialRouteImport } from './routes/admin.social'
-import { Route as AdminObraRouteImport } from './routes/admin.obra'
-import { Route as AdminJornadaRouteImport } from './routes/admin.jornada'
-import { Route as AdminDuvidasRouteImport } from './routes/admin.duvidas'
-import { Route as AdminDocumentosRouteImport } from './routes/admin.documentos'
 import { Route as AdminCamisasRouteImport } from './routes/admin.camisas'
+import { Route as AdminDocumentosRouteImport } from './routes/admin.documentos'
+import { Route as AdminDuvidasRouteImport } from './routes/admin.duvidas'
+import { Route as AdminJornadaRouteImport } from './routes/admin.jornada'
+import { Route as AdminObraRouteImport } from './routes/admin.obra'
+import { Route as AdminSocialRouteImport } from './routes/admin.social'
+import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppCamisasRouteImport } from './routes/app.camisas'
+import { Route as AppCentralRouteImport } from './routes/app.central'
+import { Route as AppFinanceiroRouteImport } from './routes/app.financeiro'
+import { Route as AppMarketingRouteImport } from './routes/app.marketing'
+import { Route as AppObraRouteImport } from './routes/app.obra'
+import { Route as AppProgressoRouteImport } from './routes/app.progresso'
 import { Route as AdminSocialIndexRouteImport } from './routes/admin.social.index'
-import { Route as AdminSocialTemplatesRouteImport } from './routes/admin.social.templates'
-import { Route as AdminSocialRespostasRouteImport } from './routes/admin.social.respostas'
-import { Route as AdminSocialRankingRouteImport } from './routes/admin.social.ranking'
-import { Route as AdminSocialInboxRouteImport } from './routes/admin.social.inbox'
-import { Route as AdminSocialContatosRouteImport } from './routes/admin.social.contatos'
-import { Route as AdminSocialConfigRouteImport } from './routes/admin.social.config'
-import { Route as AdminSocialChatRouteImport } from './routes/admin.social.chat'
 import { Route as AdminSocialAssistenteRouteImport } from './routes/admin.social.assistente'
+import { Route as AdminSocialChatRouteImport } from './routes/admin.social.chat'
+import { Route as AdminSocialConfigRouteImport } from './routes/admin.social.config'
+import { Route as AdminSocialContatosRouteImport } from './routes/admin.social.contatos'
+import { Route as AdminSocialInboxRouteImport } from './routes/admin.social.inbox'
+import { Route as AdminSocialRankingRouteImport } from './routes/admin.social.ranking'
+import { Route as AdminSocialRespostasRouteImport } from './routes/admin.social.respostas'
+import { Route as AdminSocialTemplatesRouteImport } from './routes/admin.social.templates'
 import { Route as AdminSocialAutomacoesIndexRouteImport } from './routes/admin.social.automacoes.index'
 import { Route as AdminSocialAutomacoesIdRouteImport } from './routes/admin.social.automacoes.$id'
 
-const ObrigadoRoute = ObrigadoRouteImport.update({
-  id: '/obrigado',
-  path: '/obrigado',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DefinirSenhaRoute = DefinirSenhaRouteImport.update({
-  id: '/definir-senha',
-  path: '/definir-senha',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CadastroRoute = CadastroRouteImport.update({
-  id: '/cadastro',
-  path: '/cadastro',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -67,79 +52,29 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRoute,
+const CadastroRoute = CadastroRouteImport.update({
+  id: '/cadastro',
+  path: '/cadastro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DefinirSenhaRoute = DefinirSenhaRouteImport.update({
+  id: '/definir-senha',
+  path: '/definir-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ObrigadoRoute = ObrigadoRouteImport.update({
+  id: '/obrigado',
+  path: '/obrigado',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AppProgressoRoute = AppProgressoRouteImport.update({
-  id: '/progresso',
-  path: '/progresso',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppObraRoute = AppObraRouteImport.update({
-  id: '/obra',
-  path: '/obra',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMarketingRoute = AppMarketingRouteImport.update({
-  id: '/marketing',
-  path: '/marketing',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppFinanceiroRoute = AppFinanceiroRouteImport.update({
-  id: '/financeiro',
-  path: '/financeiro',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCentralRoute = AppCentralRouteImport.update({
-  id: '/central',
-  path: '/central',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppCamisasRoute = AppCamisasRouteImport.update({
-  id: '/camisas',
-  path: '/camisas',
-  getParentRoute: () => AppRoute,
-} as any)
-const AdminUnidadesRoute = AdminUnidadesRouteImport.update({
-  id: '/unidades',
-  path: '/unidades',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSocialRoute = AdminSocialRouteImport.update({
-  id: '/social',
-  path: '/social',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminObraRoute = AdminObraRouteImport.update({
-  id: '/obra',
-  path: '/obra',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminJornadaRoute = AdminJornadaRouteImport.update({
-  id: '/jornada',
-  path: '/jornada',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminDuvidasRoute = AdminDuvidasRouteImport.update({
-  id: '/duvidas',
-  path: '/duvidas',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminDocumentosRoute = AdminDocumentosRouteImport.update({
-  id: '/documentos',
-  path: '/documentos',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCamisasRoute = AdminCamisasRouteImport.update({
@@ -147,39 +82,79 @@ const AdminCamisasRoute = AdminCamisasRouteImport.update({
   path: '/camisas',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDocumentosRoute = AdminDocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDuvidasRoute = AdminDuvidasRouteImport.update({
+  id: '/duvidas',
+  path: '/duvidas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminJornadaRoute = AdminJornadaRouteImport.update({
+  id: '/jornada',
+  path: '/jornada',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminObraRoute = AdminObraRouteImport.update({
+  id: '/obra',
+  path: '/obra',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSocialRoute = AdminSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUnidadesRoute = AdminUnidadesRouteImport.update({
+  id: '/unidades',
+  path: '/unidades',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCamisasRoute = AppCamisasRouteImport.update({
+  id: '/camisas',
+  path: '/camisas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCentralRoute = AppCentralRouteImport.update({
+  id: '/central',
+  path: '/central',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinanceiroRoute = AppFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMarketingRoute = AppMarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppObraRoute = AppObraRouteImport.update({
+  id: '/obra',
+  path: '/obra',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProgressoRoute = AppProgressoRouteImport.update({
+  id: '/progresso',
+  path: '/progresso',
+  getParentRoute: () => AppRoute,
+} as any)
 const AdminSocialIndexRoute = AdminSocialIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminSocialRoute,
 } as any)
-const AdminSocialTemplatesRoute = AdminSocialTemplatesRouteImport.update({
-  id: '/templates',
-  path: '/templates',
-  getParentRoute: () => AdminSocialRoute,
-} as any)
-const AdminSocialRespostasRoute = AdminSocialRespostasRouteImport.update({
-  id: '/respostas',
-  path: '/respostas',
-  getParentRoute: () => AdminSocialRoute,
-} as any)
-const AdminSocialRankingRoute = AdminSocialRankingRouteImport.update({
-  id: '/ranking',
-  path: '/ranking',
-  getParentRoute: () => AdminSocialRoute,
-} as any)
-const AdminSocialInboxRoute = AdminSocialInboxRouteImport.update({
-  id: '/inbox',
-  path: '/inbox',
-  getParentRoute: () => AdminSocialRoute,
-} as any)
-const AdminSocialContatosRoute = AdminSocialContatosRouteImport.update({
-  id: '/contatos',
-  path: '/contatos',
-  getParentRoute: () => AdminSocialRoute,
-} as any)
-const AdminSocialConfigRoute = AdminSocialConfigRouteImport.update({
-  id: '/config',
-  path: '/config',
+const AdminSocialAssistenteRoute = AdminSocialAssistenteRouteImport.update({
+  id: '/assistente',
+  path: '/assistente',
   getParentRoute: () => AdminSocialRoute,
 } as any)
 const AdminSocialChatRoute = AdminSocialChatRouteImport.update({
@@ -187,9 +162,34 @@ const AdminSocialChatRoute = AdminSocialChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AdminSocialRoute,
 } as any)
-const AdminSocialAssistenteRoute = AdminSocialAssistenteRouteImport.update({
-  id: '/assistente',
-  path: '/assistente',
+const AdminSocialConfigRoute = AdminSocialConfigRouteImport.update({
+  id: '/config',
+  path: '/config',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialContatosRoute = AdminSocialContatosRouteImport.update({
+  id: '/contatos',
+  path: '/contatos',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialInboxRoute = AdminSocialInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialRankingRoute = AdminSocialRankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialRespostasRoute = AdminSocialRespostasRouteImport.update({
+  id: '/respostas',
+  path: '/respostas',
+  getParentRoute: () => AdminSocialRoute,
+} as any)
+const AdminSocialTemplatesRoute = AdminSocialTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
   getParentRoute: () => AdminSocialRoute,
 } as any)
 const AdminSocialAutomacoesIndexRoute =
@@ -417,32 +417,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/obrigado': {
-      id: '/obrigado'
-      path: '/obrigado'
-      fullPath: '/obrigado'
-      preLoaderRoute: typeof ObrigadoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/definir-senha': {
-      id: '/definir-senha'
-      path: '/definir-senha'
-      fullPath: '/definir-senha'
-      preLoaderRoute: typeof DefinirSenhaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cadastro': {
-      id: '/cadastro'
-      path: '/cadastro'
-      fullPath: '/cadastro'
-      preLoaderRoute: typeof CadastroRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -452,109 +431,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/': {
-      id: '/app/'
-      path: '/'
-      fullPath: '/app/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
+    '/cadastro': {
+      id: '/cadastro'
+      path: '/cadastro'
+      fullPath: '/cadastro'
+      preLoaderRoute: typeof CadastroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/definir-senha': {
+      id: '/definir-senha'
+      path: '/definir-senha'
+      fullPath: '/definir-senha'
+      preLoaderRoute: typeof DefinirSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/obrigado': {
+      id: '/obrigado'
+      path: '/obrigado'
+      fullPath: '/obrigado'
+      preLoaderRoute: typeof ObrigadoRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/': {
       id: '/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/app/progresso': {
-      id: '/app/progresso'
-      path: '/progresso'
-      fullPath: '/app/progresso'
-      preLoaderRoute: typeof AppProgressoRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/obra': {
-      id: '/app/obra'
-      path: '/obra'
-      fullPath: '/app/obra'
-      preLoaderRoute: typeof AppObraRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/marketing': {
-      id: '/app/marketing'
-      path: '/marketing'
-      fullPath: '/app/marketing'
-      preLoaderRoute: typeof AppMarketingRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/financeiro': {
-      id: '/app/financeiro'
-      path: '/financeiro'
-      fullPath: '/app/financeiro'
-      preLoaderRoute: typeof AppFinanceiroRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/central': {
-      id: '/app/central'
-      path: '/central'
-      fullPath: '/app/central'
-      preLoaderRoute: typeof AppCentralRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/camisas': {
-      id: '/app/camisas'
-      path: '/camisas'
-      fullPath: '/app/camisas'
-      preLoaderRoute: typeof AppCamisasRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/admin/unidades': {
-      id: '/admin/unidades'
-      path: '/unidades'
-      fullPath: '/admin/unidades'
-      preLoaderRoute: typeof AdminUnidadesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/social': {
-      id: '/admin/social'
-      path: '/social'
-      fullPath: '/admin/social'
-      preLoaderRoute: typeof AdminSocialRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/obra': {
-      id: '/admin/obra'
-      path: '/obra'
-      fullPath: '/admin/obra'
-      preLoaderRoute: typeof AdminObraRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/jornada': {
-      id: '/admin/jornada'
-      path: '/jornada'
-      fullPath: '/admin/jornada'
-      preLoaderRoute: typeof AdminJornadaRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/duvidas': {
-      id: '/admin/duvidas'
-      path: '/duvidas'
-      fullPath: '/admin/duvidas'
-      preLoaderRoute: typeof AdminDuvidasRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/documentos': {
-      id: '/admin/documentos'
-      path: '/documentos'
-      fullPath: '/admin/documentos'
-      preLoaderRoute: typeof AdminDocumentosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/camisas': {
@@ -564,6 +473,97 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCamisasRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/documentos': {
+      id: '/admin/documentos'
+      path: '/documentos'
+      fullPath: '/admin/documentos'
+      preLoaderRoute: typeof AdminDocumentosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/duvidas': {
+      id: '/admin/duvidas'
+      path: '/duvidas'
+      fullPath: '/admin/duvidas'
+      preLoaderRoute: typeof AdminDuvidasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/jornada': {
+      id: '/admin/jornada'
+      path: '/jornada'
+      fullPath: '/admin/jornada'
+      preLoaderRoute: typeof AdminJornadaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/obra': {
+      id: '/admin/obra'
+      path: '/obra'
+      fullPath: '/admin/obra'
+      preLoaderRoute: typeof AdminObraRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/social': {
+      id: '/admin/social'
+      path: '/social'
+      fullPath: '/admin/social'
+      preLoaderRoute: typeof AdminSocialRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/unidades': {
+      id: '/admin/unidades'
+      path: '/unidades'
+      fullPath: '/admin/unidades'
+      preLoaderRoute: typeof AdminUnidadesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/camisas': {
+      id: '/app/camisas'
+      path: '/camisas'
+      fullPath: '/app/camisas'
+      preLoaderRoute: typeof AppCamisasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/central': {
+      id: '/app/central'
+      path: '/central'
+      fullPath: '/app/central'
+      preLoaderRoute: typeof AppCentralRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/financeiro': {
+      id: '/app/financeiro'
+      path: '/financeiro'
+      fullPath: '/app/financeiro'
+      preLoaderRoute: typeof AppFinanceiroRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/marketing': {
+      id: '/app/marketing'
+      path: '/marketing'
+      fullPath: '/app/marketing'
+      preLoaderRoute: typeof AppMarketingRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/obra': {
+      id: '/app/obra'
+      path: '/obra'
+      fullPath: '/app/obra'
+      preLoaderRoute: typeof AppObraRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/progresso': {
+      id: '/app/progresso'
+      path: '/progresso'
+      fullPath: '/app/progresso'
+      preLoaderRoute: typeof AppProgressoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/admin/social/': {
       id: '/admin/social/'
       path: '/'
@@ -571,46 +571,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSocialIndexRouteImport
       parentRoute: typeof AdminSocialRoute
     }
-    '/admin/social/templates': {
-      id: '/admin/social/templates'
-      path: '/templates'
-      fullPath: '/admin/social/templates'
-      preLoaderRoute: typeof AdminSocialTemplatesRouteImport
-      parentRoute: typeof AdminSocialRoute
-    }
-    '/admin/social/respostas': {
-      id: '/admin/social/respostas'
-      path: '/respostas'
-      fullPath: '/admin/social/respostas'
-      preLoaderRoute: typeof AdminSocialRespostasRouteImport
-      parentRoute: typeof AdminSocialRoute
-    }
-    '/admin/social/ranking': {
-      id: '/admin/social/ranking'
-      path: '/ranking'
-      fullPath: '/admin/social/ranking'
-      preLoaderRoute: typeof AdminSocialRankingRouteImport
-      parentRoute: typeof AdminSocialRoute
-    }
-    '/admin/social/inbox': {
-      id: '/admin/social/inbox'
-      path: '/inbox'
-      fullPath: '/admin/social/inbox'
-      preLoaderRoute: typeof AdminSocialInboxRouteImport
-      parentRoute: typeof AdminSocialRoute
-    }
-    '/admin/social/contatos': {
-      id: '/admin/social/contatos'
-      path: '/contatos'
-      fullPath: '/admin/social/contatos'
-      preLoaderRoute: typeof AdminSocialContatosRouteImport
-      parentRoute: typeof AdminSocialRoute
-    }
-    '/admin/social/config': {
-      id: '/admin/social/config'
-      path: '/config'
-      fullPath: '/admin/social/config'
-      preLoaderRoute: typeof AdminSocialConfigRouteImport
+    '/admin/social/assistente': {
+      id: '/admin/social/assistente'
+      path: '/assistente'
+      fullPath: '/admin/social/assistente'
+      preLoaderRoute: typeof AdminSocialAssistenteRouteImport
       parentRoute: typeof AdminSocialRoute
     }
     '/admin/social/chat': {
@@ -620,11 +585,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSocialChatRouteImport
       parentRoute: typeof AdminSocialRoute
     }
-    '/admin/social/assistente': {
-      id: '/admin/social/assistente'
-      path: '/assistente'
-      fullPath: '/admin/social/assistente'
-      preLoaderRoute: typeof AdminSocialAssistenteRouteImport
+    '/admin/social/config': {
+      id: '/admin/social/config'
+      path: '/config'
+      fullPath: '/admin/social/config'
+      preLoaderRoute: typeof AdminSocialConfigRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/contatos': {
+      id: '/admin/social/contatos'
+      path: '/contatos'
+      fullPath: '/admin/social/contatos'
+      preLoaderRoute: typeof AdminSocialContatosRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/inbox': {
+      id: '/admin/social/inbox'
+      path: '/inbox'
+      fullPath: '/admin/social/inbox'
+      preLoaderRoute: typeof AdminSocialInboxRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/ranking': {
+      id: '/admin/social/ranking'
+      path: '/ranking'
+      fullPath: '/admin/social/ranking'
+      preLoaderRoute: typeof AdminSocialRankingRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/respostas': {
+      id: '/admin/social/respostas'
+      path: '/respostas'
+      fullPath: '/admin/social/respostas'
+      preLoaderRoute: typeof AdminSocialRespostasRouteImport
+      parentRoute: typeof AdminSocialRoute
+    }
+    '/admin/social/templates': {
+      id: '/admin/social/templates'
+      path: '/templates'
+      fullPath: '/admin/social/templates'
+      preLoaderRoute: typeof AdminSocialTemplatesRouteImport
       parentRoute: typeof AdminSocialRoute
     }
     '/admin/social/automacoes/': {
