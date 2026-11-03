@@ -4,7 +4,7 @@
 //         o evento ao ss-engine, que casa os gatilhos e executa as automações.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const GRAPH = `https://graph.instagram.com/${Deno.env.get("IG_GRAPH_VERSION") ?? "v24.0"}`;
+const GRAPH = "https://graph.facebook.com/v26.0";
 const env = (k: string) => {
   const v = Deno.env.get(k);
   if (!v) throw new Error(`Variável ${k} não configurada.`);

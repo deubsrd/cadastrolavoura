@@ -6,7 +6,7 @@
 //   { action: "chat", messages: [{role, content}] }   -> { text, graph? }   (Assistente)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const GRAPH_API = `https://graph.instagram.com/${Deno.env.get("IG_GRAPH_VERSION") ?? "v24.0"}`;
+const GRAPH_API = "https://graph.facebook.com/v26.0";
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -78,14 +78,16 @@ async function igContext() {
   const sb = service();
   const { data: ch } = await sb.from("ss_channels").select("id, username, name").eq("kind", "instagram").eq("status", "connected").limit(1).maybeSingle();
   if (!ch) return { profile: null, media: [] as any[] };
-  const { data: s } = await sb.from("ss_channel_secrets").select("access_token").eq("channel_id", ch.id).single();
+  const { data: s } = await sb.from("ss_channel_secrets").select("access_token, ig_user_id").eq("channel_id", ch.id).single();
   const token = s?.access_token;
+  const igId = s?.ig_user_id;
   let profile: any = { username: ch.username, name: ch.name };
   let media: any[] = [];
   try {
-    const p = await fetch(`${GRAPH_API}/me?fields=username,name,biography,followers_count,media_count&access_token=${token}`);
+    if (!igId) throw new Error("sem ig_user_id");
+    const p = await fetch(`${GRAPH_API}/${igId}?fields=username,name,biography,followers_count,media_count&access_token=${token}`);
     if (p.ok) profile = await p.json();
-    const m = await fetch(`${GRAPH_API}/me/media?fields=caption,media_type,timestamp,like_count,comments_count&limit=25&access_token=${token}`);
+    const m = await fetch(`${GRAPH_API}/${igId}/media?fields=caption,media_type,timestamp,like_count,comments_count&limit=25&access_token=${token}`);
     if (m.ok) media = (await m.json()).data ?? [];
   } catch { /* contexto é opcional */ }
   return { profile, media };

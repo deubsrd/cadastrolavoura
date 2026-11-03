@@ -13,7 +13,7 @@
 // Autocontida (sem ../_shared), mesmo padrão das outras functions do repo.
 import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const GRAPH = `https://graph.instagram.com/${Deno.env.get("IG_GRAPH_VERSION") ?? "v24.0"}`;
+const GRAPH = "https://graph.facebook.com/v26.0";
 const MAX_STEPS = 60;
 const WINDOW_MS = 24 * 3600_000;
 

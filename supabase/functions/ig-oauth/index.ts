@@ -171,13 +171,11 @@ Deno.serve(async (req) => {
     if (body.action === "start") {
       const nonce = `${crypto.randomUUID()}-${Date.now()}`;
       const state = `${nonce}.${await hmac(nonce)}`;
-      const auth = new URL("https://www.instagram.com/oauth/authorize");
-      auth.searchParams.set("enable_fb_login", "0");
-      auth.searchParams.set("force_authentication", "1");
+      const auth = new URL(`https://www.facebook.com/${GRAPH_VERSION}/dialog/oauth`);
       auth.searchParams.set("client_id", env("IG_APP_ID"));
       auth.searchParams.set("redirect_uri", redirectUri());
+      auth.searchParams.set("config_id", env("FB_LOGIN_CONFIG_ID"));
       auth.searchParams.set("response_type", "code");
-      auth.searchParams.set("scope", SCOPES);
       auth.searchParams.set("state", state);
       return json({ url: auth.toString() });
     }
