@@ -29,6 +29,13 @@
       "when": 1793714858882,
       "tag": "0003_ss_channel_secrets_fb_login",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793737860920,
+      "tag": "0004_ss_consultor_notificacoes",
+      "breakpoints": true
     }
   ]
 }

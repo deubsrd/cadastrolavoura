@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -219,6 +220,7 @@ function Canais() {
           )}
         </CardContent>
       </Card>
+      <ConsultorCard />
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Endereços para o app da Meta</CardTitle>
@@ -247,6 +249,113 @@ function Canais() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+// ------------------------------------------------------------------ consultor
+type Consultor = {
+  username: string | null;
+  igsid: string | null;
+  ativo: boolean;
+  status: "aguardando" | "pronto" | "falha";
+  ultimo_erro: string | null;
+  ultima_mensagem_em: string | null;
+};
+
+function ConsultorCard() {
+  const [cfg, setCfg] = useState<Consultor | null>(null);
+  const [user, setUser] = useState("");
+  const [pend, setPend] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const load = async () => {
+    const { data } = await sdb.from("ss_consultor").select("*").eq("id", true).maybeSingle();
+    const c = (data ?? { username: null, igsid: null, ativo: false, status: "aguardando", ultimo_erro: null, ultima_mensagem_em: null }) as Consultor;
+    setCfg(c);
+    setUser(c.username ?? "");
+    const { count } = await sdb.from("ss_consultor_fila").select("id", { count: "exact", head: true }).eq("status", "pendente");
+    setPend(count ?? 0);
+  };
+  useEffect(() => {
+    load();
+  }, []);
+
+  const save = async (patch: Partial<Consultor>) => {
+    setSaving(true);
+    const { error } = await sdb.from("ss_consultor").upsert({ id: true, ...patch, updated_at: new Date().toISOString() });
+    setSaving(false);
+    if (error) return toast.error(error.message);
+    toast.success("Salvo");
+    load();
+  };
+  const saveUser = () => {
+    const u = user.trim().replace(/^@/, "").toLowerCase();
+    if (!/^[a-z0-9._]{1,30}$/.test(u)) return toast.error("Informe um @usuário válido do Instagram.");
+    const mudou = u !== (cfg?.username ?? "");
+    save(mudou ? { username: u, igsid: null, status: "aguardando", ultimo_erro: null } : { username: u });
+  };
+
+  if (!cfg) return <Loader2 className="h-5 w-5 animate-spin" />;
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">Consultor de franquia</CardTitle>
+        <CardDescription>
+          Recebe por direct do Instagram um aviso de cada nova mensagem que chega para a conta.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4 text-sm">
+        <div>
+          <Label className="text-xs">@usuário do Instagram do consultor</Label>
+          <div className="flex gap-2">
+            <Input value={user} onChange={(e) => setUser(e.target.value)} placeholder="@consultor" />
+            <Button onClick={saveUser} disabled={saving}>
+              {saving && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}Salvar
+            </Button>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <Switch
+            id="consultor-ativo"
+            checked={cfg.ativo}
+            disabled={!cfg.username || saving}
+            onCheckedChange={(v) => save({ ativo: v })}
+          />
+          <Label htmlFor="consultor-ativo">Ativar notificações</Label>
+        </div>
+        {cfg.username && (
+          <div className="rounded-lg border p-3">
+            {cfg.status === "pronto" ? (
+              <p className="flex items-center gap-1 font-medium text-success">
+                <CheckCircle2 className="h-4 w-4" /> Pronto
+              </p>
+            ) : cfg.status === "falha" ? (
+              <p className="flex items-start gap-1 font-medium text-destructive">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /> Falha no último envio
+                {cfg.ultimo_erro ? `: ${cfg.ultimo_erro}` : ""}
+              </p>
+            ) : (
+              <p className="flex items-center gap-1 font-medium text-muted-foreground">
+                <Loader2 className="h-4 w-4" /> Aguardando o consultor mandar mensagem para a conta
+              </p>
+            )}
+            {cfg.ultima_mensagem_em && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Última mensagem do consultor: {new Date(cfg.ultima_mensagem_em).toLocaleString("pt-BR")}
+              </p>
+            )}
+            {pend > 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">
+                {pend} notificação(ões) na fila, reenviadas quando ele mandar nova mensagem.
+              </p>
+            )}
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">
+          O consultor deve mandar uma mensagem para @lavanderialavourabr; isso libera o recebimento
+          por 24h e renova a cada nova mensagem dele.
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 
