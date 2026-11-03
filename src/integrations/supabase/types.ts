@@ -743,6 +743,761 @@ export type Database = {
           },
         ]
       }
+      ss_channel_secrets: {
+        Row: {
+          access_token: string
+          channel_id: string
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          channel_id: string
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          channel_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_channel_secrets_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: true
+            referencedRelation: "ss_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_channels: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          external_id: string
+          id: string
+          kind: string
+          name: string | null
+          status: string
+          timezone: string
+          token_expires_at: string | null
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          external_id: string
+          id?: string
+          kind?: string
+          name?: string | null
+          status?: string
+          timezone?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          external_id?: string
+          id?: string
+          kind?: string
+          name?: string | null
+          status?: string
+          timezone?: string
+          token_expires_at?: string | null
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      ss_contact_tags: {
+        Row: {
+          contact_id: string
+          created_at: string
+          tag_id: string
+        }
+        Insert: {
+          contact_id: string
+          created_at?: string
+          tag_id: string
+        }
+        Update: {
+          contact_id?: string
+          created_at?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_contact_tags_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ss_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ss_contact_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "ss_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_contacts: {
+        Row: {
+          automation_paused_until: string | null
+          avatar_url: string | null
+          blocked: boolean
+          channel_id: string
+          created_at: string
+          email: string | null
+          external_id: string
+          fields: Json
+          follows_business: boolean | null
+          id: string
+          last_inbound_at: string | null
+          last_interaction_at: string | null
+          name: string | null
+          score: number
+          updated_at: string
+          username: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          automation_paused_until?: string | null
+          avatar_url?: string | null
+          blocked?: boolean
+          channel_id: string
+          created_at?: string
+          email?: string | null
+          external_id: string
+          fields?: Json
+          follows_business?: boolean | null
+          id?: string
+          last_inbound_at?: string | null
+          last_interaction_at?: string | null
+          name?: string | null
+          score?: number
+          updated_at?: string
+          username?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          automation_paused_until?: string | null
+          avatar_url?: string | null
+          blocked?: boolean
+          channel_id?: string
+          created_at?: string
+          email?: string | null
+          external_id?: string
+          fields?: Json
+          follows_business?: boolean | null
+          id?: string
+          last_inbound_at?: string | null
+          last_interaction_at?: string | null
+          name?: string | null
+          score?: number
+          updated_at?: string
+          username?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_contacts_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "ss_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_conversations: {
+        Row: {
+          channel_id: string
+          column_id: string | null
+          contact_id: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          last_message_preview: string | null
+          starred: boolean
+          status: string
+          unread: number
+        }
+        Insert: {
+          channel_id: string
+          column_id?: string | null
+          contact_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          starred?: boolean
+          status?: string
+          unread?: number
+        }
+        Update: {
+          channel_id?: string
+          column_id?: string | null
+          contact_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          starred?: boolean
+          status?: string
+          unread?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_conversations_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "ss_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ss_conversations_column_id_fkey"
+            columns: ["column_id"]
+            isOneToOne: false
+            referencedRelation: "ss_inbox_columns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ss_conversations_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ss_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_custom_fields: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          label: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          label: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          label?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      ss_events: {
+        Row: {
+          channel_id: string
+          contact_id: string | null
+          created_at: string
+          external_id: string
+          id: string
+          kind: string
+          media_id: string | null
+          payload: Json
+          sentiment: string | null
+          text: string | null
+        }
+        Insert: {
+          channel_id: string
+          contact_id?: string | null
+          created_at?: string
+          external_id: string
+          id?: string
+          kind: string
+          media_id?: string | null
+          payload?: Json
+          sentiment?: string | null
+          text?: string | null
+        }
+        Update: {
+          channel_id?: string
+          contact_id?: string | null
+          created_at?: string
+          external_id?: string
+          id?: string
+          kind?: string
+          media_id?: string | null
+          payload?: Json
+          sentiment?: string | null
+          text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_events_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "ss_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ss_events_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ss_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_folders: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      ss_ice_breakers: {
+        Row: {
+          created_at: string
+          id: string
+          position: number
+          question: string
+          workflow_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          position?: number
+          question: string
+          workflow_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          position?: number
+          question?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_ice_breakers_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "ss_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_inbox_columns: {
+        Row: {
+          color: string
+          created_at: string
+          criteria: string
+          id: string
+          name: string
+          position: number
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          criteria?: string
+          id?: string
+          name: string
+          position?: number
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          criteria?: string
+          id?: string
+          name?: string
+          position?: number
+        }
+        Relationships: []
+      }
+      ss_link_clicks: {
+        Row: {
+          created_at: string
+          id: string
+          link_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_link_clicks_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "ss_links"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_links: {
+        Row: {
+          code: string
+          contact_id: string | null
+          created_at: string
+          id: string
+          run_id: string | null
+          url: string
+          workflow_id: string | null
+        }
+        Insert: {
+          code?: string
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          run_id?: string | null
+          url: string
+          workflow_id?: string | null
+        }
+        Update: {
+          code?: string
+          contact_id?: string | null
+          created_at?: string
+          id?: string
+          run_id?: string | null
+          url?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_links_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ss_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ss_links_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "ss_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_messages: {
+        Row: {
+          content: Json
+          conversation_id: string
+          created_at: string
+          direction: string
+          error: string | null
+          external_id: string | null
+          id: string
+          sent_by: string
+          workflow_id: string | null
+        }
+        Insert: {
+          content: Json
+          conversation_id: string
+          created_at?: string
+          direction: string
+          error?: string | null
+          external_id?: string | null
+          id?: string
+          sent_by?: string
+          workflow_id?: string | null
+        }
+        Update: {
+          content?: Json
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          error?: string | null
+          external_id?: string | null
+          id?: string
+          sent_by?: string
+          workflow_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ss_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ss_messages_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "ss_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_reply_lists: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          replies: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          replies?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          replies?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ss_runs: {
+        Row: {
+          contact_id: string
+          context: Json
+          created_at: string
+          current_node: string | null
+          error: string | null
+          event_id: string | null
+          id: string
+          resume_at: string | null
+          status: string
+          steps: number
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          contact_id: string
+          context?: Json
+          created_at?: string
+          current_node?: string | null
+          error?: string | null
+          event_id?: string | null
+          id?: string
+          resume_at?: string | null
+          status?: string
+          steps?: number
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          contact_id?: string
+          context?: Json
+          created_at?: string
+          current_node?: string | null
+          error?: string | null
+          event_id?: string | null
+          id?: string
+          resume_at?: string | null
+          status?: string
+          steps?: number
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_runs_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "ss_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ss_runs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "ss_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ss_settings: {
+        Row: {
+          ai_tone: string
+          blocked_words: string[]
+          id: boolean
+          minutes_saved_per_reply: number
+          score_points: Json
+          updated_at: string
+        }
+        Insert: {
+          ai_tone?: string
+          blocked_words?: string[]
+          id?: boolean
+          minutes_saved_per_reply?: number
+          score_points?: Json
+          updated_at?: string
+        }
+        Update: {
+          ai_tone?: string
+          blocked_words?: string[]
+          id?: boolean
+          minutes_saved_per_reply?: number
+          score_points?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ss_shortcuts: {
+        Row: {
+          created_at: string
+          id: string
+          shortcut: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          shortcut: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          shortcut?: string
+          text?: string
+        }
+        Relationships: []
+      }
+      ss_tags: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      ss_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          graph: Json
+          id: string
+          name: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          graph: Json
+          id?: string
+          name: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          graph?: Json
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      ss_variables: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          value?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      ss_workflows: {
+        Row: {
+          created_at: string
+          folder_id: string | null
+          graph: Json
+          id: string
+          name: string
+          published_at: string | null
+          runs_count: number
+          status: string
+          trigger_types: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          folder_id?: string | null
+          graph?: Json
+          id?: string
+          name?: string
+          published_at?: string | null
+          runs_count?: number
+          status?: string
+          trigger_types?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          folder_id?: string | null
+          graph?: Json
+          id?: string
+          name?: string
+          published_at?: string | null
+          runs_count?: number
+          status?: string
+          trigger_types?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ss_workflows_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "ss_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       unidade_documentos: {
         Row: {
           arquivado: boolean
@@ -880,6 +1635,7 @@ export type Database = {
         Args: { p_unidade_id: string }
         Returns: undefined
       }
+      ss_dashboard: { Args: { _from: string; _to: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "franqueado"
