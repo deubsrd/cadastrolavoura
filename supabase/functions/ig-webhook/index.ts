@@ -94,6 +94,92 @@ async function storeInboundMessage(
   }).eq("id", conv.id);
 }
 
+// ------------------------------------------------ notificação ao consultor
+const MEDIA_LABEL: Record<string, string> = {
+  image: "imagem", video: "vídeo", audio: "áudio", file: "arquivo", share: "compartilhamento",
+  story_mention: "menção no story", reel: "reel", ig_reel: "reel", animated_image: "GIF", sticker: "figurinha",
+};
+
+async function sendDM(token: string, igsid: string, text: string): Promise<string | null> {
+  try {
+    const r = await fetch(`${GRAPH}/me/messages?access_token=${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ recipient: { id: igsid }, message: { text } }),
+    });
+    if (r.ok) return null;
+    const j = await r.json().catch(() => ({}));
+    const e = j?.error ?? {};
+    const janela = e.code === 10 || e.error_subcode === 2018278 || e.error_subcode === 2534022;
+    return janela
+      ? "Janela de 24h expirada: o consultor precisa mandar nova mensagem para a conta."
+      : `${e.message ?? `HTTP ${r.status}`}${e.code ? ` (código ${e.code})` : ""}`;
+  } catch (err) {
+    return err instanceof Error ? err.message : String(err);
+  }
+}
+
+async function notifyConsultor(
+  sb: ReturnType<typeof db>, token: string | null, sender: string, msg: any, ts: number | undefined, kind: Kind,
+) {
+  const { data: cfg } = await sb.from("ss_consultor").select("*").eq("id", true).maybeSingle();
+  if (!cfg?.username || !token) return;
+  const alvo = String(cfg.username).replace(/^@/, "").toLowerCase();
+
+  let profile: { name?: string; username?: string } = {};
+  try {
+    const r = await fetch(`${GRAPH}/${sender}?fields=name,username&access_token=${token}`);
+    if (r.ok) profile = await r.json();
+  } catch { /* segue com o ID */ }
+
+  const now = new Date().toISOString();
+  const ehConsultor = sender === cfg.igsid || (profile.username ?? "").toLowerCase() === alvo;
+
+  if (ehConsultor) {
+    // Consultor escreveu: janela de 24h aberta. Salva IGSID e reenvia a fila.
+    await sb.from("ss_consultor").update({
+      igsid: sender, status: "pronto", ultimo_erro: null, ultima_mensagem_em: now, updated_at: now,
+    }).eq("id", true);
+    if (!cfg.ativo) return;
+    const { data: fila } = await sb.from("ss_consultor_fila").select("id, texto, tentativas")
+      .eq("status", "pendente").order("created_at").limit(50);
+    for (const item of fila ?? []) {
+      const err = await sendDM(token, sender, item.texto);
+      if (err) {
+        await sb.from("ss_consultor_fila").update({ tentativas: item.tentativas + 1, ultimo_erro: err }).eq("id", item.id);
+        await sb.from("ss_consultor").update({ status: "falha", ultimo_erro: err, updated_at: now }).eq("id", true);
+        break;
+      }
+      await sb.from("ss_consultor_fila").update({ status: "enviada", enviada_em: new Date().toISOString(), tentativas: item.tentativas + 1 }).eq("id", item.id);
+      await sb.from("ss_consultor").update({ ultimo_envio_em: new Date().toISOString() }).eq("id", true);
+    }
+    return;
+  }
+  if (!cfg.ativo) return;
+
+  const quando = new Date(ts ?? Date.now()).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+  const quem = profile.username
+    ? `${profile.name ?? profile.username} (@${profile.username})\nhttps://instagram.com/${profile.username}`
+    : `ID ${sender} (não foi possível obter nome e usuário)`;
+  const att = (msg.attachments ?? [])[0];
+  const conteudo = msg.text
+    ? msg.text
+    : att ? `[Mídia: ${MEDIA_LABEL[att.type] ?? att.type}]` : "[mensagem sem texto]";
+  const extra = kind === "story_reply" ? " (resposta a story)" : "";
+  const texto = `📩 Nova mensagem no Instagram${extra}\n\nDe: ${quem}\nData/hora: ${quando}\n\nMensagem:\n${conteudo}`.slice(0, 1000);
+
+  const err = cfg.igsid ? await sendDM(token, cfg.igsid, texto) : "Aguardando o consultor mandar uma mensagem para a conta.";
+  if (!err) {
+    await sb.from("ss_consultor").update({ status: "pronto", ultimo_erro: null, ultimo_envio_em: now, updated_at: now }).eq("id", true);
+    return;
+  }
+  console.error("consultor: envio falhou —", err);
+  await sb.from("ss_consultor_fila").insert({ texto, ultimo_erro: err, tentativas: cfg.igsid ? 1 : 0 });
+  await sb.from("ss_consultor").update(
+    cfg.igsid ? { status: "falha", ultimo_erro: err, updated_at: now } : { status: "aguardando", updated_at: now },
+  ).eq("id", true);
+}
+
 async function process(body: any) {
   const sb = db();
   const { data: settings } = await sb.from("ss_settings").select("score_points").single();
@@ -162,6 +248,8 @@ async function process(body: any) {
         : attachments[0] ? { attachment: { type: attachments[0].type, url: attachments[0].payload?.url } } : { text: "" };
       const preview = kind === "story_mention" ? "Mencionou você no story" : text ?? "[mídia]";
       await storeInboundMessage(sb, channel.id, cid, msg.mid, content, preview);
+      await notifyConsultor(sb, token, sender, msg, m.timestamp, kind)
+        .catch((e) => console.error("consultor", e));
     }
   }
 
