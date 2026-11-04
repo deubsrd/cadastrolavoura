@@ -187,9 +187,16 @@ async function process(body: any) {
   const eventIds: string[] = [];
 
   for (const entry of body.entry ?? []) {
-    const { data: channel } = await sb.from("ss_channels").select("id, external_id")
+    console.log("webhook entry", JSON.stringify({ object: body.object, id: entry.id,
+      changes: (entry.changes ?? []).map((c: any) => c.field), messaging: (entry.messaging ?? []).length }));
+    let { data: channel } = await sb.from("ss_channels").select("id, external_id")
       .eq("kind", "instagram").eq("external_id", String(entry.id)).eq("status", "connected").maybeSingle();
-    if (!channel) continue;
+    if (!channel) {
+      // Eventos de DM podem chegar com o id da Página (object "page") em vez do id do Instagram
+      const { data: s } = await sb.from("ss_channel_secrets").select("channel_id").eq("page_id", String(entry.id)).maybeSingle();
+      if (s) ({ data: channel } = await sb.from("ss_channels").select("id, external_id").eq("id", s.channel_id).eq("status", "connected").maybeSingle());
+    }
+    if (!channel) { console.warn("webhook: canal não encontrado para entry.id", entry.id); continue; }
     const { data: secret } = await sb.from("ss_channel_secrets").select("access_token").eq("channel_id", channel.id).maybeSingle();
     const token = secret?.access_token ?? null;
 
