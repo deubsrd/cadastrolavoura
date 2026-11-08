@@ -21,6 +21,7 @@ import { Route as AdminDocumentosRouteImport } from './routes/admin.documentos'
 import { Route as AdminDuvidasRouteImport } from './routes/admin.duvidas'
 import { Route as AdminJornadaRouteImport } from './routes/admin.jornada'
 import { Route as AdminObraRouteImport } from './routes/admin.obra'
+import { Route as AdminSdrRouteImport } from './routes/admin.sdr'
 import { Route as AdminSocialRouteImport } from './routes/admin.social'
 import { Route as AdminUnidadesRouteImport } from './routes/admin.unidades'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -30,6 +31,8 @@ import { Route as AppFinanceiroRouteImport } from './routes/app.financeiro'
 import { Route as AppMarketingRouteImport } from './routes/app.marketing'
 import { Route as AppObraRouteImport } from './routes/app.obra'
 import { Route as AppProgressoRouteImport } from './routes/app.progresso'
+import { Route as AdminSdrIndexRouteImport } from './routes/admin.sdr.index'
+import { Route as AdminSdrAgenteRouteImport } from './routes/admin.sdr.agente'
 import { Route as AdminSocialIndexRouteImport } from './routes/admin.social.index'
 import { Route as AdminSocialAssistenteRouteImport } from './routes/admin.social.assistente'
 import { Route as AdminSocialChatRouteImport } from './routes/admin.social.chat'
@@ -102,6 +105,11 @@ const AdminObraRoute = AdminObraRouteImport.update({
   path: '/obra',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSdrRoute = AdminSdrRouteImport.update({
+  id: '/sdr',
+  path: '/sdr',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSocialRoute = AdminSocialRouteImport.update({
   id: '/social',
   path: '/social',
@@ -146,6 +154,16 @@ const AppProgressoRoute = AppProgressoRouteImport.update({
   id: '/progresso',
   path: '/progresso',
   getParentRoute: () => AppRoute,
+} as any)
+const AdminSdrIndexRoute = AdminSdrIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminSdrRoute,
+} as any)
+const AdminSdrAgenteRoute = AdminSdrAgenteRouteImport.update({
+  id: '/agente',
+  path: '/agente',
+  getParentRoute: () => AdminSdrRoute,
 } as any)
 const AdminSocialIndexRoute = AdminSocialIndexRouteImport.update({
   id: '/',
@@ -216,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
+  '/admin/sdr': typeof AdminSdrRouteWithChildren
   '/admin/social': typeof AdminSocialRouteWithChildren
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/camisas': typeof AppCamisasRoute
@@ -226,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/app/progresso': typeof AppProgressoRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/admin/sdr/agente': typeof AdminSdrAgenteRoute
   '/admin/social/assistente': typeof AdminSocialAssistenteRoute
   '/admin/social/chat': typeof AdminSocialChatRoute
   '/admin/social/config': typeof AdminSocialConfigRoute
@@ -234,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/admin/social/ranking': typeof AdminSocialRankingRoute
   '/admin/social/respostas': typeof AdminSocialRespostasRoute
   '/admin/social/templates': typeof AdminSocialTemplatesRoute
+  '/admin/sdr/': typeof AdminSdrIndexRoute
   '/admin/social/': typeof AdminSocialIndexRoute
   '/admin/social/automacoes/$id': typeof AdminSocialAutomacoesIdRoute
   '/admin/social/automacoes/': typeof AdminSocialAutomacoesIndexRoute
@@ -257,6 +278,7 @@ export interface FileRoutesByTo {
   '/app/progresso': typeof AppProgressoRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/admin/sdr/agente': typeof AdminSdrAgenteRoute
   '/admin/social/assistente': typeof AdminSocialAssistenteRoute
   '/admin/social/chat': typeof AdminSocialChatRoute
   '/admin/social/config': typeof AdminSocialConfigRoute
@@ -265,6 +287,7 @@ export interface FileRoutesByTo {
   '/admin/social/ranking': typeof AdminSocialRankingRoute
   '/admin/social/respostas': typeof AdminSocialRespostasRoute
   '/admin/social/templates': typeof AdminSocialTemplatesRoute
+  '/admin/sdr': typeof AdminSdrIndexRoute
   '/admin/social': typeof AdminSocialIndexRoute
   '/admin/social/automacoes/$id': typeof AdminSocialAutomacoesIdRoute
   '/admin/social/automacoes': typeof AdminSocialAutomacoesIndexRoute
@@ -282,6 +305,7 @@ export interface FileRoutesById {
   '/admin/duvidas': typeof AdminDuvidasRoute
   '/admin/jornada': typeof AdminJornadaRoute
   '/admin/obra': typeof AdminObraRoute
+  '/admin/sdr': typeof AdminSdrRouteWithChildren
   '/admin/social': typeof AdminSocialRouteWithChildren
   '/admin/unidades': typeof AdminUnidadesRoute
   '/app/camisas': typeof AppCamisasRoute
@@ -292,6 +316,7 @@ export interface FileRoutesById {
   '/app/progresso': typeof AppProgressoRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/admin/sdr/agente': typeof AdminSdrAgenteRoute
   '/admin/social/assistente': typeof AdminSocialAssistenteRoute
   '/admin/social/chat': typeof AdminSocialChatRoute
   '/admin/social/config': typeof AdminSocialConfigRoute
@@ -300,6 +325,7 @@ export interface FileRoutesById {
   '/admin/social/ranking': typeof AdminSocialRankingRoute
   '/admin/social/respostas': typeof AdminSocialRespostasRoute
   '/admin/social/templates': typeof AdminSocialTemplatesRoute
+  '/admin/sdr/': typeof AdminSdrIndexRoute
   '/admin/social/': typeof AdminSocialIndexRoute
   '/admin/social/automacoes/$id': typeof AdminSocialAutomacoesIdRoute
   '/admin/social/automacoes/': typeof AdminSocialAutomacoesIndexRoute
@@ -318,6 +344,7 @@ export interface FileRouteTypes {
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
+    | '/admin/sdr'
     | '/admin/social'
     | '/admin/unidades'
     | '/app/camisas'
@@ -328,6 +355,7 @@ export interface FileRouteTypes {
     | '/app/progresso'
     | '/admin/'
     | '/app/'
+    | '/admin/sdr/agente'
     | '/admin/social/assistente'
     | '/admin/social/chat'
     | '/admin/social/config'
@@ -336,6 +364,7 @@ export interface FileRouteTypes {
     | '/admin/social/ranking'
     | '/admin/social/respostas'
     | '/admin/social/templates'
+    | '/admin/sdr/'
     | '/admin/social/'
     | '/admin/social/automacoes/$id'
     | '/admin/social/automacoes/'
@@ -359,6 +388,7 @@ export interface FileRouteTypes {
     | '/app/progresso'
     | '/admin'
     | '/app'
+    | '/admin/sdr/agente'
     | '/admin/social/assistente'
     | '/admin/social/chat'
     | '/admin/social/config'
@@ -367,6 +397,7 @@ export interface FileRouteTypes {
     | '/admin/social/ranking'
     | '/admin/social/respostas'
     | '/admin/social/templates'
+    | '/admin/sdr'
     | '/admin/social'
     | '/admin/social/automacoes/$id'
     | '/admin/social/automacoes'
@@ -383,6 +414,7 @@ export interface FileRouteTypes {
     | '/admin/duvidas'
     | '/admin/jornada'
     | '/admin/obra'
+    | '/admin/sdr'
     | '/admin/social'
     | '/admin/unidades'
     | '/app/camisas'
@@ -393,6 +425,7 @@ export interface FileRouteTypes {
     | '/app/progresso'
     | '/admin/'
     | '/app/'
+    | '/admin/sdr/agente'
     | '/admin/social/assistente'
     | '/admin/social/chat'
     | '/admin/social/config'
@@ -401,6 +434,7 @@ export interface FileRouteTypes {
     | '/admin/social/ranking'
     | '/admin/social/respostas'
     | '/admin/social/templates'
+    | '/admin/sdr/'
     | '/admin/social/'
     | '/admin/social/automacoes/$id'
     | '/admin/social/automacoes/'
@@ -501,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminObraRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/sdr': {
+      id: '/admin/sdr'
+      path: '/sdr'
+      fullPath: '/admin/sdr'
+      preLoaderRoute: typeof AdminSdrRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/social': {
       id: '/admin/social'
       path: '/social'
@@ -563,6 +604,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/progresso'
       preLoaderRoute: typeof AppProgressoRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/admin/sdr/': {
+      id: '/admin/sdr/'
+      path: '/'
+      fullPath: '/admin/sdr/'
+      preLoaderRoute: typeof AdminSdrIndexRouteImport
+      parentRoute: typeof AdminSdrRoute
+    }
+    '/admin/sdr/agente': {
+      id: '/admin/sdr/agente'
+      path: '/agente'
+      fullPath: '/admin/sdr/agente'
+      preLoaderRoute: typeof AdminSdrAgenteRouteImport
+      parentRoute: typeof AdminSdrRoute
     }
     '/admin/social/': {
       id: '/admin/social/'
@@ -644,6 +699,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminSdrRouteChildren {
+  AdminSdrAgenteRoute: typeof AdminSdrAgenteRoute
+  AdminSdrIndexRoute: typeof AdminSdrIndexRoute
+}
+
+const AdminSdrRouteChildren: AdminSdrRouteChildren = {
+  AdminSdrAgenteRoute: AdminSdrAgenteRoute,
+  AdminSdrIndexRoute: AdminSdrIndexRoute,
+}
+
+const AdminSdrRouteWithChildren = AdminSdrRoute._addFileChildren(
+  AdminSdrRouteChildren,
+)
+
 interface AdminSocialRouteChildren {
   AdminSocialAssistenteRoute: typeof AdminSocialAssistenteRoute
   AdminSocialChatRoute: typeof AdminSocialChatRoute
@@ -682,6 +751,7 @@ interface AdminRouteChildren {
   AdminDuvidasRoute: typeof AdminDuvidasRoute
   AdminJornadaRoute: typeof AdminJornadaRoute
   AdminObraRoute: typeof AdminObraRoute
+  AdminSdrRoute: typeof AdminSdrRouteWithChildren
   AdminSocialRoute: typeof AdminSocialRouteWithChildren
   AdminUnidadesRoute: typeof AdminUnidadesRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -693,6 +763,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDuvidasRoute: AdminDuvidasRoute,
   AdminJornadaRoute: AdminJornadaRoute,
   AdminObraRoute: AdminObraRoute,
+  AdminSdrRoute: AdminSdrRouteWithChildren,
   AdminSocialRoute: AdminSocialRouteWithChildren,
   AdminUnidadesRoute: AdminUnidadesRoute,
   AdminIndexRoute: AdminIndexRoute,

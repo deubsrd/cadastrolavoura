@@ -11,6 +11,7 @@ import {
   FileText,
   Shirt,
   Megaphone,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import lavouraLogo from "@/assets/lavoura-logo.png";
@@ -91,6 +92,7 @@ function AdminLayout() {
           {navItem("/admin/duvidas", "Dúvidas", MessageCircleQuestion)}
           {navItem("/admin/camisas", "Camisas", Shirt)}
           {navItem("/admin/social", "Social Selling", Megaphone)}
+          {navItem("/admin/sdr", "SDR WhatsApp", Bot)}
         </nav>
         <Button
           variant="ghost"
@@ -160,6 +162,12 @@ function AdminLayout() {
             className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
           >
             Social Selling
+          </Link>
+          <Link
+            to="/admin/sdr"
+            className="whitespace-nowrap rounded-md px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            SDR WhatsApp
           </Link>
         </nav>
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6">

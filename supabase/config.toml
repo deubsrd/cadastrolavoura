@@ -22,3 +22,11 @@ verify_jwt = false
 
 [functions.ss-ai]
 verify_jwt = false
+
+# SDR IA no WhatsApp — o webhook valida a assinatura da Meta; o sdr-engine checa
+# o JWT de admin ou o segredo interno dentro da função.
+[functions.wa-webhook]
+verify_jwt = false
+
+[functions.sdr-engine]
+verify_jwt = false
