@@ -62,12 +62,13 @@ Deno.serve(async (req) => {
     if (socioErr || !socio) return json({ error: "Sócio não encontrado." }, 404);
     if (!socio.unidade_id) return json({ error: "Sócio sem unidade vinculada." }, 400);
 
+    const socioEmail: string = socio.email;
     const redirectTo = Deno.env.get("APP_REDIRECT_URL") ?? "https://cadastro.lavanderialavoura.com.br/app";
 
     async function sendRecovery() {
       const { error: linkErr } = await adminClient.auth.admin.generateLink({
         type: "recovery",
-        email: socio.email,
+        email: socioEmail,
         options: { redirectTo },
       });
       return linkErr;
