@@ -13,20 +13,32 @@ const db = () => createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KE
 
 // A assinatura do webhook usa a chave secreta do app da Meta. Como o WhatsApp
 // está no mesmo app do social selling, cai no IG_APP_SECRET se não houver uma própria.
-const appSecret = () => Deno.env.get("WA_APP_SECRET") ?? env("IG_APP_SECRET");
+// Aceita qualquer uma das chaves configuradas (a do app pode estar em mais de um secret).
+const appSecrets = () =>
+  ["WA_APP_SECRET", "IG_APP_SECRET", "FB_APP_SECRET"]
+    .map((k) => Deno.env.get(k))
+    .filter((v): v is string => !!v);
 
-async function validSignature(raw: string, header: string | null) {
-  if (!header?.startsWith("sha256=")) return false;
+async function signatureMatches(secret: string, raw: string, given: string) {
   const key = await crypto.subtle.importKey(
-    "raw", new TextEncoder().encode(appSecret()), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
+    "raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"],
   );
   const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(raw)));
   const hex = Array.from(sig).map((b) => b.toString(16).padStart(2, "0")).join("");
-  const given = header.slice(7);
   if (given.length !== hex.length) return false;
   let diff = 0;
   for (let i = 0; i < hex.length; i++) diff |= hex.charCodeAt(i) ^ given.charCodeAt(i);
   return diff === 0;
+}
+
+async function validSignature(raw: string, header: string | null) {
+  if (!header?.startsWith("sha256=")) return false;
+  const secrets = appSecrets();
+  if (!secrets.length) console.error("[wa-webhook] nenhuma chave secreta do app configurada (WA_APP_SECRET/IG_APP_SECRET)");
+  for (const s of secrets) {
+    if (await signatureMatches(s, raw, header.slice(7))) return true;
+  }
+  return false;
 }
 
 const MEDIA_LABEL: Record<string, string> = {
