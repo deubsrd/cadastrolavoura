@@ -36,7 +36,16 @@ async function requireAdmin(req: Request) {
 const graph = () =>
   `https://graph.facebook.com/${Deno.env.get("WA_GRAPH_VERSION") ?? "v24.0"}/${env("WA_PHONE_NUMBER_ID")}/messages`;
 
+// A Meta entrega celulares do Brasil sem o nono dígito (55 + DDD + 8 dígitos), mas a lista de
+// destinatários de teste e a rede aceitam o formato com o 9. Insere o 9 só ao enviar; o wa_id do
+// lead continua como a Meta mandou.
+function toE164Br(to: string) {
+  const d = to.replace(/\D/g, "");
+  return /^55\d{2}[6-9]\d{7}$/.test(d) ? `${d.slice(0, 4)}9${d.slice(4)}` : d;
+}
+
 async function waPost(body: Record<string, unknown>) {
+  if (typeof body.to === "string") body = { ...body, to: toE164Br(body.to) };
   const r = await fetch(graph(), {
     method: "POST",
     headers: { Authorization: `Bearer ${env("WA_TOKEN")}`, "Content-Type": "application/json" },
