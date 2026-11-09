@@ -142,14 +142,22 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("method not allowed", { status: 405 });
 
   const raw = await req.text();
-  if (!(await validSignature(raw, req.headers.get("x-hub-signature-256")))) {
+  const sigHeader = req.headers.get("x-hub-signature-256");
+  console.log(`[wa-webhook] POST recebido (${raw.length} bytes, assinatura ${sigHeader ? "presente" : "ausente"})`);
+  if (!(await validSignature(raw, sigHeader))) {
+    console.error(
+      "[wa-webhook] assinatura inválida: a chave secreta do app (WA_APP_SECRET ou IG_APP_SECRET) não bate com a do app da Meta.",
+    );
     return new Response("assinatura inválida", { status: 401 });
   }
 
   // deno-lint-ignore no-explicit-any
   let body: any;
   try { body = JSON.parse(raw); } catch { return new Response("ok"); }
-  if (body.object !== "whatsapp_business_account") return new Response("ok");
+  if (body.object !== "whatsapp_business_account") {
+    console.log(`[wa-webhook] ignorado: object=${body.object}`);
+    return new Response("ok");
+  }
 
   const sb = db();
   const phoneId = Deno.env.get("WA_PHONE_NUMBER_ID");
@@ -157,9 +165,20 @@ Deno.serve(async (req) => {
 
   for (const entry of body.entry ?? []) {
     for (const change of entry.changes ?? []) {
-      if (change.field !== "messages") continue;
+      if (change.field !== "messages") {
+        console.log(`[wa-webhook] campo ignorado: ${change.field}`);
+        continue;
+      }
       const v = change.value ?? {};
-      if (phoneId && v.metadata?.phone_number_id && v.metadata.phone_number_id !== phoneId) continue;
+      if (phoneId && v.metadata?.phone_number_id && v.metadata.phone_number_id !== phoneId) {
+        console.log(
+          `[wa-webhook] ignorado: phone_number_id ${v.metadata.phone_number_id} diferente do WA_PHONE_NUMBER_ID configurado`,
+        );
+        continue;
+      }
+      console.log(
+        `[wa-webhook] messages: ${(v.messages ?? []).length} mensagem(ns), ${(v.statuses ?? []).length} status`,
+      );
 
       for (const s of v.statuses ?? []) {
         try { await handleStatus(sb, s); } catch (e) { console.error("status", e); }
