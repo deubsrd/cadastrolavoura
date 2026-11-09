@@ -625,6 +625,182 @@ export type Database = {
           },
         ]
       }
+      sdr_config: {
+        Row: {
+          base_conhecimento: string
+          cidades_plano: string
+          closer_email: string | null
+          ia_ligada: boolean
+          id: boolean
+          instrucoes: string
+          mensagem_abertura: string
+          sdr_whatsapp: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_conhecimento?: string
+          cidades_plano?: string
+          closer_email?: string | null
+          ia_ligada?: boolean
+          id?: boolean
+          instrucoes?: string
+          mensagem_abertura?: string
+          sdr_whatsapp?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_conhecimento?: string
+          cidades_plano?: string
+          closer_email?: string | null
+          ia_ligada?: boolean
+          id?: boolean
+          instrucoes?: string
+          mensagem_abertura?: string
+          sdr_whatsapp?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sdr_leads: {
+        Row: {
+          anuncio: Json | null
+          bairro: string | null
+          cidade: string | null
+          created_at: string
+          entrou_em: string
+          etapa: string
+          faixa: string | null
+          ia_ativa: boolean
+          id: string
+          last_inbound_at: string | null
+          last_message_at: string | null
+          last_message_preview: string | null
+          motivo_humano: string | null
+          motivo_perda: string | null
+          nome: string | null
+          nome_perfil: string | null
+          nota: number | null
+          observacoes: string | null
+          opt_out: boolean
+          origem: string
+          precisa_humano: boolean
+          primeiro_contato_em: string | null
+          qualificado_em: string | null
+          respostas: Json
+          unread: number
+          updated_at: string
+          wa_id: string
+        }
+        Insert: {
+          anuncio?: Json | null
+          bairro?: string | null
+          cidade?: string | null
+          created_at?: string
+          entrou_em?: string
+          etapa?: string
+          faixa?: string | null
+          ia_ativa?: boolean
+          id?: string
+          last_inbound_at?: string | null
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          motivo_humano?: string | null
+          motivo_perda?: string | null
+          nome?: string | null
+          nome_perfil?: string | null
+          nota?: number | null
+          observacoes?: string | null
+          opt_out?: boolean
+          origem?: string
+          precisa_humano?: boolean
+          primeiro_contato_em?: string | null
+          qualificado_em?: string | null
+          respostas?: Json
+          unread?: number
+          updated_at?: string
+          wa_id: string
+        }
+        Update: {
+          anuncio?: Json | null
+          bairro?: string | null
+          cidade?: string | null
+          created_at?: string
+          entrou_em?: string
+          etapa?: string
+          faixa?: string | null
+          ia_ativa?: boolean
+          id?: string
+          last_inbound_at?: string | null
+          last_message_at?: string | null
+          last_message_preview?: string | null
+          motivo_humano?: string | null
+          motivo_perda?: string | null
+          nome?: string | null
+          nome_perfil?: string | null
+          nota?: number | null
+          observacoes?: string | null
+          opt_out?: boolean
+          origem?: string
+          precisa_humano?: boolean
+          primeiro_contato_em?: string | null
+          qualificado_em?: string | null
+          respostas?: Json
+          unread?: number
+          updated_at?: string
+          wa_id?: string
+        }
+        Relationships: []
+      }
+      sdr_messages: {
+        Row: {
+          body: string | null
+          created_at: string
+          direction: string
+          error: string | null
+          id: string
+          lead_id: string
+          payload: Json | null
+          sent_by: string
+          status: string | null
+          type: string
+          wa_message_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          direction: string
+          error?: string | null
+          id?: string
+          lead_id: string
+          payload?: Json | null
+          sent_by: string
+          status?: string | null
+          type?: string
+          wa_message_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          direction?: string
+          error?: string | null
+          id?: string
+          lead_id?: string
+          payload?: Json | null
+          sent_by?: string
+          status?: string | null
+          type?: string
+          wa_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sdr_messages_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "sdr_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       socio_app_state: {
         Row: {
           socio_id: string
