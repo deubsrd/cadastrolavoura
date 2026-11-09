@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
-import { MessagesSquare, Bot } from "lucide-react";
+import { MessagesSquare, Bot, KanbanSquare } from "lucide-react";
 
 export const Route = createFileRoute("/admin/sdr")({
   head: () => ({ meta: [{ title: "SDR WhatsApp — Admin" }] }),
@@ -8,6 +8,7 @@ export const Route = createFileRoute("/admin/sdr")({
 
 const TABS = [
   { to: "/admin/sdr", label: "Conversas", icon: MessagesSquare, exact: true },
+  { to: "/admin/sdr/pipeline", label: "Pipeline", icon: KanbanSquare },
   { to: "/admin/sdr/agente", label: "Agente", icon: Bot },
 ] as const;
 

@@ -33,6 +33,7 @@ import { Route as AppObraRouteImport } from './routes/app.obra'
 import { Route as AppProgressoRouteImport } from './routes/app.progresso'
 import { Route as AdminSdrIndexRouteImport } from './routes/admin.sdr.index'
 import { Route as AdminSdrAgenteRouteImport } from './routes/admin.sdr.agente'
+import { Route as AdminSdrPipelineRouteImport } from './routes/admin.sdr.pipeline'
 import { Route as AdminSocialIndexRouteImport } from './routes/admin.social.index'
 import { Route as AdminSocialAssistenteRouteImport } from './routes/admin.social.assistente'
 import { Route as AdminSocialChatRouteImport } from './routes/admin.social.chat'
@@ -165,6 +166,11 @@ const AdminSdrAgenteRoute = AdminSdrAgenteRouteImport.update({
   path: '/agente',
   getParentRoute: () => AdminSdrRoute,
 } as any)
+const AdminSdrPipelineRoute = AdminSdrPipelineRouteImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
+  getParentRoute: () => AdminSdrRoute,
+} as any)
 const AdminSocialIndexRoute = AdminSocialIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/admin/sdr/agente': typeof AdminSdrAgenteRoute
+  '/admin/sdr/pipeline': typeof AdminSdrPipelineRoute
   '/admin/social/assistente': typeof AdminSocialAssistenteRoute
   '/admin/social/chat': typeof AdminSocialChatRoute
   '/admin/social/config': typeof AdminSocialConfigRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/admin/sdr/agente': typeof AdminSdrAgenteRoute
+  '/admin/sdr/pipeline': typeof AdminSdrPipelineRoute
   '/admin/social/assistente': typeof AdminSocialAssistenteRoute
   '/admin/social/chat': typeof AdminSocialChatRoute
   '/admin/social/config': typeof AdminSocialConfigRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/admin/sdr/agente': typeof AdminSdrAgenteRoute
+  '/admin/sdr/pipeline': typeof AdminSdrPipelineRoute
   '/admin/social/assistente': typeof AdminSocialAssistenteRoute
   '/admin/social/chat': typeof AdminSocialChatRoute
   '/admin/social/config': typeof AdminSocialConfigRoute
@@ -356,6 +365,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/admin/sdr/agente'
+    | '/admin/sdr/pipeline'
     | '/admin/social/assistente'
     | '/admin/social/chat'
     | '/admin/social/config'
@@ -389,6 +399,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/admin/sdr/agente'
+    | '/admin/sdr/pipeline'
     | '/admin/social/assistente'
     | '/admin/social/chat'
     | '/admin/social/config'
@@ -426,6 +437,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/admin/sdr/agente'
+    | '/admin/sdr/pipeline'
     | '/admin/social/assistente'
     | '/admin/social/chat'
     | '/admin/social/config'
@@ -619,6 +631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSdrAgenteRouteImport
       parentRoute: typeof AdminSdrRoute
     }
+    '/admin/sdr/pipeline': {
+      id: '/admin/sdr/pipeline'
+      path: '/pipeline'
+      fullPath: '/admin/sdr/pipeline'
+      preLoaderRoute: typeof AdminSdrPipelineRouteImport
+      parentRoute: typeof AdminSdrRoute
+    }
     '/admin/social/': {
       id: '/admin/social/'
       path: '/'
@@ -701,11 +720,13 @@ declare module '@tanstack/react-router' {
 
 interface AdminSdrRouteChildren {
   AdminSdrAgenteRoute: typeof AdminSdrAgenteRoute
+  AdminSdrPipelineRoute: typeof AdminSdrPipelineRoute
   AdminSdrIndexRoute: typeof AdminSdrIndexRoute
 }
 
 const AdminSdrRouteChildren: AdminSdrRouteChildren = {
   AdminSdrAgenteRoute: AdminSdrAgenteRoute,
+  AdminSdrPipelineRoute: AdminSdrPipelineRoute,
   AdminSdrIndexRoute: AdminSdrIndexRoute,
 }
 
