@@ -346,6 +346,23 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
 
+    if (body.action === "wa_subscribe") {
+      if (!internal) await requireAdmin(req);
+      const url = "https://graph.facebook.com/v25.0/1395102652444717/subscribed_apps";
+      const h = { Authorization: `Bearer ${env("WA_TOKEN")}` };
+      const g = await fetch(url, { headers: h });
+      const listaResp = await g.json().catch(() => null);
+      const lista = { status: g.status, body: listaResp };
+      const apps: any[] = listaResp?.data ?? [];
+      const ja = apps.some((a) => (a?.whatsapp_business_api_data?.id ?? a?.id) === "1635531744975132");
+      let inscricao: unknown = ja ? "app já inscrito; POST não executado" : null;
+      if (!ja && g.ok) {
+        const p = await fetch(url, { method: "POST", headers: h });
+        inscricao = { status: p.status, body: await p.json().catch(() => null) };
+      } else if (!g.ok) inscricao = "GET falhou; POST não executado";
+      return json({ lista, inscricao });
+    }
+
     await requireAdmin(req);
     const sb = service();
     const { data: lead } = await sb.from("sdr_leads").select("id, wa_id, last_inbound_at").eq("id", body.lead_id).single();
