@@ -50,6 +50,13 @@
       "when": 1794185773150,
       "tag": "0006_create_sdr_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794625181824,
+      "tag": "0007_socios_profissao",
+      "breakpoints": true
     }
   ]
 }
