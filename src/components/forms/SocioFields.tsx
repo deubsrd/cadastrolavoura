@@ -26,6 +26,7 @@ export type SocioData = {
   cep: string;
   nacionalidade: string;
   estado_civil: string;
+  profissao: string;
 };
 
 export const emptySocio = (): SocioData => ({
@@ -45,6 +46,7 @@ export const emptySocio = (): SocioData => ({
   cep: "",
   nacionalidade: "Brasileira",
   estado_civil: "",
+  profissao: "",
 });
 
 type Props = {
@@ -189,6 +191,17 @@ export function SocioFields({ value, onChange, errors }: Props) {
           </SelectContent>
         </Select>,
         errors?.estado_civil,
+      )}
+
+      {field(
+        "profissao",
+        "Profissão",
+        <Input
+          id="profissao"
+          value={value.profissao}
+          onChange={(e) => set("profissao", e.target.value)}
+        />,
+        errors?.profissao,
       )}
 
       {field(

@@ -58,6 +58,7 @@ type SocioRow = {
   rg_orgao: string | null;
   nacionalidade: string | null;
   estado_civil: string | null;
+  profissao: string | null;
   logradouro: string | null;
   numero_casa: string | null;
   bairro: string | null;
@@ -227,6 +228,7 @@ function AdminFranqueados() {
     field("Data de nascimento", formatDateBR(r.data_nascimento));
     field("Nacionalidade", r.nacionalidade);
     field("Estado civil", r.estado_civil);
+    field("Profissão", r.profissao);
 
     section("Contato");
     field("Email", r.email);
@@ -271,6 +273,7 @@ function AdminFranqueados() {
       cep: r.cep ?? "",
       nacionalidade: r.nacionalidade ?? "",
       estado_civil: r.estado_civil ?? "",
+      profissao: r.profissao ?? "",
     });
     setEditUnidade(r.numero_unidade ?? "");
   };
@@ -500,6 +503,7 @@ function AdminFranqueados() {
                 <Field label="Data de nascimento" value={formatDateBR(selected.data_nascimento)} />
                 <Field label="Nacionalidade" value={selected.nacionalidade} />
                 <Field label="Estado civil" value={selected.estado_civil} />
+                <Field label="Profissão" value={selected.profissao} />
               </Section>
               <Section title="Contato">
                 <Field label="Email" value={selected.email} />

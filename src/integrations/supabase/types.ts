@@ -848,6 +848,7 @@ export type Database = {
           nome_completo: string
           numero_casa: string
           numero_unidade: string
+          profissao: string | null
           rg: string
           rg_orgao: string
           telefone: string
@@ -874,6 +875,7 @@ export type Database = {
           nome_completo: string
           numero_casa: string
           numero_unidade: string
+          profissao?: string | null
           rg: string
           rg_orgao: string
           telefone: string
@@ -900,6 +902,7 @@ export type Database = {
           nome_completo?: string
           numero_casa?: string
           numero_unidade?: string
+          profissao?: string | null
           rg?: string
           rg_orgao?: string
           telefone?: string

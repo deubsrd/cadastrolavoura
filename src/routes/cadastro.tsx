@@ -50,6 +50,7 @@ function validateSocio(s: SocioData): Partial<Record<keyof SocioData, string>> {
   if (s.cep.replace(/\D/g, "").length !== 8) e.cep = "CEP inválido";
   if (!s.nacionalidade.trim()) e.nacionalidade = "Obrigatório";
   if (!s.estado_civil) e.estado_civil = "Obrigatório";
+  if (!s.profissao.trim()) e.profissao = "Obrigatório";
   return e;
 }
 

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Lock, Truck } from "lucide-react";
+import { FileText, Download, Truck } from "lucide-react";
 import jsPDF from "jspdf";
 
 export const Route = createFileRoute("/admin/documentos")({
@@ -32,6 +32,16 @@ type Socio = {
   tipo: string;
   unidade_id: string | null;
   numero_unidade: string;
+  nacionalidade: string | null;
+  estado_civil: string | null;
+  profissao: string | null;
+};
+
+type UnidadeInfo = {
+  id: string;
+  nome: string | null;
+  cnpj: string | null;
+  endereco: string | null;
 };
 
 // ──────────────────────────────────────────
@@ -128,6 +138,161 @@ function AdminDocumentos() {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taxaTipo, taxaOutroValor]);
+
+  // ──────────────────────────────────────────
+  // Contrato de franquia
+  // ──────────────────────────────────────────
+  const [contratoSocioId, setContratoSocioId] = useState("");
+  const [contratoSocio, setContratoSocio] = useState<Socio | null>(null);
+  const [contratoUnidade, setContratoUnidade] = useState<UnidadeInfo | null>(null);
+  const [gerandoContrato, setGerandoContrato] = useState(false);
+  const [primeiraUnidade, setPrimeiraUnidade] = useState(true);
+
+  const [contratoForm, setContratoForm] = useState({
+    cidade: "Boa Vista",
+    nome_territorio: "",
+    modalidade: "3 conjuntos de máquinas",
+    empresa_razao_social: "",
+    empresa_cnpj: "",
+    empresa_endereco: "",
+    data_inauguracao: "",
+    data_assinatura_cof: "",
+    outras_condicoes: "",
+    data_assinatura_dia: String(new Date().getDate()),
+    data_assinatura_mes: new Date().toLocaleDateString("pt-BR", { month: "long" }),
+    data_assinatura_ano: String(new Date().getFullYear()),
+    testemunha1_nome: "",
+    testemunha1_cpf: "",
+    testemunha2_nome: "",
+    testemunha2_cpf: "",
+  });
+  const [contratoTaxaTipo, setContratoTaxaTipo] = useState<"padrao" | "outro">("padrao");
+  const [contratoTaxaOutroValor, setContratoTaxaOutroValor] = useState("");
+  const setContrato = (key: string, value: string) => setContratoForm((p) => ({ ...p, [key]: value }));
+
+  useEffect(() => {
+    if (!contratoSocioId) {
+      setContratoSocio(null);
+      setContratoUnidade(null);
+      return;
+    }
+    const s = socios.find((s) => s.id === contratoSocioId) ?? null;
+    setContratoSocio(s);
+    if (!s?.unidade_id) {
+      setContratoUnidade(null);
+      return;
+    }
+    supabase
+      .from("unidades")
+      .select("id, nome, cnpj, endereco")
+      .eq("id", s.unidade_id)
+      .maybeSingle()
+      .then(({ data }) => {
+        const u = (data as UnidadeInfo | null) ?? null;
+        setContratoUnidade(u);
+        setContrato("empresa_cnpj", u?.cnpj ?? "");
+        setContrato("empresa_endereco", u?.endereco ?? "");
+      });
+  }, [contratoSocioId, socios]);
+
+  const gerarContrato = async () => {
+    if (!contratoSocio) return toast.error("Selecione um franqueado.");
+    if (!contratoForm.empresa_razao_social.trim()) return toast.error("Preencha a razão social da empresa franqueada.");
+    if (!contratoForm.empresa_cnpj.trim()) return toast.error("Preencha o CNPJ da empresa franqueada.");
+    if (contratoTaxaTipo === "outro" && !contratoTaxaOutroValor.trim()) {
+      return toast.error("Preencha o valor da taxa de franquia.");
+    }
+    setGerandoContrato(true);
+    try {
+      const dados = {
+        franqueado_nome: contratoSocio.nome_completo,
+        franqueado_nacionalidade: contratoSocio.nacionalidade || "brasileiro(a)",
+        franqueado_estado_civil: contratoSocio.estado_civil || "",
+        franqueado_profissao: contratoSocio.profissao || "",
+        franqueado_rg: `${contratoSocio.rg} ${contratoSocio.rg_orgao}`,
+        franqueado_cpf: contratoSocio.cpf,
+        franqueado_endereco: `${contratoSocio.logradouro}, ${contratoSocio.numero_casa}, ${contratoSocio.bairro}, ${contratoSocio.cidade}/${contratoSocio.uf}`,
+        taxa_franquia:
+          contratoTaxaTipo === "padrao"
+            ? "R$ 25.900,00 (vinte e cinco mil e novecentos reais)"
+            : `R$ ${contratoTaxaOutroValor}`,
+        primeira_unidade: String(primeiraUnidade),
+        ...contratoForm,
+      };
+
+      const { data, error } = await supabase.functions.invoke("gerar-contrato", { body: dados });
+      if (error || !data?.docx) throw new Error(error?.message ?? "Falha ao gerar documento.");
+
+      const binary = atob(data.docx);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Contrato de Franquia - ${data.nome || contratoSocio.nome_completo}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Contrato de franquia gerado!");
+    } catch (e) {
+      toast.error("Falha ao gerar o documento.");
+      console.error(e);
+    }
+    setGerandoContrato(false);
+  };
+
+  // ──────────────────────────────────────────
+  // Anexos do Contrato (Mix de Produtos, Fornecedores Homologados, Área Territorial)
+  // ──────────────────────────────────────────
+  const [anexosSocioId, setAnexosSocioId] = useState("");
+  const [anexosUnidadeNome, setAnexosUnidadeNome] = useState("");
+  const [areaTerritorial, setAreaTerritorial] = useState("");
+  const [mixProdutos, setMixProdutos] = useState("");
+  const [fornecedoresHomologados, setFornecedoresHomologados] = useState("");
+  const [gerandoAnexos, setGerandoAnexos] = useState(false);
+
+  useEffect(() => {
+    if (!anexosSocioId) { setAnexosUnidadeNome(""); return; }
+    const s = socios.find((s) => s.id === anexosSocioId) ?? null;
+    if (!s?.unidade_id) { setAnexosUnidadeNome(s?.numero_unidade ?? ""); return; }
+    supabase
+      .from("unidades")
+      .select("nome, numero")
+      .eq("id", s.unidade_id)
+      .maybeSingle()
+      .then(({ data }) => setAnexosUnidadeNome(data?.nome || data?.numero || s.numero_unidade || ""));
+  }, [anexosSocioId, socios]);
+
+  const gerarAnexos = async () => {
+    if (!anexosSocioId) return toast.error("Selecione um franqueado/unidade.");
+    setGerandoAnexos(true);
+    try {
+      const dados = {
+        unidade_nome: anexosUnidadeNome,
+        area_territorial: areaTerritorial,
+        mix_produtos: mixProdutos,
+        fornecedores_homologados: fornecedoresHomologados,
+      };
+      const { data, error } = await supabase.functions.invoke("gerar-anexos-contrato", { body: dados });
+      if (error || !data?.docx) throw new Error(error?.message ?? "Falha ao gerar documento.");
+
+      const binary = atob(data.docx);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      const blob = new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Anexos do Contrato - ${data.nome || anexosUnidadeNome || "unidade"}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Anexos gerados!");
+    } catch (e) {
+      toast.error("Falha ao gerar os anexos.");
+      console.error(e);
+    }
+    setGerandoAnexos(false);
+  };
 
   // ──────────────────────────────────────────
   // Cotação de frete
@@ -301,7 +466,7 @@ function AdminDocumentos() {
         <p className="text-sm text-muted-foreground">Gere documentos contratuais com dados do sistema, revisados pelo Claude.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Pré-contrato */}
         <Card className="border-border/50">
           <CardHeader className="pb-3">
@@ -446,22 +611,231 @@ function AdminDocumentos() {
           </CardContent>
         </Card>
 
-        {/* Contrato — Em breve */}
-        <Card className="border-border/50 opacity-60">
+        {/* Contrato de franquia */}
+        <Card className="border-border/50">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <CardTitle className="text-base text-muted-foreground">Contrato de franquia</CardTitle>
+                <FileText className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base">Contrato de franquia</CardTitle>
               </div>
-              <Badge variant="outline" className="text-muted-foreground">Em breve</Badge>
+              <Badge variant="default">Disponível</Badge>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Contrato definitivo entre CNPJ e CNPJ. Disponível em breve.</p>
+            <p className="text-xs text-muted-foreground mt-1">Contrato definitivo, entre a Franqueadora e a EMPRESA FRANQUEADA (CNPJ).</p>
           </CardHeader>
-          <CardContent>
-            <Button className="w-full" disabled>
-              <Lock className="mr-2 h-4 w-4" />
-              Em breve
+          <CardContent className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Franqueado</Label>
+              <Select value={contratoSocioId} onValueChange={setContratoSocioId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o franqueado..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {socios.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.nome_completo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {contratoSocio && (
+              <div className="rounded-md bg-muted/40 p-3 text-xs space-y-1 text-muted-foreground">
+                <p><span className="font-semibold text-foreground">CPF:</span> {contratoSocio.cpf}</p>
+                <p><span className="font-semibold text-foreground">RG:</span> {contratoSocio.rg} {contratoSocio.rg_orgao}</p>
+                <p><span className="font-semibold text-foreground">Nacionalidade/Estado civil:</span> {contratoSocio.nacionalidade || "—"} / {contratoSocio.estado_civil || "—"}</p>
+                <p><span className="font-semibold text-foreground">Profissão:</span> {contratoSocio.profissao || "— (preencha no cadastro do sócio)"}</p>
+                <p><span className="font-semibold text-foreground">Endereço:</span> {contratoSocio.logradouro}, {contratoSocio.numero_casa}, {contratoSocio.bairro}, {contratoSocio.cidade}/{contratoSocio.uf}</p>
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label>Esta é a 1ª unidade deste franqueado ou uma unidade adicional?</Label>
+              <div className="flex gap-2">
+                <Button type="button" variant={primeiraUnidade ? "default" : "outline"} className="flex-1" onClick={() => setPrimeiraUnidade(true)}>
+                  1ª unidade
+                </Button>
+                <Button type="button" variant={!primeiraUnidade ? "default" : "outline"} className="flex-1" onClick={() => setPrimeiraUnidade(false)}>
+                  Unidade adicional
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {primeiraUnidade
+                  ? "Taxa Inicial de Franquia já quitada no pré-contrato."
+                  : "Taxa Inicial de Franquia será quitada no ato da assinatura deste Contrato."}
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Razão Social (empresa franqueada)</Label>
+                <Input placeholder="ex: XYZ LAVANDERIA LTDA" value={contratoForm.empresa_razao_social} onChange={(e) => setContrato("empresa_razao_social", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>CNPJ da empresa franqueada</Label>
+                <Input placeholder="00.000.000/0000-00" value={contratoForm.empresa_cnpj} onChange={(e) => setContrato("empresa_cnpj", e.target.value)} />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Endereço da Unidade Franqueada</Label>
+              <Input value={contratoForm.empresa_endereco} onChange={(e) => setContrato("empresa_endereco", e.target.value)} />
+              {!contratoUnidade?.endereco && contratoSocioId && (
+                <p className="text-xs text-muted-foreground">A unidade ainda não tem endereço cadastrado — preencha manualmente.</p>
+              )}
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Cidade</Label>
+                <Input value={contratoForm.cidade} onChange={(e) => setContrato("cidade", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Nome do Território</Label>
+                <Input placeholder="ex: Liberdade" value={contratoForm.nome_territorio} onChange={(e) => setContrato("nome_territorio", e.target.value)} />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Modalidade</Label>
+              <Select value={contratoForm.modalidade} onValueChange={(v) => setContrato("modalidade", v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3 conjuntos de máquinas">3 conjuntos de máquinas</SelectItem>
+                  <SelectItem value="4 conjuntos de máquinas">4 conjuntos de máquinas</SelectItem>
+                  <SelectItem value="5 conjuntos de máquinas">5 conjuntos de máquinas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Data da inauguração</Label>
+                <Input placeholder="ex: 20/08/2026" value={contratoForm.data_inauguracao} onChange={(e) => setContrato("data_inauguracao", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Data de assinatura da COF</Label>
+                <Input placeholder="ex: 20/08/2026" value={contratoForm.data_assinatura_cof} onChange={(e) => setContrato("data_assinatura_cof", e.target.value)} />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Taxa Inicial de Franquia</Label>
+              <div className="flex gap-2">
+                <Button type="button" variant={contratoTaxaTipo === "padrao" ? "default" : "outline"} className="flex-1" onClick={() => setContratoTaxaTipo("padrao")}>
+                  Padrão (R$ 25.900,00)
+                </Button>
+                <Button type="button" variant={contratoTaxaTipo === "outro" ? "default" : "outline"} className="flex-1" onClick={() => setContratoTaxaTipo("outro")}>
+                  Outro valor
+                </Button>
+              </div>
+              {contratoTaxaTipo === "outro" && (
+                <Input className="mt-2" placeholder="ex: 30.000,00 (trinta mil reais)" value={contratoTaxaOutroValor} onChange={(e) => setContratoTaxaOutroValor(e.target.value)} />
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Outras condições <span className="text-muted-foreground">(opcional)</span></Label>
+              <Input placeholder="Deixe em branco se não houver" value={contratoForm.outras_condicoes} onChange={(e) => setContrato("outras_condicoes", e.target.value)} />
+            </div>
+
+            <div className="grid gap-3 grid-cols-3">
+              <div className="space-y-1.5">
+                <Label>Dia</Label>
+                <Input value={contratoForm.data_assinatura_dia} onChange={(e) => setContrato("data_assinatura_dia", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Mês</Label>
+                <Input value={contratoForm.data_assinatura_mes} onChange={(e) => setContrato("data_assinatura_mes", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Ano</Label>
+                <Input value={contratoForm.data_assinatura_ano} onChange={(e) => setContrato("data_assinatura_ano", e.target.value)} />
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Testemunha 1 — Nome</Label>
+                <Input value={contratoForm.testemunha1_nome} onChange={(e) => setContrato("testemunha1_nome", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Testemunha 1 — CPF</Label>
+                <Input value={contratoForm.testemunha1_cpf} onChange={(e) => setContrato("testemunha1_cpf", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Testemunha 2 — Nome</Label>
+                <Input value={contratoForm.testemunha2_nome} onChange={(e) => setContrato("testemunha2_nome", e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Testemunha 2 — CPF</Label>
+                <Input value={contratoForm.testemunha2_cpf} onChange={(e) => setContrato("testemunha2_cpf", e.target.value)} />
+              </div>
+            </div>
+
+            <Button className="w-full" onClick={gerarContrato} disabled={gerandoContrato || !contratoSocioId}>
+              <Download className="mr-2 h-4 w-4" />
+              {gerandoContrato ? "Gerando com Claude..." : "Gerar contrato de franquia"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Anexos do Contrato */}
+        <Card className="border-border/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base">Anexos do Contrato</CardTitle>
+              </div>
+              <Badge variant="default">Disponível</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Anexo I (Mix de Produtos/Serviços), Anexo II (Fornecedores Homologados) e Anexo III (Área Territorial), num .docx separado.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Franqueado / unidade</Label>
+              <Select value={anexosSocioId} onValueChange={setAnexosSocioId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o franqueado..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {socios.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.nome_completo}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Área Territorial</Label>
+              <Input
+                placeholder="ex: Raio de 2km do ponto, bairro Liberdade, Boa Vista/RR"
+                value={areaTerritorial}
+                onChange={(e) => setAreaTerritorial(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Mix de Produtos/Serviços <span className="text-muted-foreground">(opcional — deixe em branco para usar o texto padrão remetendo ao manual)</span></Label>
+              <Input value={mixProdutos} onChange={(e) => setMixProdutos(e.target.value)} />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Fornecedores Homologados <span className="text-muted-foreground">(opcional — deixe em branco para usar o texto padrão remetendo ao manual)</span></Label>
+              <Input value={fornecedoresHomologados} onChange={(e) => setFornecedoresHomologados(e.target.value)} />
+            </div>
+
+            <Button className="w-full" onClick={gerarAnexos} disabled={gerandoAnexos || !anexosSocioId}>
+              <Download className="mr-2 h-4 w-4" />
+              {gerandoAnexos ? "Gerando..." : "Gerar anexos"}
             </Button>
           </CardContent>
         </Card>
