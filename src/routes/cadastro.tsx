@@ -69,6 +69,7 @@ function PublicForm() {
     Array<{ id: string; numero: string; nome: string | null }>
   >([]);
   const [loadingUnidades, setLoadingUnidades] = useState(true);
+  const [erroUnidades, setErroUnidades] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -79,7 +80,12 @@ function PublicForm() {
         .eq("ativo", true)
         .order("numero", { ascending: true });
       if (!mounted) return;
-      if (!error && data) setUnidades(data);
+      if (error) {
+        console.error("Falha ao buscar unidades para o cadastro público:", error);
+        setErroUnidades(error.message);
+      } else if (data) {
+        setUnidades(data);
+      }
       setLoadingUnidades(false);
     })();
     return () => {
@@ -227,6 +233,11 @@ function PublicForm() {
               </Label>
               {loadingUnidades ? (
                 <Skeleton className="mt-2 h-9 w-full" />
+              ) : erroUnidades ? (
+                <p className="mt-2 text-sm text-destructive">
+                  Não foi possível carregar as unidades agora ({erroUnidades}). Atualize a página
+                  ou avise a franqueadora.
+                </p>
               ) : unidades.length === 0 ? (
                 <p className="mt-2 text-sm text-destructive">
                   Nenhuma unidade disponível. Entre em contato com a franqueadora.
