@@ -64,6 +64,13 @@
       "when": 1795479350465,
       "tag": "0008_remove_public_socio_docs_upload",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795480566170,
+      "tag": "0009_fix_unidades_anon_policy",
+      "breakpoints": true
     }
   ]
 }

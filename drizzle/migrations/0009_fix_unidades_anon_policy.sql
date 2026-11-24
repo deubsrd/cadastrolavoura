@@ -1,0 +1,3 @@
+DROP POLICY IF EXISTS "Unidades ativas visíveis no cadastro" ON public.unidades;
+CREATE POLICY "Unidades ativas visíveis no cadastro" ON public.unidades FOR SELECT TO anon USING (ativo = true);
+CREATE POLICY "Unidades visíveis para usuários logados" ON public.unidades FOR SELECT TO authenticated USING ((ativo = true) OR public.has_role(auth.uid(), 'admin'::app_role) OR (id = public.get_my_unidade_id()));
