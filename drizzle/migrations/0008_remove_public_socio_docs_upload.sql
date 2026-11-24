@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Cadastro envia documentos de sócio (pending)" ON storage.objects;

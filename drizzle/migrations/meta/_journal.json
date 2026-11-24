@@ -57,6 +57,13 @@
       "when": 1794625181824,
       "tag": "0007_socios_profissao",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795479350465,
+      "tag": "0008_remove_public_socio_docs_upload",
+      "breakpoints": true
     }
   ]
 }

@@ -22,6 +22,7 @@ import { SocioDocuments, type SocioDocs, emptyDocs } from "@/components/forms/So
 import { Skeleton } from "@/components/ui/skeleton";
 import { isValidCPF, isValidEmail, isValidPhone } from "@/lib/masks";
 import { Checkbox } from "@/components/ui/checkbox";
+import { uploadSocioDocs } from "@/lib/socio-docs.functions";
 
 export const Route = createFileRoute("/cadastro")({
   head: () => ({
@@ -135,30 +136,16 @@ function PublicForm() {
     }
     setSubmitting(true);
 
-    // Upload dos PDFs antes de inserir
-    const ts = Date.now();
+    // Upload dos PDFs (no servidor) antes de inserir
     const uploadedPaths: Array<{ identidade: string; cpf: string }> = [];
     try {
       for (let i = 0; i < socios.length; i++) {
-        const cpfDigits = socios[i].cpf.replace(/\D/g, "");
-        const uniqueId =
-          typeof crypto !== "undefined" && "randomUUID" in crypto
-            ? crypto.randomUUID()
-            : `${ts}-${Math.random().toString(36).slice(2, 12)}`;
-        const folder = `pending/${numero}/${ts}-${cpfDigits || `socio${i + 1}`}-${uniqueId}`;
-        const idFile = docs[i].identidadeFile!;
-        const cpfFile = docs[i].cpfFile!;
-        const idPath = `${folder}/identidade.pdf`;
-        const cpfPath = `${folder}/cpf.pdf`;
-        const up1 = await supabase.storage
-          .from("socio-documentos")
-          .upload(idPath, idFile, { contentType: "application/pdf", upsert: false });
-        if (up1.error) throw up1.error;
-        const up2 = await supabase.storage
-          .from("socio-documentos")
-          .upload(cpfPath, cpfFile, { contentType: "application/pdf", upsert: false });
-        if (up2.error) throw up2.error;
-        uploadedPaths.push({ identidade: idPath, cpf: cpfPath });
+        const fd = new FormData();
+        fd.append("numero", numero);
+        fd.append("hint", socios[i].cpf.replace(/\D/g, ""));
+        fd.append("identidade", docs[i].identidadeFile!);
+        fd.append("cpf", docs[i].cpfFile!);
+        uploadedPaths.push(await uploadSocioDocs({ data: fd }));
       }
     } catch (err) {
       setSubmitting(false);
